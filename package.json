@@ -1,0 +1,32 @@
+{
+  "name": "vision-world-web",
+  "version": "1.0.0",
+  "description": "炫酷UI风格选择应用",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4",
+    "pinia": "^2.1.6",
+    "@vueuse/core": "^10.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@vitejs/plugin-vue": "^4.3.1",
+    "@vue/eslint-config-typescript": "^11.0.3",
+    "@vue/tsconfig": "^0.4.0",
+    "autoprefixer": "^10.4.15",
+    "eslint": "^8.47.0",
+    "eslint-plugin-vue": "^9.17.0",
+    "postcss": "^8.4.29",
+    "tailwindcss": "^3.3.3",
+    "typescript": "~5.1.6",
+    "vite": "^4.4.9",
+    "vue-tsc": "^1.8.8"
+  }
+}

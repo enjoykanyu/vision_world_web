@@ -1,0 +1,146 @@
+<template>
+  <div class="min-h-screen relative overflow-hidden">
+    <!-- 背景动画 -->
+    <div class="absolute inset-0 tech-grid opacity-20"></div>
+    <div class="absolute inset-0 bg-animated opacity-10"></div>
+    
+    <!-- 浮动粒子效果 -->
+    <div class="absolute inset-0">
+      <div v-for="i in 20" :key="i" 
+           class="absolute w-2 h-2 bg-white rounded-full opacity-30 animate-float"
+           :style="{
+             left: Math.random() * 100 + '%',
+             top: Math.random() * 100 + '%',
+             animationDelay: Math.random() * 6 + 's',
+             animationDuration: (Math.random() * 4 + 4) + 's'
+           }">
+      </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
+      <!-- 标题区域 -->
+      <div class="text-center mb-16 animate-float">
+        <h1 class="text-6xl md:text-8xl font-bold mb-6 gradient-text">
+          Vision World
+        </h1>
+        <p class="text-xl md:text-2xl text-white/80 mb-8">
+          选择你喜欢的UI风格，体验不同的视觉盛宴
+        </p>
+        <div class="w-32 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full animate-glow"></div>
+      </div>
+
+      <!-- 风格选择卡片 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full">
+        <!-- 抖音风格 -->
+        <div @click="navigateToStyle('douyin')" 
+             class="group cursor-pointer transform transition-all duration-500 hover:scale-105">
+          <div class="glass-effect rounded-2xl p-8 text-center card-hover">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-douyin-primary to-douyin-secondary flex items-center justify-center group-hover:animate-spin-slow">
+              <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4">抖音风格</h3>
+            <p class="text-white/70 mb-6">年轻、活力、潮流，充满动感的视觉体验</p>
+            <div class="inline-flex items-center text-douyin-primary group-hover:text-douyin-secondary transition-colors">
+              <span>立即体验</span>
+              <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- B站风格 -->
+        <div @click="navigateToStyle('bilibili')" 
+             class="group cursor-pointer transform transition-all duration-500 hover:scale-105">
+          <div class="glass-effect rounded-2xl p-8 text-center card-hover">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-bilibili-primary to-bilibili-secondary flex items-center justify-center group-hover:animate-pulse-slow">
+              <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z"/>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4">B站风格</h3>
+            <p class="text-white/70 mb-6">二次元、弹幕、社区，年轻文化的聚集地</p>
+            <div class="inline-flex items-center text-bilibili-primary group-hover:text-bilibili-secondary transition-colors">
+              <span>立即体验</span>
+              <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- 小红书风格 -->
+        <div @click="navigateToStyle('xiaohongshu')" 
+             class="group cursor-pointer transform transition-all duration-500 hover:scale-105">
+          <div class="glass-effect rounded-2xl p-8 text-center card-hover">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-xiaohongshu-primary to-xiaohongshu-secondary flex items-center justify-center group-hover:animate-bounce-slow">
+              <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4">小红书风格</h3>
+            <p class="text-white/70 mb-6">生活方式、美妆、时尚，精致生活的分享平台</p>
+            <div class="inline-flex items-center text-xiaohongshu-primary group-hover:text-xiaohongshu-secondary transition-colors">
+              <span>立即体验</span>
+              <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部装饰 -->
+      <div class="mt-16 text-center">
+        <p class="text-white/50 text-sm">
+          选择你喜欢的风格，开启独特的视觉之旅
+        </p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const navigateToStyle = (style: string) => {
+  router.push({ name: style })
+}
+</script>
+
+<style scoped>
+/* 添加额外的动画效果 */
+.glass-effect {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-hover:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.gradient-text {
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+</style>
