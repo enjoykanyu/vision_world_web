@@ -1,33 +1,20 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-xiaohongshu-dark via-pink-50 to-white relative overflow-hidden">
+  <div class="min-h-screen bg-white relative overflow-hidden">
     <!-- 背景装饰 -->
     <div class="absolute inset-0 opacity-5">
       <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-xiaohongshu-primary to-xiaohongshu-secondary"></div>
     </div>
     
-    <!-- 浮动装饰元素 -->
-    <div class="absolute inset-0 pointer-events-none">
-      <div v-for="i in 12" :key="i" 
-           class="absolute w-2 h-2 bg-xiaohongshu-primary rounded-full opacity-20 animate-float"
-           :style="{
-             left: Math.random() * 100 + '%',
-             top: Math.random() * 100 + '%',
-             animationDelay: Math.random() * 6 + 's',
-             animationDuration: (Math.random() * 4 + 4) + 's'
-           }">
-      </div>
-    </div>
-
-    <!-- 导航栏 -->
-    <nav class="relative z-10 p-6 bg-white/80 backdrop-blur-md border-b border-pink-100">
-      <div class="flex items-center justify-between max-w-6xl mx-auto">
+    <!-- 移动端顶部导航 -->
+    <nav class="relative z-10 p-4 bg-white/90 backdrop-blur-md border-b border-pink-100">
+      <div class="flex items-center justify-between">
         <button @click="goBack" class="text-gray-700 hover:text-xiaohongshu-primary transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
-        <h1 class="text-2xl font-bold text-xiaohongshu-primary">小红书风格</h1>
-        <div class="flex items-center space-x-4">
+        <h1 class="text-xl font-bold text-xiaohongshu-primary">小红书</h1>
+        <div class="flex items-center space-x-3">
           <button class="text-gray-700 hover:text-xiaohongshu-primary transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -43,20 +30,20 @@
     </nav>
 
     <!-- 主要内容 -->
-    <div class="relative z-10 max-w-6xl mx-auto px-6 py-8">
+    <div class="relative z-10 pb-20">
       <!-- 分类标签 -->
-      <div class="flex space-x-4 mb-8 overflow-x-auto pb-4">
-        <button v-for="category in categories" :key="category" 
-                class="px-6 py-2 rounded-full whitespace-nowrap transition-all duration-300"
-                :class="selectedCategory === category ? 
-                  'bg-xiaohongshu-primary text-white shadow-lg' : 
-                  'bg-white text-gray-700 hover:bg-pink-50 border border-pink-200'">
+      <div class="flex space-x-3 px-4 py-3 overflow-x-auto bg-white border-b border-pink-100">
+        <button v-for="category in categories" :key="category"
+                class="px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-300 text-sm flex-shrink-0"
+                :class="selectedCategory === category ?
+                  'bg-xiaohongshu-primary text-white shadow-md' :
+                  'bg-gray-100 text-gray-700 hover:bg-pink-50'">
           {{ category }}
         </button>
       </div>
 
-      <!-- 笔记瀑布流 -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <!-- 笔记瀑布流 - 移动端两列 -->
+      <div class="grid grid-cols-2 gap-3 p-3">
         <div v-for="note in notes" :key="note.id" 
              class="group cursor-pointer transform transition-all duration-500 hover:scale-105">
           <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
@@ -112,58 +99,11 @@
           </div>
         </div>
       </div>
-
-      <!-- 推荐用户 -->
-      <div class="mt-12 bg-white rounded-2xl p-6 shadow-lg">
-        <h3 class="text-xl font-bold text-gray-800 mb-6">推荐关注</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          <div v-for="user in recommendedUsers" :key="user.id" 
-               class="text-center group cursor-pointer">
-            <div class="relative mb-3">
-              <div class="w-16 h-16 mx-auto bg-gradient-to-br from-xiaohongshu-primary to-xiaohongshu-secondary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span class="text-white font-bold text-lg">{{ user.name.charAt(0) }}</span>
-              </div>
-              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center">
-                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </div>
-            </div>
-            <h4 class="text-gray-800 font-medium text-sm mb-1">{{ user.name }}</h4>
-            <p class="text-gray-500 text-xs mb-2">{{ user.followers }}粉丝</p>
-            <button class="w-full py-1 bg-xiaohongshu-primary text-white text-xs rounded-full hover:bg-xiaohongshu-secondary transition-colors">
-              关注
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 热门话题 -->
-      <div class="mt-8 bg-white rounded-2xl p-6 shadow-lg">
-        <h3 class="text-xl font-bold text-gray-800 mb-6">热门话题</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div v-for="topic in hotTopics" :key="topic.id" 
-               class="group cursor-pointer">
-            <div class="flex items-center space-x-3 p-3 rounded-lg hover:bg-pink-50 transition-colors">
-              <div class="w-12 h-12 bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg flex items-center justify-center">
-                <span class="text-2xl">#{{ topic.rank }}</span>
-              </div>
-              <div class="flex-1">
-                <h4 class="text-gray-800 font-medium mb-1">{{ topic.title }}</h4>
-                <p class="text-gray-500 text-xs">{{ topic.views }}浏览</p>
-              </div>
-              <svg class="w-4 h-4 text-gray-400 group-hover:text-xiaohongshu-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- 底部导航 -->
     <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-pink-100">
-      <div class="flex items-center justify-around py-3">
+      <div class="flex items-center justify-around py-2">
         <button class="flex flex-col items-center space-y-1 text-xiaohongshu-primary">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
