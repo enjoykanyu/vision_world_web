@@ -228,35 +228,6 @@
       </main>
     </div>
 
-    <!-- 底部导航 -->
-    <div class="fixed bottom-0 left-0 right-0 glass-effect border-t border-white/20">
-      <div class="flex items-center justify-around py-4">
-        <button class="flex flex-col items-center space-y-1 text-bilibili-primary">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-          </svg>
-          <span class="text-xs">首页</span>
-        </button>
-        <button class="flex flex-col items-center space-y-1 text-white/70 hover:text-white transition-colors">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/>
-          </svg>
-          <span class="text-xs">动态</span>
-        </button>
-        <button class="flex flex-col items-center space-y-1 text-white/70 hover:text-white transition-colors">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-          </svg>
-          <span class="text-xs">会员购</span>
-        </button>
-        <button class="flex flex-col items-center space-y-1 text-white/70 hover:text-white transition-colors">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
-          <span class="text-xs">我的</span>
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
