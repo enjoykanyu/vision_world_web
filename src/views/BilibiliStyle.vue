@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-bilibili-dark via-gray-900 to-bilibili-primary relative overflow-hidden">
+  <div class="min-h-screen bg-bilibili-bg relative overflow-hidden">
     <!-- 背景动画 -->
     <div class="absolute inset-0 opacity-10">
       <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-bilibili-primary to-bilibili-secondary animate-pulse-slow"></div>
@@ -7,7 +7,7 @@
     
     <!-- 弹幕效果 -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div v-for="i in 20" :key="i" 
+      <div v-for="i in 20" :key="i"
            class="absolute text-white/60 text-sm whitespace-nowrap animate-barrage"
            :style="{
              top: Math.random() * 100 + '%',
@@ -20,7 +20,7 @@
     </div>
 
     <!-- 网页端顶部导航 -->
-    <header class="relative z-10 bg-bilibili-dark/80 backdrop-blur-md border-b border-bilibili-primary/20">
+    <header class="relative z-10 glass-card border-b border-bilibili-primary/20">
       <div class="container mx-auto px-6">
         <div class="flex items-center justify-between h-16">
           <!-- 左侧Logo和返回按钮 -->
@@ -67,7 +67,7 @@
     <!-- 主要内容区域 -->
     <div class="relative z-10 flex">
       <!-- 左侧边栏 -->
-      <aside class="hidden lg:block w-48 bg-bilibili-dark/60 backdrop-blur-md border-r border-bilibili-primary/20 p-4">
+      <aside class="hidden lg:block w-48 glass-card border-r border-bilibili-primary/20 p-4">
         <div class="space-y-4">
           <div class="text-white/60 text-xs font-semibold mb-4">分区导航</div>
           <a v-for="category in sidebarCategories" :key="category.id" 
@@ -100,9 +100,9 @@
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            <div v-for="i in 8" :key="i" 
-                 class="group cursor-pointer transform transition-all duration-500 hover:scale-105">
-              <div class="glass-effect rounded-2xl overflow-hidden">
+            <div v-for="i in 8" :key="i"
+                 class="group cursor-pointer transform transition-all duration-500 hover:scale-105 animate-scale-in">
+              <div class="glass-card overflow-hidden">
                 <div class="relative h-40 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary flex items-center justify-center">
                   <div class="text-center text-white">
                     <svg class="w-12 h-12 mx-auto mb-2 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
@@ -135,7 +135,7 @@
         <!-- 分区内容 -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <!-- 动画区 -->
-          <div class="glass-effect rounded-2xl p-6">
+          <div class="glass-card p-6 animate-scale-in">
             <h3 class="text-xl font-bold text-white mb-4 flex items-center">
               <span class="w-3 h-3 bg-bilibili-primary rounded-full mr-2 animate-pulse"></span>
               动画区
@@ -155,7 +155,7 @@
           </div>
 
           <!-- 游戏区 -->
-          <div class="glass-effect rounded-2xl p-6">
+          <div class="glass-card p-6 animate-scale-in" style="animation-delay: 0.1s">
             <h3 class="text-xl font-bold text-white mb-4 flex items-center">
               <span class="w-3 h-3 bg-bilibili-secondary rounded-full mr-2 animate-pulse"></span>
               游戏区
@@ -175,7 +175,7 @@
           </div>
 
           <!-- 音乐区 -->
-          <div class="glass-effect rounded-2xl p-6">
+          <div class="glass-card p-6 animate-scale-in" style="animation-delay: 0.2s">
             <h3 class="text-xl font-bold text-white mb-4 flex items-center">
               <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
               音乐区
@@ -202,9 +202,9 @@
             热门直播
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div v-for="i in 4" :key="i" 
-                 class="group cursor-pointer transform transition-all duration-500 hover:scale-105">
-              <div class="glass-effect rounded-2xl overflow-hidden">
+            <div v-for="i in 4" :key="i"
+                 class="group cursor-pointer transform transition-all duration-500 hover:scale-105 animate-scale-in" style="animation-delay: 0.3s">
+              <div class="glass-card overflow-hidden">
                 <div class="relative h-48 bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
                   <div class="text-center text-white">
                     <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-2 animate-pulse">

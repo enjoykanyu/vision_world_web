@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white relative overflow-hidden">
+  <div class="min-h-screen bg-xiaohongshu-bg relative overflow-hidden">
     <!-- 背景装饰 -->
     <div class="absolute inset-0 opacity-5">
       <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-xiaohongshu-primary to-xiaohongshu-secondary"></div>
@@ -44,9 +44,9 @@
 
       <!-- 笔记瀑布流 - 移动端两列 -->
       <div class="grid grid-cols-2 gap-3 p-3">
-        <div v-for="note in notes" :key="note.id" 
-             class="group cursor-pointer transform transition-all duration-500 hover:scale-105">
-          <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+        <div v-for="note in notes" :key="note.id"
+             class="group cursor-pointer transform transition-all duration-500 hover:scale-105 animate-scale-in">
+          <div class="glass-card overflow-hidden">
             <!-- 图片区域 -->
             <div class="relative">
               <div class="aspect-square bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 flex items-center justify-center">
@@ -102,7 +102,7 @@
     </div>
 
     <!-- 底部导航 -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-pink-100">
+    <div class="fixed bottom-0 left-0 right-0 glass-card border-t border-pink-100">
       <div class="flex items-center justify-around py-2">
         <button class="flex flex-col items-center space-y-1 text-xiaohongshu-primary">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@
           <span class="text-xs">发现</span>
         </button>
         <button class="flex flex-col items-center space-y-1 text-gray-600 hover:text-xiaohongshu-primary transition-colors">
-          <div class="w-12 h-12 bg-xiaohongshu-primary rounded-full flex items-center justify-center -mt-4">
+          <div class="w-12 h-12 bg-gradient-to-br from-xiaohongshu-primary to-xiaohongshu-secondary rounded-full flex items-center justify-center -mt-4 shadow-glow">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>

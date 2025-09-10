@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+  <div id="app" class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 overflow-hidden">
     <router-view v-slot="{ Component }">
       <transition name="fade" mode="out-in">
         <component :is="Component" />
