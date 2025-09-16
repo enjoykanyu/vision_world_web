@@ -5,10 +5,14 @@
         <component :is="Component" />
       </transition>
     </router-view>
+    
+    <!-- 全局小V助手组件 -->
+    <VAssistant />
   </div>
 </template>
 
 <script setup lang="ts">
+import VAssistant from './components/VAssistant.vue'
 // App组件逻辑
 </script>
 
