@@ -1,326 +1,340 @@
 <template>
-  <div class="min-h-screen bg-bilibili-bg relative overflow-hidden">
-    <!-- 背景动画 -->
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-bilibili-primary to-bilibili-secondary animate-pulse-slow"></div>
-    </div>
-    
-    <!-- 弹幕效果 -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div v-for="i in 20" :key="i"
-           class="absolute text-white/60 text-sm whitespace-nowrap animate-barrage"
-           :style="{
-             top: Math.random() * 100 + '%',
-             left: '-100%',
-             animationDelay: Math.random() * 10 + 's',
-             animationDuration: (Math.random() * 10 + 10) + 's'
-           }">
-        {{ barrageTexts[i % barrageTexts.length] }}
-      </div>
-    </div>
-
-    <!-- 网页端顶部导航 -->
-    <header class="relative z-10 glass-card border-b border-bilibili-primary/20">
-      <div class="container mx-auto px-6">
-        <div class="flex items-center justify-between h-16">
-          <!-- 左侧Logo和返回按钮 -->
+  <div class="min-h-screen bg-gray-100">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-14">
+          <!-- 左侧Logo和导航 -->
           <div class="flex items-center space-x-6">
-            <button @click="goBack" class="text-white hover:text-bilibili-secondary transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-              </svg>
-            </button>
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-bilibili-primary rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-pink-500 rounded flex items-center justify-center">
                 <span class="text-white font-bold text-sm">B</span>
               </div>
-              <h1 class="text-xl font-bold text-white">B站风格</h1>
+              <span class="text-xl font-bold text-gray-900">哔哩哔哩</span>
             </div>
+            
+            <!-- 桌面端导航 -->
+            <nav class="hidden md:flex items-center space-x-6">
+              <a href="#" class="text-pink-500 font-medium">首页</a>
+              <a href="#" class="text-gray-600 hover:text-gray-900">番剧</a>
+              <a href="#" class="text-gray-600 hover:text-gray-900">直播</a>
+              <a href="#" class="text-gray-600 hover:text-gray-900">游戏中心</a>
+              <a href="#" class="text-gray-600 hover:text-gray-900">会员购</a>
+            </nav>
           </div>
-
-          <!-- 中间导航菜单 -->
-          <nav class="hidden md:flex items-center space-x-8">
-            <a href="#" class="text-bilibili-primary hover:text-bilibili-secondary transition-colors font-medium">首页</a>
-            <a href="#" class="text-white/70 hover:text-white transition-colors">番剧</a>
-            <a href="#" class="text-white/70 hover:text-white transition-colors">电影</a>
-            <a href="#" class="text-white/70 hover:text-white transition-colors">综艺</a>
-            <a href="#" class="text-white/70 hover:text-white transition-colors">游戏</a>
-            <a href="#" class="text-white/70 hover:text-white transition-colors">科技</a>
-          </nav>
 
           <!-- 右侧搜索和用户 -->
           <div class="flex items-center space-x-4">
-            <div class="hidden md:flex items-center bg-white/10 rounded-full px-4 py-2">
-              <input type="text" placeholder="搜索视频" class="bg-transparent text-white placeholder-white/50 outline-none text-sm w-48">
-              <svg class="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- 搜索框 -->
+            <div class="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2">
+              <input type="text" placeholder="搜索视频、用户" class="bg-transparent text-gray-700 placeholder-gray-500 outline-none text-sm w-64">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
             </div>
-            <button class="w-8 h-8 bg-bilibili-primary rounded-full flex items-center justify-center">
-              <span class="text-white text-sm font-bold">U</span>
+            
+            <!-- 用户头像 -->
+            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+              <span class="text-gray-600 text-sm">U</span>
+            </div>
+            
+            <!-- 移动端菜单按钮 -->
+            <button @click="toggleMobileMenu" class="md:hidden">
+              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
             </button>
           </div>
+        </div>
+      </div>
+      
+      <!-- 移动端菜单 -->
+      <div v-if="isMobileMenuOpen" class="md:hidden bg-white border-t">
+        <div class="px-4 py-2 space-y-2">
+          <a href="#" class="block py-2 text-pink-500 font-medium">首页</a>
+          <a href="#" class="block py-2 text-gray-600">番剧</a>
+          <a href="#" class="block py-2 text-gray-600">直播</a>
+          <a href="#" class="block py-2 text-gray-600">游戏中心</a>
+          <a href="#" class="block py-2 text-gray-600">会员购</a>
         </div>
       </div>
     </header>
 
     <!-- 主要内容区域 -->
-    <div class="relative z-10 flex">
-      <!-- 左侧边栏 -->
-      <aside class="hidden lg:block w-48 glass-card border-r border-bilibili-primary/20 p-4">
-        <div class="space-y-4">
-          <div class="text-white/60 text-xs font-semibold mb-4">分区导航</div>
-          <a v-for="category in sidebarCategories" :key="category.id" 
-             href="#" 
-             class="flex items-center space-x-3 text-white/70 hover:text-bilibili-primary transition-colors p-2 rounded-lg hover:bg-white/5">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path :d="category.icon"/>
-            </svg>
-            <span class="text-sm">{{ category.name }}</span>
-          </a>
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <!-- 轮播图区域 -->
+      <div class="mb-6">
+        <div class="bg-gradient-to-r from-pink-500 to-blue-500 h-48 rounded-lg flex items-center justify-center text-white">
+          <div class="text-center">
+            <h2 class="text-2xl font-bold mb-2">热门推荐</h2>
+            <p class="text-sm opacity-90">发现精彩内容</p>
+          </div>
         </div>
-      </aside>
+      </div>
 
-      <!-- 主内容区 -->
-      <main class="flex-1 container mx-auto px-6 py-8">
-        <!-- 推荐视频 -->
-        <div class="mb-12">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-white flex items-center">
-              <span class="bg-bilibili-primary text-white px-3 py-1 rounded-lg text-sm mr-3">推荐</span>
-              为你推荐
-            </h2>
-            <div class="flex space-x-2">
-              <button class="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors text-sm">
-                换一批
-              </button>
-              <button class="px-4 py-2 bg-bilibili-primary text-white rounded-lg hover:bg-bilibili-secondary transition-colors text-sm">
-                更多
-              </button>
+      <!-- 分区导航 -->
+      <div class="mb-6">
+        <div class="flex items-center space-x-4 overflow-x-auto pb-2">
+          <button v-for="category in categories" :key="category.id"
+                  @click="activeCategory = category.id"
+                  :class="['px-4 py-2 rounded-full whitespace-nowrap transition-colors',
+                           activeCategory === category.id 
+                             ? 'bg-pink-500 text-white' 
+                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300']">
+            {{ category.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 视频网格 -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div v-for="video in videos" :key="video.id"
+             class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+          <!-- 视频封面 -->
+          <div class="relative aspect-video bg-gray-200">
+            <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover">
+            <div class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+              {{ video.duration }}
+            </div>
+            <div class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+              {{ video.views }}
             </div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            <div v-for="i in 8" :key="i"
-                 class="group cursor-pointer transform transition-all duration-500 hover:scale-105 animate-scale-in">
-              <div class="glass-card overflow-hidden">
-                <div class="relative h-40 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary flex items-center justify-center">
-                  <div class="text-center text-white">
-                    <svg class="w-12 h-12 mx-auto mb-2 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <p class="text-sm font-semibold">{{ Math.floor(Math.random() * 100) + ':' + (Math.floor(Math.random() * 60)).toString().padStart(2, '0') }}</p>
-                  </div>
-                  <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                  <div class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                    {{ Math.floor(Math.random() * 1000) }}万
-                  </div>
-                </div>
-                <div class="p-4">
-                  <h3 class="text-white font-semibold mb-2 line-clamp-2">
-                    {{ videoTitles[i % videoTitles.length] }} {{ i }}
-                  </h3>
-                  <div class="flex items-center justify-between text-white/70 text-xs">
-                    <span>UP主 {{ i }}</span>
-                    <div class="flex items-center space-x-2">
-                      <span>{{ Math.floor(Math.random() * 100) }}万播放</span>
-                      <span>{{ Math.floor(Math.random() * 10000) }}弹幕</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          
+          <!-- 视频信息 -->
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-900 mb-2 line-clamp-2">{{ video.title }}</h3>
+            <div class="flex items-center space-x-2">
+              <div class="w-6 h-6 bg-gray-300 rounded-full flex-shrink-0"></div>
+              <span class="text-xs text-gray-600 truncate">{{ video.uploader }}</span>
+            </div>
+            <div class="flex items-center justify-between mt-2 text-xs text-gray-500">
+              <span>{{ video.playCount }}播放</span>
+              <span>{{ video.danmaku }}弹幕</span>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- 分区内容 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <!-- 动画区 -->
-          <div class="glass-card p-6 animate-scale-in">
-            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-              <span class="w-3 h-3 bg-bilibili-primary rounded-full mr-2 animate-pulse"></span>
-              动画区
-            </h3>
-            <div class="space-y-4">
-              <div v-for="i in 3" :key="i" 
-                   class="flex items-center space-x-3 cursor-pointer group">
-                <div class="w-20 h-12 bg-gradient-to-br from-pink-500 to-purple-500 rounded-lg flex-shrink-0"></div>
-                <div class="flex-1">
-                  <h4 class="text-white text-sm font-semibold group-hover:text-bilibili-secondary transition-colors">
-                    动画视频 {{ i }}
-                  </h4>
-                  <p class="text-white/60 text-xs">{{ Math.floor(Math.random() * 100) }}万播放</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 游戏区 -->
-          <div class="glass-card p-6 animate-scale-in" style="animation-delay: 0.1s">
-            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-              <span class="w-3 h-3 bg-bilibili-secondary rounded-full mr-2 animate-pulse"></span>
-              游戏区
-            </h3>
-            <div class="space-y-4">
-              <div v-for="i in 3" :key="i" 
-                   class="flex items-center space-x-3 cursor-pointer group">
-                <div class="w-20 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex-shrink-0"></div>
-                <div class="flex-1">
-                  <h4 class="text-white text-sm font-semibold group-hover:text-bilibili-secondary transition-colors">
-                    游戏视频 {{ i }}
-                  </h4>
-                  <p class="text-white/60 text-xs">{{ Math.floor(Math.random() * 100) }}万播放</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 音乐区 -->
-          <div class="glass-card p-6 animate-scale-in" style="animation-delay: 0.2s">
-            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-              <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-              音乐区
-            </h3>
-            <div class="space-y-4">
-              <div v-for="i in 3" :key="i" 
-                   class="flex items-center space-x-3 cursor-pointer group">
-                <div class="w-20 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex-shrink-0"></div>
-                <div class="flex-1">
-                  <h4 class="text-white text-sm font-semibold group-hover:text-bilibili-secondary transition-colors">
-                    音乐视频 {{ i }}
-                  </h4>
-                  <p class="text-white/60 text-xs">{{ Math.floor(Math.random() * 100) }}万播放</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 直播间 -->
-        <div>
-          <h2 class="text-3xl font-bold text-white mb-6 flex items-center">
-            <span class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm mr-3 animate-pulse">LIVE</span>
+      <!-- 直播区域 -->
+      <div class="mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-gray-900 flex items-center">
+            <span class="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></span>
             热门直播
           </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div v-for="i in 4" :key="i"
-                 class="group cursor-pointer transform transition-all duration-500 hover:scale-105 animate-scale-in" style="animation-delay: 0.3s">
-              <div class="glass-card overflow-hidden">
-                <div class="relative h-48 bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
-                  <div class="text-center text-white">
-                    <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-2 animate-pulse">
-                      <span class="text-xs font-bold">直播</span>
-                    </div>
-                    <p class="text-sm font-semibold">主播 {{ i }}</p>
-                  </div>
-                  <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                  <div class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                    {{ Math.floor(Math.random() * 10000) }}人气
-                  </div>
-                </div>
-                <div class="p-4">
-                  <h3 class="text-white font-semibold mb-2">直播间 {{ i }}</h3>
-                  <p class="text-white/70 text-sm">{{ gameCategories[i % gameCategories.length] }}</p>
-                </div>
+          <a href="#" class="text-sm text-pink-500 hover:text-pink-600">查看更多</a>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div v-for="live in lives" :key="live.id"
+               class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+            <div class="relative aspect-video bg-gray-200">
+              <img :src="live.cover" :alt="live.title" class="w-full h-full object-cover">
+              <div class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded flex items-center">
+                <span class="w-2 h-2 bg-white rounded-full mr-1 animate-pulse"></span>
+                直播中
               </div>
+              <div class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                {{ live.popularity }}
+              </div>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-medium text-gray-900 mb-1">{{ live.title }}</h3>
+              <p class="text-xs text-gray-600">{{ live.streamer }}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ live.category }}</p>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
 
+    <!-- 底部导航（移动端） -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t">
+      <div class="flex items-center justify-around py-2">
+        <button class="flex flex-col items-center p-2 text-pink-500">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+          </svg>
+          <span class="text-xs mt-1">首页</span>
+        </button>
+        <button class="flex flex-col items-center p-2 text-gray-600">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <span class="text-xs mt-1">动态</span>
+        </button>
+        <button class="flex flex-col items-center p-2 text-gray-600">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <span class="text-xs mt-1">会员购</span>
+        </button>
+        <button class="flex flex-col items-center p-2 text-gray-600">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+          <span class="text-xs mt-1">我的</span>
+        </button>
+      </div>
+    </nav>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 
-const router = useRouter()
+const isMobileMenuOpen = ref(false)
+const activeCategory = ref(1)
 
-const goBack = () => {
-  router.push({ name: 'home' })
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
 
-const barrageTexts = [
-  '前方高能预警！！！',
-  '2333333333',
-  '太厉害了！',
-  'UP主加油！',
-  '这个视频太棒了',
-  '笑死我了哈哈哈',
-  '学到了学到了',
-  '一键三连支持',
-  'UP主辛苦了',
-  '期待更多内容',
-  '这个操作太秀了',
-  '6666666666',
-  '太精彩了',
-  '支持UP主',
-  '干货满满',
-  '收藏了',
-  '分享给朋友',
-  '关注了',
-  '点赞了',
-  '投币了'
+const categories = [
+  { id: 1, name: '推荐' },
+  { id: 2, name: '动画' },
+  { id: 3, name: '音乐' },
+  { id: 4, name: '舞蹈' },
+  { id: 5, name: '游戏' },
+  { id: 6, name: '知识' },
+  { id: 7, name: '科技' },
+  { id: 8, name: '运动' },
+  { id: 9, name: '生活' },
+  { id: 10, name: '美食' }
 ]
 
-const videoTitles = [
-  '【原创动画】超燃战斗场面',
-  '【游戏实况】极限操作秀翻全场',
-  '【音乐MV】最新热门歌曲',
-  '【科技评测】黑科技产品体验',
-  '【美食制作】教你做网红美食',
-  '【旅行Vlog】探索未知世界',
-  '【知识科普】有趣的科学知识',
-  '【搞笑合集】笑到肚子疼'
+const videos = [
+  {
+    id: 1,
+    title: '【原创动画】超燃战斗场面，特效炸裂',
+    cover: 'https://via.placeholder.com/300x200/FF69B4/FFFFFF?text=视频1',
+    duration: '12:34',
+    views: '128万',
+    uploader: '动画UP主',
+    playCount: '128万',
+    danmaku: '2.3万'
+  },
+  {
+    id: 2,
+    title: '【游戏实况】极限操作秀翻全场，队友都惊呆了',
+    cover: 'https://via.placeholder.com/300x200/4169E1/FFFFFF?text=视频2',
+    duration: '25:18',
+    views: '89万',
+    uploader: '游戏达人',
+    playCount: '89万',
+    danmaku: '1.8万'
+  },
+  {
+    id: 3,
+    title: '【音乐MV】最新热门歌曲，太好听了',
+    cover: 'https://via.placeholder.com/300x200/32CD32/FFFFFF?text=视频3',
+    duration: '4:23',
+    views: '256万',
+    uploader: '音乐分享',
+    playCount: '256万',
+    danmaku: '5.6万'
+  },
+  {
+    id: 4,
+    title: '【科技评测】黑科技产品体验，未来已来',
+    cover: 'https://via.placeholder.com/300x200/FF4500/FFFFFF?text=视频4',
+    duration: '18:45',
+    views: '67万',
+    uploader: '科技博主',
+    playCount: '67万',
+    danmaku: '9800'
+  },
+  {
+    id: 5,
+    title: '【美食制作】教你做网红美食，简单易学',
+    cover: 'https://via.placeholder.com/300x200/FFD700/FFFFFF?text=视频5',
+    duration: '8:12',
+    views: '145万',
+    uploader: '美食达人',
+    playCount: '145万',
+    danmaku: '3.2万'
+  },
+  {
+    id: 6,
+    title: '【旅行Vlog】探索未知世界，美景如画',
+    cover: 'https://via.placeholder.com/300x200/9370DB/FFFFFF?text=视频6',
+    duration: '15:30',
+    views: '92万',
+    uploader: '旅行博主',
+    playCount: '92万',
+    danmaku: '1.5万'
+  },
+  {
+    id: 7,
+    title: '【知识科普】有趣的科学知识，长见识了',
+    cover: 'https://via.placeholder.com/300x200/20B2AA/FFFFFF?text=视频7',
+    duration: '10:15',
+    views: '178万',
+    uploader: '知识分享',
+    playCount: '178万',
+    danmaku: '4.1万'
+  },
+  {
+    id: 8,
+    title: '【搞笑合集】笑到肚子疼，太搞笑了',
+    cover: 'https://via.placeholder.com/300x200/FF6347/FFFFFF?text=视频8',
+    duration: '6:45',
+    views: '234万',
+    uploader: '搞笑日常',
+    playCount: '234万',
+    danmaku: '6.7万'
+  }
 ]
 
-const gameCategories = [
-  '英雄联盟',
-  '王者荣耀',
-  '原神',
-  '绝地求生',
-  'CS:GO',
-  '守望先锋',
-  'DOTA2',
-  '炉石传说'
-]
-
-const sidebarCategories = [
-  { id: 1, name: '动画', icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' },
-  { id: 2, name: '音乐', icon: 'M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z' },
-  { id: 3, name: '游戏', icon: 'M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z' },
-  { id: 4, name: '知识', icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z' },
-  { id: 5, name: '科技', icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' },
-  { id: 6, name: '运动', icon: 'M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z' },
-  { id: 7, name: '生活', icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' },
-  { id: 8, name: '国创', icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' }
+const lives = [
+  {
+    id: 1,
+    title: '今晚一起打游戏，超欢乐',
+    cover: 'https://via.placeholder.com/300x200/FF0000/FFFFFF?text=直播1',
+    streamer: '游戏主播',
+    category: '英雄联盟',
+    popularity: '12.3万'
+  },
+  {
+    id: 2,
+    title: '唱歌聊天，欢迎来到直播间',
+    cover: 'https://via.placeholder.com/300x200/FF1493/FFFFFF?text=直播2',
+    streamer: '音乐主播',
+    category: '唱歌',
+    popularity: '8.7万'
+  },
+  {
+    id: 3,
+    title: '绘画教学，从零开始学画画',
+    cover: 'https://via.placeholder.com/300x200/00CED1/FFFFFF?text=直播3',
+    streamer: '绘画老师',
+    category: '绘画',
+    popularity: '5.2万'
+  },
+  {
+    id: 4,
+    title: '户外直播，探索城市美景',
+    cover: 'https://via.placeholder.com/300x200/FF8C00/FFFFFF?text=直播4',
+    streamer: '户外主播',
+    category: '户外',
+    popularity: '3.8万'
+  }
 ]
 </script>
 
 <style scoped>
-.glass-effect {
-  backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-@keyframes barrage {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(100vw + 100%));
-  }
-}
-
-.animate-barrage {
-  animation: barrage linear infinite;
-}
-
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 移动端底部导航占位 */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px;
+  }
 }
 </style>

@@ -25,62 +25,18 @@
           Vision World
         </h1>
         <p class="text-xl md:text-2xl text-white/80 mb-8">
-          选择你喜欢的UI风格，体验不同的视觉盛宴
+          体验仿B站风格UI，感受二次元文化的魅力
         </p>
         <div class="w-32 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full animate-glow"></div>
       </div>
 
       <!-- 风格选择卡片 -->
-      <div class="card-grid max-w-6xl w-full">
-        <!-- 视频智能分析助手 -->
-        <div @click="navigateToStyle('video-assistant')"
-             class="group cursor-pointer animate-scale-in">
-          <div class="glass-card p-8 text-center">
-            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center group-hover:animate-pulse-slow shadow-glow">
-              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-3">视频智能分析助手</h3>
-            <p class="text-white/80 mb-6 text-sm leading-relaxed">AI驱动的视频内容分析，提供专业的智能解析和建议</p>
-            <button class="btn-secondary w-full">
-              <span class="flex items-center justify-center">
-                立即体验
-                <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 抖音风格 -->
-        <div @click="navigateToStyle('douyin')"
-             class="group cursor-pointer animate-scale-in">
-          <div class="glass-card p-8 text-center">
-            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-douyin-primary to-douyin-secondary flex items-center justify-center group-hover:animate-spin-slow shadow-glow">
-              <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-3">抖音风格</h3>
-            <p class="text-white/80 mb-6 text-sm leading-relaxed">年轻、活力、潮流，充满动感的视觉体验</p>
-            <button class="btn-secondary w-full">
-              <span class="flex items-center justify-center">
-                立即体验
-                <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-
+      <div class="card-grid max-w-4xl w-full">
         <!-- B站风格 -->
         <div @click="navigateToStyle('bilibili')"
-             class="group cursor-pointer animate-scale-in" style="animation-delay: 0.1s">
+             class="group cursor-pointer animate-scale-in">
           <div class="glass-card p-8 text-center">
-            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-bilibili-primary to-bilibili-secondary flex items-center justify-center group-hover:animate-pulse-slow shadow-glow">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-500 to-blue-500 flex items-center justify-center group-hover:animate-pulse-slow shadow-glow">
               <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z"/>
               </svg>
@@ -98,17 +54,17 @@
           </div>
         </div>
 
-        <!-- 小红书风格 -->
-        <div @click="navigateToStyle('xiaohongshu')"
-             class="group cursor-pointer animate-scale-in" style="animation-delay: 0.2s">
+        <!-- 视频智能分析助手 -->
+        <div @click="navigateToStyle('video-assistant')"
+             class="group cursor-pointer animate-scale-in" style="animation-delay: 0.1s">
           <div class="glass-card p-8 text-center">
-            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-xiaohongshu-primary to-xiaohongshu-secondary flex items-center justify-center group-hover:animate-bounce-slow shadow-glow">
-              <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center group-hover:animate-pulse-slow shadow-glow">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-3">小红书风格</h3>
-            <p class="text-white/80 mb-6 text-sm leading-relaxed">生活方式、美妆、时尚，精致生活的分享平台</p>
+            <h3 class="text-2xl font-bold text-white mb-3">视频智能分析助手</h3>
+            <p class="text-white/80 mb-6 text-sm leading-relaxed">AI驱动的视频内容分析，提供专业的智能解析和建议</p>
             <button class="btn-secondary w-full">
               <span class="flex items-center justify-center">
                 立即体验
@@ -124,7 +80,7 @@
       <!-- 底部装饰 -->
       <div class="mt-16 text-center">
         <p class="text-white/50 text-sm">
-          选择你喜欢的风格，开启独特的视觉之旅
+          进入B站世界，探索无限可能
         </p>
       </div>
     </div>

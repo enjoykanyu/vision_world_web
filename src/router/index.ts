@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
-import DouyinStyle from '@/views/DouyinStyle.vue'
 import BilibiliStyle from '@/views/BilibiliStyle.vue'
-import XiaohongshuStyle from '@/views/XiaohongshuStyle.vue'
 import VideoAssistant from '@/views/VideoAssistant.vue'
 
 const router = createRouter({
@@ -17,27 +15,11 @@ const router = createRouter({
       }
     },
     {
-      path: '/douyin',
-      name: 'douyin',
-      component: DouyinStyle,
-      meta: {
-        title: '抖音风格 - Vision World'
-      }
-    },
-    {
       path: '/bilibili',
       name: 'bilibili',
       component: BilibiliStyle,
       meta: {
         title: 'B站风格 - Vision World'
-      }
-    },
-    {
-      path: '/xiaohongshu',
-      name: 'xiaohongshu',
-      component: XiaohongshuStyle,
-      meta: {
-        title: '小红书风格 - Vision World'
       }
     },
     {
