@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="min-h-screen bg-gray-100">
     <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
+      <transition name="bilibili" mode="out-in">
         <component :is="Component" />
       </transition>
     </router-view>

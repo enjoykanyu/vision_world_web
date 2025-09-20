@@ -8,55 +8,107 @@
   }
   
   html, body {
-    @apply bg-gray-100 text-gray-900;
+    @apply bg-gray-50 text-gray-900;
     font-feature-settings: "rlig" 1, "calt" 1;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
     min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
   
   #app {
-    @apply bg-gray-100;
+    @apply bg-gray-50;
     min-height: 100vh;
   }
 }
 
 @layer components {
+  /* B站风格渐变文字 */
   .gradient-text {
     @apply bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent;
   }
   
+  /* B站风格玻璃效果 */
   .glass-effect {
-    @apply backdrop-blur-lg bg-white/10 border border-white/20 shadow-glow;
+    @apply backdrop-blur-lg bg-white/10 border border-white/20;
   }
   
   .glass-card {
-    @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-card transition-all duration-300 hover:shadow-card-lg hover:scale-105;
+    @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl transition-all duration-300 hover:scale-105;
   }
   
+  /* B站风格发光效果 */
   .neon-glow {
-    @apply shadow-glow;
+    @apply shadow-lg;
   }
   
+  /* B站风格卡片悬停 */
   .card-hover {
-    @apply transition-all duration-300 hover:scale-105 hover:shadow-card-lg;
+    @apply transition-all duration-300 hover:scale-105;
   }
   
+  /* B站风格主要按钮 */
   .btn-primary {
     @apply bg-gradient-to-r from-pink-500 to-blue-500 text-white px-6 py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:scale-105 transform;
   }
   
+  /* B站风格次要按钮 */
   .btn-secondary {
-    @apply bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-full font-medium transition-all duration-300 hover:bg-white/20 hover:shadow-glow;
+    @apply bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-full font-medium transition-all duration-300 hover:bg-white/20;
   }
   
+  /* B站风格标题 */
   .section-title {
-    @apply text-3xl md:text-4xl font-bold gradient-text mb-8 animate-fade-in;
+    @apply text-3xl md:text-4xl font-bold gradient-text mb-8;
   }
   
+  /* B站风格卡片网格 */
   .card-grid {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  }
+  
+  /* B站风格搜索框 */
+  .bilibili-search {
+    @apply bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 hover:border-pink-300 rounded-full px-5 py-3 transition-all duration-300 focus-within:border-pink-500 focus-within:shadow-lg focus-within:shadow-pink-100;
+  }
+  
+  /* B站风格导航链接 */
+  .nav-link {
+    @apply relative text-gray-700 hover:text-pink-500 font-medium text-lg transition-colors duration-300;
+  }
+  
+  .nav-link::after {
+    content: '';
+    @apply absolute -bottom-1 left-0 w-full h-0.5 bg-pink-500 transform scale-x-0 transition-transform duration-300;
+  }
+  
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    @apply scale-x-100;
+  }
+  
+  /* B站风格视频卡片 */
+  .video-card {
+    @apply bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 hover:scale-105;
+  }
+  
+  /* B站风格直播卡片 */
+  .live-card {
+    @apply bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 hover:scale-105;
+  }
+  
+  /* B站风格分类标签 */
+  .category-chip {
+    @apply px-6 py-3 rounded-full whitespace-nowrap transition-all duration-300 font-medium text-base border-2 transform hover:scale-105;
+  }
+  
+  .category-chip.active {
+    @apply bg-gradient-to-r from-pink-500 to-blue-400 text-white border-transparent shadow-lg shadow-pink-200;
+  }
+  
+  .category-chip:not(.active) {
+    @apply bg-white text-gray-700 border-gray-200 hover:border-pink-300 hover:text-pink-500 hover:shadow-md;
   }
 }
 
@@ -68,27 +120,160 @@
   .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
   }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+  
+  .animate-bilibili-bounce {
+    animation: bilibiliBounce 2s infinite;
+  }
 }
 
-/* 自定义滚动条 */
+/* 自定义滚动条 - B站风格 */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(249, 250, 251, 0.8);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, #ec4899 0%, #3b82f6 100%);
   border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #db2777 0%, #2563eb 100%);
+  transform: scale(1.1);
 }
 
-/* 背景动画 */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* B站风格的动画效果 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.8), 0 0 30px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bilibiliBounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes wiggle {
+  0%, 7% {
+    transform: rotateZ(0);
+  }
+  15% {
+    transform: rotateZ(-15deg);
+  }
+  20% {
+    transform: rotateZ(10deg);
+  }
+  25% {
+    transform: rotateZ(-10deg);
+  }
+  30% {
+    transform: rotateZ(6deg);
+  }
+  35% {
+    transform: rotateZ(-4deg);
+  }
+  40%, 100% {
+    transform: rotateZ(0);
+  }
+}
+
+/* B站风格背景动画 */
 .bg-animated {
   background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
   background-size: 400% 400%;
@@ -107,20 +292,24 @@
   }
 }
 
-/* 科技感网格背景 */
-.tech-grid {
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: grid-move 20s linear infinite;
+/* B站风格的渐变背景 */
+.bilibili-gradient {
+  background: linear-gradient(135deg, #fb7299 0%, #ff6b9d 25%, #4ecdc4 50%, #45b7d1 75%, #96ceb4 100%);
+  background-size: 400% 400%;
+  animation: bilibili-gradient 10s ease infinite;
 }
 
-@keyframes grid-move {
-  0% {
-    background-position: 0 0;
+@keyframes bilibili-gradient {
+  0%, 100% {
+    background-position: 0% 50%;
   }
-  100% {
-    background-position: 50px 50px;
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
   }
 }

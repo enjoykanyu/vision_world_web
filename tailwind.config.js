@@ -17,6 +17,18 @@ module.exports = {
         'scale-in': 'scaleIn 0.6s ease-out',
       },
       keyframes: {
+        'bilibili-float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-15px)' }
+        },
+        'bilibili-glow': {
+          'from': { boxShadow: '0 0 15px -5px rgba(251,114,153,0.5)' },
+          'to': { boxShadow: '0 0 25px -5px rgba(251,114,153,0.8)' }
+        },
+        'card-slide': {
+          'from': { transform: 'translateY(20px)', opacity: '0' },
+          'to': { transform: 'translateY(0)', opacity: '1' }
+        },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-20px)' },

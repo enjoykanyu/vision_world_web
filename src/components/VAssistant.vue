@@ -10,14 +10,8 @@
     >
       <div class="v-icon">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="20" fill="url(#gradient)"/>
+          <circle cx="20" cy="20" r="20" fill="#FB7299"/>
           <text x="20" y="28" text-anchor="middle" fill="white" font-size="20" font-weight="bold">V</text>
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
-              <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
-            </linearGradient>
-          </defs>
         </svg>
       </div>
     </div>
@@ -42,10 +36,10 @@
             <div class="message-content">{{ message.content }}</div>
           </div>
           <div v-if="isTyping" class="message assistant typing">
-            <div class="typing-indicator">
-              <span></span>
-              <span></span>
-              <span></span>
+            <div class="typing-indicator animate-bilibili-float">
+              <span class="hover:animate-bilibili-glow"></span>
+              <span class="hover:animate-bilibili-glow"></span>
+              <span class="hover:animate-bilibili-glow"></span>
             </div>
           </div>
         </div>
@@ -312,7 +306,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+  background: #FB7299;
   color: white;
   border-radius: 12px 12px 0 0;
 }
@@ -377,7 +371,7 @@ onUnmounted(() => {
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+  background: #FB7299;
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -444,7 +438,7 @@ onUnmounted(() => {
 }
 
 .input-area input:focus {
-  border-color: #8B5CF6;
+  border-color: #FB7299;
 }
 
 .input-area input:disabled {
@@ -454,7 +448,7 @@ onUnmounted(() => {
 
 .input-area button {
   padding: 10px 20px;
-  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+  background: #FB7299;
   color: white;
   border: none;
   border-radius: 8px;
@@ -510,11 +504,11 @@ onUnmounted(() => {
 }
 
 .question-chip:hover {
-  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+  background: #FB7299;
   color: white;
-  border-color: #8B5CF6;
+  border-color: #FB7299;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(251, 114, 153, 0.3);
 }
 
 .question-chip:active {
