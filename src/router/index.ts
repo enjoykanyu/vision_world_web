@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import BilibiliStyle from '@/views/BilibiliStyle.vue'
 import VideoAssistant from '@/views/VideoAssistant.vue'
+import VideoDetail from '@/views/VideoDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +29,14 @@ const router = createRouter({
       component: VideoAssistant,
       meta: {
         title: '视频智能分析助手 - Vision World'
+      }
+    },
+    {
+      path: '/video/:id',
+      name: 'videoDetail',
+      component: VideoDetail,
+      meta: {
+        title: '视频详情 - Vision World'
       }
     }
   ]

@@ -82,7 +82,8 @@
       <!-- 推荐视频网格 -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
         <div v-for="video in recommendedVideos" :key="video.id"
-             class="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer">
+             class="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer"
+             @click="router.push(`/video/${video.id}`)">
           <div class="relative aspect-video">
             <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover">
             <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
@@ -126,7 +127,8 @@
       <!-- 视频网格 -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <div v-for="video in videos" :key="video.id"
-             class="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer">
+             class="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer"
+             @click="router.push(`/video/${video.id}`)">
           <div class="relative aspect-video">
             <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover">
             <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
@@ -234,6 +236,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const activeCategory = ref(1)
 const currentSlide = ref(0)
