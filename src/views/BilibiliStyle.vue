@@ -1,415 +1,331 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- 顶部导航栏 -->
-    <header class="bg-white shadow-md sticky top-0 z-50 border-b border-gray-100">
-      <div class="max-w-7xl mx-auto px-4">
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-screen-xl mx-auto px-4">
         <div class="flex items-center justify-between h-16">
-          <!-- 左侧Logo和导航 -->
-          <div class="flex items-center space-x-6">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-blue-400 rounded-lg flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <span class="text-white font-bold text-lg">B</span>
-              </div>
-              <span class="text-2xl font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">哔哩哔哩</span>
+          <!-- Logo -->
+          <div class="flex items-center space-x-8">
+            <div class="flex items-center">
+              <svg class="w-8 h-8 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.51.556-2.764 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.920-.373.347 0 .653.124.920.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .160-.213l2.853-2.747c.267-.249.573-.373.920-.373.347 0 .662.151.929.400.267.249.391.551.391.907 0 .356-.124.657-.373.906l-1.174 1.120zM5.333 7.24c-.746.018-1.373.276-1.880.773-.506.498-.769 1.13-.789 1.894v7.52c.02.764.283 1.395.789 1.893.507.498 1.134.756 1.880.773h13.334c.746-.017 1.373-.275 1.880-.773.506-.498.769-1.129.789-1.893v-7.52c-.02-.765-.283-1.396-.789-1.894-.507-.497-1.134-.755-1.880-.773H5.333zM8 11.107c.373 0 .684.124.933.373.249.249.373.560.373.933v1.173c0 .373-.124.684-.373.933-.249.249-.560.373-.933.373s-.684-.124-.933-.373c-.249-.249-.373-.560-.373-.933V12.413c0-.373.124-.684.373-.933.249-.249.560-.373.933-.373zm8 0c.373 0 .684.124.933.373.249.249.373.560.373.933v1.173c0 .373-.124.684-.373.933-.249.249-.560.373-.933.373s-.684-.124-.933-.373c-.249-.249-.373-.560-.373-.933V12.413c0-.373.124-.684.373-.933.249-.249.560-.373.933-.373z"/>
+              </svg>
+              <span class="ml-2 text-xl font-bold text-gray-900">bilibili</span>
             </div>
             
-            <!-- 桌面端导航 -->
-            <nav class="hidden md:flex items-center space-x-8">
-              <a href="#" class="relative text-pink-500 font-semibold text-lg group">
-                首页
-                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-pink-500 transform scale-x-100 transition-transform duration-300"></span>
-              </a>
-              <a href="#" class="relative text-gray-700 hover:text-pink-500 font-medium text-lg transition-colors duration-300 group">
-                番剧
-                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-              </a>
-              <a href="#" class="relative text-gray-700 hover:text-pink-500 font-medium text-lg transition-colors duration-300 group">
-                直播
-                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-              </a>
-              <a href="#" class="relative text-gray-700 hover:text-pink-500 font-medium text-lg transition-colors duration-300 group">
-                游戏中心
-                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-              </a>
-              <a href="#" class="relative text-gray-700 hover:text-pink-500 font-medium text-lg transition-colors duration-300 group">
-                会员购
-                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-              </a>
+            <!-- 主导航 -->
+            <nav class="hidden md:flex items-center space-x-6 text-sm">
+              <a href="#" class="text-blue-500 font-medium">首页</a>
+              <a href="#" class="text-gray-600 hover:text-blue-500">番剧</a>
+              <a href="#" class="text-gray-600 hover:text-blue-500">直播</a>
+              <a href="#" class="text-gray-600 hover:text-blue-500">游戏中心</a>
+              <a href="#" class="text-gray-600 hover:text-blue-500">会员购</a>
+              <a href="#" class="text-gray-600 hover:text-blue-500">漫画</a>
+              <a href="#" class="text-gray-600 hover:text-blue-500">赛事</a>
             </nav>
           </div>
 
-          <!-- 右侧搜索和用户 -->
+          <!-- 搜索和用户 -->
           <div class="flex items-center space-x-4">
             <!-- 搜索框 -->
-            <div class="hidden md:flex items-center bg-gray-50 hover:bg-gray-100 border border-gray-200 hover:border-pink-300 rounded-full px-5 py-3 transition-all duration-300 focus-within:border-pink-500 focus-within:shadow-lg focus-within:shadow-pink-100">
-              <input type="text" placeholder="搜索视频、直播、用户" class="bg-transparent text-gray-700 placeholder-gray-400 outline-none text-base w-80 font-medium">
-              <svg class="w-5 h-5 text-gray-400 hover:text-pink-500 cursor-pointer transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-80">
+              <input type="text" placeholder="搜索视频、番剧、UP主..." class="bg-transparent text-gray-700 placeholder-gray-500 outline-none text-sm flex-1">
+              <svg class="w-4 h-4 text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
             </div>
             
-            <!-- 用户头像和操作按钮 -->
-            <div class="flex items-center space-x-4">
-              <!-- 投稿按钮 -->
-              <button class="hidden md:flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-blue-400 text-white px-4 py-2 rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-300">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>投稿</span>
-              </button>
-              <!-- 用户头像 -->
-              <div class="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
-                <span class="text-white font-semibold text-lg">U</span>
-              </div>
-            </div>
-            
-            <!-- 移动端菜单按钮 -->
-            <button @click="toggleMobileMenu" class="md:hidden">
-              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-              </svg>
+            <!-- 投稿按钮 -->
+            <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium">
+              投稿
             </button>
+            
+            <!-- 用户头像 -->
+            <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center cursor-pointer">
+              <span class="text-white text-sm font-semibold">U</span>
+            </div>
           </div>
-        </div>
-      </div>
-      
-      <!-- 移动端菜单 -->
-      <div v-if="isMobileMenuOpen" class="md:hidden bg-white border-t">
-        <div class="px-4 py-2 space-y-2">
-          <a href="#" class="block py-2 text-pink-500 font-medium">首页</a>
-          <a href="#" class="block py-2 text-gray-600">番剧</a>
-          <a href="#" class="block py-2 text-gray-600">直播</a>
-          <a href="#" class="block py-2 text-gray-600">游戏中心</a>
-          <a href="#" class="block py-2 text-gray-600">会员购</a>
         </div>
       </div>
     </header>
 
-    <!-- 主要内容区域 -->
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- 主要内容 -->
+    <main class="max-w-screen-xl mx-auto px-4 py-6">
       <!-- 轮播图区域 -->
-      <div class="mb-8">
-        <div class="relative bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 h-60 md:h-72 rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 group">
-          <div class="absolute inset-0 bg-black/20"></div>
-          <div class="absolute inset-0 flex items-center justify-center text-white">
-            <div class="text-center transform group-hover:scale-105 transition-transform duration-500">
-              <h2 class="text-3xl md:text-5xl font-bold mb-4 drop-shadow-lg">热门推荐</h2>
-              <p class="text-lg md:text-xl opacity-90 drop-shadow-md">发现精彩内容，遇见更大的世界</p>
-              <button class="mt-6 bg-white/20 backdrop-blur-sm border border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/30 transition-all duration-300 hover:scale-105">
-                立即探索
-              </button>
+      <div class="mb-6">
+        <div class="relative h-64 rounded-lg overflow-hidden">
+          <div v-for="(slide, index) in carouselSlides" :key="index"
+               :class="['absolute inset-0 transition-opacity duration-500', 
+                       currentSlide === index ? 'opacity-100' : 'opacity-0']">
+            <img :src="slide.image" :alt="slide.title" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            <div class="absolute bottom-6 left-6 text-white">
+              <h2 class="text-xl font-bold mb-2">{{ slide.title }}</h2>
+              <p class="text-sm opacity-90">{{ slide.subtitle }}</p>
             </div>
           </div>
-          <!-- 装饰性元素 -->
-          <div class="absolute top-4 right-4 w-20 h-20 bg-white/10 rounded-full blur-xl animate-pulse"></div>
-          <div class="absolute bottom-8 left-8 w-16 h-16 bg-white/10 rounded-full blur-lg animate-bounce"></div>
+          
+          <!-- 轮播指示器 -->
+          <div class="absolute bottom-4 right-4 flex space-x-2">
+            <div v-for="(slide, index) in carouselSlides" :key="index" 
+                 @click="currentSlide = index"
+                 :class="['w-2 h-2 rounded-full transition-all duration-300 cursor-pointer', 
+                         currentSlide === index ? 'bg-white' : 'bg-white/50']">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 推荐视频网格 -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
+        <div v-for="video in recommendedVideos" :key="video.id"
+             class="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer">
+          <div class="relative aspect-video">
+            <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover">
+            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
+              {{ video.duration }}
+            </div>
+          </div>
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-800 mb-2 line-clamp-2">{{ video.title }}</h3>
+            <div class="flex items-center text-xs text-gray-500">
+              <span>{{ video.uploader }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- 分区导航 -->
-      <div class="mb-8">
-        <div class="flex items-center space-x-3 overflow-x-auto pb-4 scrollbar-hide">
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-gray-800">推荐</h2>
+          <button class="text-sm text-blue-500 hover:text-blue-600 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            换一换
+          </button>
+        </div>
+
+        <!-- 分类标签 -->
+        <div class="flex flex-wrap gap-2">
           <button v-for="category in categories" :key="category.id"
                   @click="activeCategory = category.id"
-                  :class="['px-6 py-3 rounded-full whitespace-nowrap transition-all duration-300 font-medium text-base border-2 transform hover:scale-105',
+                  :class="['px-4 py-2 rounded-full text-sm font-medium transition-all duration-300',
                            activeCategory === category.id 
-                             ? 'bg-gradient-to-r from-pink-500 to-blue-400 text-white border-transparent shadow-lg shadow-pink-200' 
-                             : 'bg-white text-gray-700 border-gray-200 hover:border-pink-300 hover:text-pink-500 hover:shadow-md']">
+                             ? 'bg-blue-500 text-white' 
+                             : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200']">
             {{ category.name }}
           </button>
         </div>
       </div>
 
       <!-- 视频网格 -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <div v-for="video in videos" :key="video.id"
-             class="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 hover:scale-105">
-          <!-- 视频封面 -->
-          <div class="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-            <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            <!-- 时长标签 -->
-            <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
+             class="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer">
+          <div class="relative aspect-video">
+            <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover">
+            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
               {{ video.duration }}
             </div>
-            <!-- 播放量标签 -->
-            <div class="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1.5 rounded-full font-medium shadow-lg">
-              {{ video.views }}
-            </div>
-            <!-- hover时显示的播放按钮 -->
-            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300">
-                <svg class="w-8 h-8 text-pink-500 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              </div>
-            </div>
           </div>
-          
-          <!-- 视频信息 -->
-          <div class="p-4">
-            <h3 class="text-sm font-semibold text-gray-800 mb-3 line-clamp-2 leading-relaxed group-hover:text-pink-600 transition-colors duration-300">{{ video.title }}</h3>
-            <div class="flex items-center space-x-3 mb-3">
-              <div class="w-8 h-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex-shrink-0 flex items-center justify-center">
-                <span class="text-white text-xs font-bold">{{ video.uploader.charAt(0) }}</span>
-              </div>
-              <span class="text-sm text-gray-600 truncate font-medium hover:text-pink-500 transition-colors duration-300 cursor-pointer">{{ video.uploader }}</span>
-            </div>
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-800 mb-2 line-clamp-2">{{ video.title }}</h3>
             <div class="flex items-center justify-between text-xs text-gray-500">
-              <div class="flex items-center space-x-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>{{ video.playCount }}</span>
-              </div>
-              <div class="flex items-center space-x-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-                <span>{{ video.danmaku }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 直播区域 -->
-      <div class="mt-12">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-            <span class="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse shadow-lg shadow-red-300"></span>
-            热门直播
-            <span class="ml-3 text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">实时更新</span>
-          </h2>
-          <a href="#" class="text-base text-pink-500 hover:text-pink-600 font-medium transition-colors duration-300 flex items-center group">
-            查看更多
-            <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </a>
-        </div>
-        
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div v-for="live in lives" :key="live.id"
-               class="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 hover:scale-105">
-            <div class="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-              <img :src="live.cover" :alt="live.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-              <!-- 直播状态 -->
-              <div class="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1.5 rounded-full flex items-center font-medium shadow-lg">
-                <span class="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>
-                直播中
-              </div>
-              <!-- 人气值 -->
-              <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium flex items-center">
-                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-                {{ live.popularity }}
-              </div>
-              <!-- hover时的播放按钮 -->
-              <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300">
-                  <svg class="w-8 h-8 text-red-500 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
+              <span>{{ video.uploader }}</span>
+              <div class="flex items-center space-x-2">
+                <span class="flex items-center">
+                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clip-rule="evenodd"/>
                   </svg>
-                </div>
-              </div>
-            </div>
-            <div class="p-4">
-              <h3 class="text-sm font-semibold text-gray-800 mb-2 line-clamp-2 leading-relaxed group-hover:text-pink-600 transition-colors duration-300">{{ live.title }}</h3>
-              <div class="flex items-center space-x-2 mb-2">
-                <div class="w-6 h-6 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
-                  <span class="text-white text-xs font-bold">{{ live.streamer.charAt(0) }}</span>
-                </div>
-                <span class="text-sm text-gray-600 font-medium hover:text-pink-500 transition-colors duration-300 cursor-pointer">{{ live.streamer }}</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full font-medium">{{ live.category }}</span>
-                <div class="flex items-center text-xs text-red-500 font-medium">
-                  <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5 animate-pulse"></span>
-                  LIVE
-                </div>
+                  {{ video.playCount }}
+                </span>
+                <span class="flex items-center">
+                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>
+                  </svg>
+                  {{ video.danmaku }}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- 底部导航（移动端） -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-2xl">
-      <div class="flex items-center justify-around py-3">
-        <button class="flex flex-col items-center p-2 text-pink-500 transform hover:scale-110 transition-all duration-300">
-          <div class="relative">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-            </svg>
-            <span class="absolute -top-1 -right-1 w-2 h-2 bg-pink-500 rounded-full animate-pulse"></span>
-          </div>
-          <span class="text-xs mt-1 font-medium">首页</span>
-        </button>
-        <button class="flex flex-col items-center p-2 text-gray-600 hover:text-pink-500 transform hover:scale-110 transition-all duration-300">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-          </svg>
-          <span class="text-xs mt-1 font-medium">动态</span>
-        </button>
-        <button class="flex flex-col items-center p-2 text-gray-600 hover:text-pink-500 transform hover:scale-110 transition-all duration-300">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-          </svg>
-          <span class="text-xs mt-1 font-medium">会员购</span>
-        </button>
-        <button class="flex flex-col items-center p-2 text-gray-600 hover:text-pink-500 transform hover:scale-110 transition-all duration-300">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
-          <span class="text-xs mt-1 font-medium">我的</span>
-        </button>
-      </div>
-    </nav>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
-const isMobileMenuOpen = ref(false)
 const activeCategory = ref(1)
+const currentSlide = ref(0)
+let slideInterval: NodeJS.Timeout | null = null
 
-const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value
-}
+const carouselSlides = [
+  {
+    id: 1,
+    title: '千杯音乐节官宣啦！',
+    subtitle: '2025.10.18-19 上海静安·星梦PARK',
+    image: 'https://via.placeholder.com/800x300/3B82F6/FFFFFF?text=千杯音乐节官宣啦！'
+  },
+  {
+    id: 2,
+    title: '餐饮企业"国改"梦永活',
+    subtitle: '17万赞 · 老北京Official · 11小时前',
+    image: 'https://via.placeholder.com/800x300/10B981/FFFFFF?text=餐饮企业国改梦永活'
+  },
+  {
+    id: 3,
+    title: '静音&无线缆等的标准答案',
+    subtitle: '3590 · 8 · Metalion · 12小时前',
+    image: 'https://via.placeholder.com/800x300/EF4444/FFFFFF?text=Spark+Neo无线耳机'
+  }
+]
+
+const recommendedVideos = [
+  {
+    id: 1,
+    title: '老婆第一次测魅力，如何得后悔了！！！',
+    cover: 'https://via.placeholder.com/300x200/FF69B4/FFFFFF?text=视频1',
+    duration: '10:44',
+    uploader: '哔哩哔哩'
+  },
+  {
+    id: 2,
+    title: '餐饮企业"国改"梦永活',
+    cover: 'https://via.placeholder.com/300x200/4169E1/FFFFFF?text=视频2',
+    duration: '13:17',
+    uploader: '老北京Official'
+  },
+  {
+    id: 3,
+    title: '静音&无线缆等的标准答案',
+    cover: 'https://via.placeholder.com/300x200/32CD32/FFFFFF?text=视频3',
+    duration: '11:36',
+    uploader: 'Metalion'
+  },
+  {
+    id: 4,
+    title: '在从生活的脚步当导游！',
+    cover: 'https://via.placeholder.com/300x200/FF4500/FFFFFF?text=视频4',
+    duration: '08:19',
+    uploader: '竹鼠洞洞的向导'
+  },
+  {
+    id: 5,
+    title: '第一次犯罪测谎仪得么准！',
+    cover: 'https://via.placeholder.com/300x200/FFD700/FFFFFF?text=视频5',
+    duration: '12:34',
+    uploader: '十五里堡'
+  }
+]
 
 const categories = [
   { id: 1, name: '推荐' },
   { id: 2, name: '动画' },
-  { id: 3, name: '音乐' },
-  { id: 4, name: '舞蹈' },
-  { id: 5, name: '游戏' },
-  { id: 6, name: '知识' },
-  { id: 7, name: '科技' },
-  { id: 8, name: '运动' },
-  { id: 9, name: '生活' },
-  { id: 10, name: '美食' }
+  { id: 3, name: '番剧' },
+  { id: 4, name: '国创' },
+  { id: 5, name: '音乐' },
+  { id: 6, name: '舞蹈' },
+  { id: 7, name: '游戏' },
+  { id: 8, name: '知识' }
 ]
 
 const videos = [
   {
     id: 1,
-    title: '【原创动画】超燃战斗场面，特效炸裂',
+    title: '老婆第一次测魅力，如何得后悔了！！！',
     cover: 'https://via.placeholder.com/300x200/FF69B4/FFFFFF?text=视频1',
-    duration: '12:34',
-    views: '128万',
-    uploader: '动画UP主',
-    playCount: '128万',
-    danmaku: '2.3万'
+    duration: '04:15',
+    uploader: '哔哩哔哩',
+    playCount: '10万',
+    danmaku: '774'
   },
   {
     id: 2,
-    title: '【游戏实况】极限操作秀翻全场，队友都惊呆了',
+    title: '小林信一 吉他他入门只需两周！',
     cover: 'https://via.placeholder.com/300x200/4169E1/FFFFFF?text=视频2',
-    duration: '25:18',
-    views: '89万',
-    uploader: '游戏达人',
-    playCount: '89万',
-    danmaku: '1.8万'
+    duration: '28:04',
+    uploader: '吉他情报长',
+    playCount: '9807',
+    danmaku: '0'
   },
   {
     id: 3,
-    title: '【音乐MV】最新热门歌曲，太好听了',
+    title: 'B站唯一一次得最高Claude Code人！',
     cover: 'https://via.placeholder.com/300x200/32CD32/FFFFFF?text=视频3',
-    duration: '4:23',
-    views: '256万',
-    uploader: '音乐分享',
-    playCount: '256万',
-    danmaku: '5.6万'
+    duration: '06:40',
+    uploader: 'AI学习TV',
+    playCount: '3万',
+    danmaku: '163'
   },
   {
     id: 4,
-    title: '【科技评测】黑科技产品体验，未来已来',
+    title: '一瞬间，我似乎明白了她的意义所在！',
     cover: 'https://via.placeholder.com/300x200/FF4500/FFFFFF?text=视频4',
-    duration: '18:45',
-    views: '67万',
-    uploader: '科技博主',
-    playCount: '67万',
-    danmaku: '9800'
+    duration: '08:19',
+    uploader: '竹鼠洞洞的向导',
+    playCount: '817万',
+    danmaku: '162'
   },
   {
     id: 5,
-    title: '【美食制作】教你做网红美食，简单易学',
+    title: '【原神】雷电将军：10小时前更新',
     cover: 'https://via.placeholder.com/300x200/FFD700/FFFFFF?text=视频5',
-    duration: '8:12',
-    views: '145万',
-    uploader: '美食达人',
+    duration: '12:34',
+    uploader: '原神官方',
     playCount: '145万',
     danmaku: '3.2万'
   },
   {
     id: 6,
-    title: '【旅行Vlog】探索未知世界，美景如画',
+    title: '【音乐MV】最新热门歌曲合集',
     cover: 'https://via.placeholder.com/300x200/9370DB/FFFFFF?text=视频6',
     duration: '15:30',
-    views: '92万',
-    uploader: '旅行博主',
+    uploader: '音乐分享',
     playCount: '92万',
     danmaku: '1.5万'
   },
   {
     id: 7,
-    title: '【知识科普】有趣的科学知识，长见识了',
+    title: '【科技评测】最新黑科技产品体验',
     cover: 'https://via.placeholder.com/300x200/20B2AA/FFFFFF?text=视频7',
-    duration: '10:15',
-    views: '178万',
-    uploader: '知识分享',
+    duration: '18:45',
+    uploader: '科技博主',
     playCount: '178万',
     danmaku: '4.1万'
   },
   {
     id: 8,
-    title: '【搞笑合集】笑到肚子疼，太搞笑了',
+    title: '【搞笑合集】爆笑视频精选',
     cover: 'https://via.placeholder.com/300x200/FF6347/FFFFFF?text=视频8',
-    duration: '6:45',
-    views: '234万',
+    duration: '25:18',
     uploader: '搞笑日常',
     playCount: '234万',
     danmaku: '6.7万'
   }
 ]
 
-const lives = [
-  {
-    id: 1,
-    title: '今晚一起打游戏，超欢乐',
-    cover: 'https://via.placeholder.com/300x200/FF0000/FFFFFF?text=直播1',
-    streamer: '游戏主播',
-    category: '英雄联盟',
-    popularity: '12.3万'
-  },
-  {
-    id: 2,
-    title: '唱歌聊天，欢迎来到直播间',
-    cover: 'https://via.placeholder.com/300x200/FF1493/FFFFFF?text=直播2',
-    streamer: '音乐主播',
-    category: '唱歌',
-    popularity: '8.7万'
-  },
-  {
-    id: 3,
-    title: '绘画教学，从零开始学画画',
-    cover: 'https://via.placeholder.com/300x200/00CED1/FFFFFF?text=直播3',
-    streamer: '绘画老师',
-    category: '绘画',
-    popularity: '5.2万'
-  },
-  {
-    id: 4,
-    title: '户外直播，探索城市美景',
-    cover: 'https://via.placeholder.com/300x200/FF8C00/FFFFFF?text=直播4',
-    streamer: '户外主播',
-    category: '户外',
-    popularity: '3.8万'
+const nextSlide = () => {
+  currentSlide.value = (currentSlide.value + 1) % carouselSlides.length
+}
+
+const startAutoSlide = () => {
+  slideInterval = setInterval(nextSlide, 4000)
+}
+
+onMounted(() => {
+  startAutoSlide()
+})
+
+onUnmounted(() => {
+  if (slideInterval) {
+    clearInterval(slideInterval)
   }
-]
+})
 </script>
 
 <style scoped>
@@ -418,155 +334,5 @@ const lives = [
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* 移动端底部导航占位 */
-@media (max-width: 768px) {
-  body {
-    padding-bottom: 80px;
-  }
-}
-
-/* 隐藏滚动条 */
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Safari and Chrome */
-}
-
-/* B站风格的渐变动画 */
-@keyframes bilibili-glow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-bilibili-glow {
-  animation: bilibili-glow 2s infinite;
-}
-
-@keyframes bilibili-float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-.animate-bilibili-float {
-  animation: bilibili-float 3s ease-in-out infinite;
-}
-
-/* 卡片hover效果 */
-.group:hover .group-hover\:scale-110 {
-  transform: scale(1.1);
-}
-
-.group:hover .group-hover\:translate-x-1 {
-  transform: translateX(0.25rem);
-}
-
-/* 渐变文字效果 */
-.bg-clip-text {
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-/* 按钮按下效果 */
-.transform:active {
-  transform: scale(0.95);
-}
-
-/* 特殊阴影效果 */
-.shadow-3xl {
-  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
-}
-
-/* 动画延迟 */
-.animate-scale-in {
-  animation: scale-in 0.5s ease-out;
-}
-
-@keyframes scale-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* 直播标签闪烁效果 */
-.animate-pulse-slow {
-  animation: pulse-slow 3s infinite;
-}
-
-@keyframes pulse-slow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-/* 响应式设计优化 */
-@media (max-width: 640px) {
-  .grid {
-    gap: 1rem;
-  }
-  
-  .px-4 {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-/* 高级动画效果 */
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-.backdrop-blur-md {
-  backdrop-filter: blur(12px);
-}
-
-/* 文字阴影 */
-.drop-shadow-lg {
-  filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.04)) drop-shadow(0 4px 3px rgb(0 0 0 / 0.1));
-}
-
-.drop-shadow-md {
-  filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
-}
-
-/* 视频卡片特殊效果 */
-.video-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.video-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s;
-  z-index: 1;
-}
-
-.video-card:hover::before {
-  left: 100%;
 }
 </style>
