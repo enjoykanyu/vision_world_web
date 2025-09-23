@@ -41,8 +41,11 @@
             </button>
             
             <!-- 用户头像 -->
-            <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center cursor-pointer">
-              <span class="text-white text-sm font-semibold">U</span>
+            <div 
+              class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center cursor-pointer"
+              @click="handleUserIconClick"
+            >
+              <span class="text-white text-sm font-semibold">{{ isLoggedIn ? username.charAt(0).toUpperCase() : 'U' }}</span>
             </div>
           </div>
         </div>
@@ -154,6 +157,78 @@
         </div>
       </div>
     </main>
+    
+    <!-- 登录弹窗 -->
+    <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-96 p-6 shadow-xl" @click.stop>
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-gray-800">登录</h3>
+          <button @click="closeLoginModal" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <div class="mb-4">
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+            <input 
+              type="text" 
+              id="username" 
+              v-model="loginForm.username" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="请输入用户名"
+            >
+          </div>
+          
+          <div class="mb-4">
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+            <input 
+              type="password" 
+              id="password" 
+              v-model="loginForm.password" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="请输入密码"
+            >
+          </div>
+          
+          <div v-if="loginError" class="mb-4 text-sm text-red-500">
+            {{ loginError }}
+          </div>
+          
+          <button 
+            @click="handleLogin" 
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-medium transition-colors duration-300"
+          >
+            登录
+          </button>
+          
+          <div class="mt-4 text-center text-sm text-gray-500">
+            <span>还没有账号？</span>
+            <a href="#" class="text-blue-500 hover:text-blue-600">立即注册</a>
+          </div>
+          
+          <div class="mt-6 flex items-center justify-center space-x-4">
+            <button class="flex items-center justify-center w-10 h-10 rounded-full bg-green-500 text-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8.07 16.57l-4.24-4.24 1.41-1.41 2.83 2.83 6.59-6.59 1.41 1.41-8 8z"></path>
+              </svg>
+            </button>
+            <button class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-400 text-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"></path>
+              </svg>
+            </button>
+            <button class="flex items-center justify-center w-10 h-10 rounded-full bg-red-500 text-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5.01 4.44c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm3.5 9.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5 1.5.67 1.5 1.5z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -163,6 +238,52 @@ import { ref, onMounted, onUnmounted } from 'vue'
 const activeCategory = ref(1)
 const currentSlide = ref(0)
 let slideInterval: NodeJS.Timeout | null = null
+
+// 登录状态管理
+const isLoggedIn = ref(false)
+const username = ref('')
+const showLoginModal = ref(false)
+const loginForm = ref({
+  username: '',
+  password: ''
+})
+const loginError = ref('')
+
+// 处理用户头像点击
+const handleUserIconClick = () => {
+  if (!isLoggedIn.value) {
+    showLoginModal.value = true
+  } else {
+    // 已登录状态下的操作，例如显示用户菜单等
+    console.log('用户已登录，显示用户菜单')
+  }
+}
+
+// 处理登录
+const handleLogin = () => {
+  // 这里应该是实际的登录API调用
+  // 这里使用模拟登录逻辑
+  if (loginForm.value.username && loginForm.value.password) {
+    if (loginForm.value.password === '123456') { // 简单的密码验证
+      isLoggedIn.value = true
+      username.value = loginForm.value.username
+      showLoginModal.value = false
+      loginError.value = ''
+      loginForm.value = { username: '', password: '' }
+    } else {
+      loginError.value = '用户名或密码错误'
+    }
+  } else {
+    loginError.value = '请输入用户名和密码'
+  }
+}
+
+// 关闭登录弹窗
+const closeLoginModal = () => {
+  showLoginModal.value = false
+  loginError.value = ''
+  loginForm.value = { username: '', password: '' }
+}
 
 const carouselSlides = [
   {
