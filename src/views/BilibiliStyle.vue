@@ -259,8 +259,8 @@ const handleUserIconClick = () => {
   if (!isLoggedIn.value) {
     showLoginModal.value = true
   } else {
-    // 已登录状态下的操作，例如显示用户菜单等
-    console.log('用户已登录，显示用户菜单')
+    // 已登录状态下跳转到用户主页
+    router.push(`/user/${isLoggedIn.value ? '12345678' : ''}`)
   }
 }
 

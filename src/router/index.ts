@@ -3,6 +3,7 @@ import Home from '@/views/Home.vue'
 import BilibiliStyle from '@/views/BilibiliStyle.vue'
 import VideoAssistant from '@/views/VideoAssistant.vue'
 import VideoDetail from '@/views/VideoDetail.vue'
+import UserProfile from '@/views/UserProfile.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +38,14 @@ const router = createRouter({
       component: VideoDetail,
       meta: {
         title: '视频详情 - Vision World'
+      }
+    },
+    {
+      path: '/user/:id',
+      name: 'userProfile',
+      component: UserProfile,
+      meta: {
+        title: '用户主页 - Vision World'
       }
     }
   ]
