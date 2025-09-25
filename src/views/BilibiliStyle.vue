@@ -1,48 +1,84 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
     <!-- 顶部导航栏 -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
       <div class="max-w-screen-xl mx-auto px-4">
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->
           <div class="flex items-center space-x-8">
             <div class="flex items-center">
-              <svg class="w-8 h-8 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+              <svg class="w-8 h-8 text-pink-500" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.51.556-2.764 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.920-.373.347 0 .653.124.920.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .160-.213l2.853-2.747c.267-.249.573-.373.920-.373.347 0 .662.151.929.400.267.249.391.551.391.907 0 .356-.124.657-.373.906l-1.174 1.120zM5.333 7.24c-.746.018-1.373.276-1.880.773-.506.498-.769 1.13-.789 1.894v7.52c.02.764.283 1.395.789 1.893.507.498 1.134.756 1.880.773h13.334c.746-.017 1.373-.275 1.880-.773.506-.498.769-1.129.789-1.893v-7.52c-.02-.765-.283-1.396-.789-1.894-.507-.497-1.134-.755-1.880-.773H5.333zM8 11.107c.373 0 .684.124.933.373.249.249.373.560.373.933v1.173c0 .373-.124.684-.373.933-.249.249-.560.373-.933.373s-.684-.124-.933-.373c-.249-.249-.373-.560-.373-.933V12.413c0-.373.124-.684.373-.933.249-.249.560-.373.933-.373zm8 0c.373 0 .684.124.933.373.249.249.373.560.373.933v1.173c0 .373-.124.684-.373.933-.249.249-.560.373-.933.373s-.684-.124-.933-.373c-.249-.249-.373-.560-.373-.933V12.413c0-.373.124-.684.373-.933.249-.249.560-.373.933-.373z"/>
               </svg>
-              <span class="ml-2 text-xl font-bold text-gray-900">bilibili</span>
+              <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">bilibili</span>
             </div>
             
             <!-- 主导航 -->
             <nav class="hidden md:flex items-center space-x-6 text-sm">
-              <a href="#" class="text-blue-500 font-medium">首页</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">番剧</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">直播</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">游戏中心</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">会员购</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">漫画</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">赛事</a>
+              <a href="#" class="text-pink-500 font-medium relative group">
+                首页
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
+              </a>
+              <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 relative group">
+                番剧
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
+              </a>
+              <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 relative group">
+                直播
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
+              </a>
+              <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 relative group">
+                游戏中心
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
+              </a>
+              <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 relative group">
+                会员购
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
+              </a>
             </nav>
           </div>
 
           <!-- 搜索和用户 -->
           <div class="flex items-center space-x-4">
+            <!-- 深色模式切换 -->
+            <button @click="toggleDarkMode" class="text-gray-500 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400">
+              <svg v-if="isDarkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+              </svg>
+              <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+            </button>
+            
             <!-- 搜索框 -->
-            <div class="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-80">
-              <input type="text" placeholder="搜索视频、番剧、UP主..." class="bg-transparent text-gray-700 placeholder-gray-500 outline-none text-sm flex-1">
-              <svg class="w-4 h-4 text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="hidden md:flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2 w-80 transition-colors duration-300 group focus-within:ring-2 focus-within:ring-pink-500 focus-within:ring-opacity-50">
+              <input type="text" placeholder="搜索视频、番剧、UP主..." class="bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none text-sm flex-1 transition-colors duration-300">
+              <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-pointer group-focus-within:text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
             </div>
             
+            <!-- 通知图标 -->
+            <div class="relative hidden sm:block">
+              <button class="text-gray-500 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+              </button>
+              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+            </div>
+            
             <!-- 投稿按钮 -->
-            <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium">
+            <button class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
               投稿
             </button>
             
             <!-- 用户头像 -->
             <div 
-              class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center cursor-pointer"
+              class="w-9 h-9 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-800 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
               @click="handleUserIconClick"
             >
               <span class="text-white text-sm font-semibold">{{ isLoggedIn ? username.charAt(0).toUpperCase() : 'U' }}</span>
@@ -55,90 +91,153 @@
     <!-- 主要内容 -->
     <main class="max-w-screen-xl mx-auto px-4 py-6">
       <!-- 轮播图区域 -->
-      <div class="mb-6">
-        <div class="relative h-64 rounded-lg overflow-hidden">
+      <div class="mb-8">
+        <div class="relative h-64 md:h-80 rounded-xl overflow-hidden shadow-lg">
           <div v-for="(slide, index) in carouselSlides" :key="index"
-               :class="['absolute inset-0 transition-opacity duration-500', 
-                       currentSlide === index ? 'opacity-100' : 'opacity-0']">
+               :class="['absolute inset-0 transition-all duration-700', 
+                       currentSlide === index ? 'opacity-100 scale-100' : 'opacity-0 scale-105']">
             <img :src="slide.image" :alt="slide.title" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-            <div class="absolute bottom-6 left-6 text-white">
-              <h2 class="text-xl font-bold mb-2">{{ slide.title }}</h2>
-              <p class="text-sm opacity-90">{{ slide.subtitle }}</p>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div class="absolute bottom-8 left-8 text-white max-w-lg">
+              <h2 class="text-2xl md:text-3xl font-bold mb-2 drop-shadow-md">{{ slide.title }}</h2>
+              <p class="text-sm md:text-base opacity-90 drop-shadow-md">{{ slide.subtitle }}</p>
+              <button class="mt-4 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                立即观看
+              </button>
             </div>
           </div>
           
           <!-- 轮播指示器 -->
-          <div class="absolute bottom-4 right-4 flex space-x-2">
+          <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
             <div v-for="(slide, index) in carouselSlides" :key="index" 
                  @click="currentSlide = index"
-                 :class="['w-2 h-2 rounded-full transition-all duration-300 cursor-pointer', 
-                         currentSlide === index ? 'bg-white' : 'bg-white/50']">
+                 :class="['w-3 h-3 rounded-full transition-all duration-300 cursor-pointer shadow-md', 
+                         currentSlide === index ? 'bg-pink-500 scale-110' : 'bg-white/70 hover:bg-white']">
             </div>
           </div>
+          
+          <!-- 轮播控制按钮 -->
+          <button @click="prevSlide" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+          <button @click="nextSlide" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
         </div>
       </div>
 
       <!-- 推荐视频网格 -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
-        <div v-for="video in recommendedVideos" :key="video.id"
-             class="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer"
-             @click="router.push(`/video/${video.id}`)">
-          <div class="relative aspect-video">
-            <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover">
-            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
-              {{ video.duration }}
+      <div class="mb-10">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+            <span class="w-1 h-6 bg-pink-500 rounded-full mr-2"></span>
+            热门推荐
+          </h2>
+          <button class="text-sm text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 flex items-center group">
+            <span>查看更多</span>
+            <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          <div v-for="video in recommendedVideos" :key="video.id"
+               class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+               @click="router.push(`/video/${video.id}`)">
+            <div class="relative aspect-video group">
+              <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+              <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+              <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-md">
+                {{ video.duration }}
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div class="w-12 h-12 bg-pink-500/90 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"></path>
+                  </svg>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="p-3">
-            <h3 class="text-sm font-medium text-gray-800 mb-2 line-clamp-2">{{ video.title }}</h3>
-            <div class="flex items-center text-xs text-gray-500">
-              <span>{{ video.uploader }}</span>
+            <div class="p-4">
+              <h3 class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-2 line-clamp-2 h-10">{{ video.title }}</h3>
+              <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                <span class="flex items-center">
+                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z"></path>
+                  </svg>
+                  {{ video.uploader }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- 分区导航 -->
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold text-gray-800">推荐</h2>
-          <button class="text-sm text-blue-500 hover:text-blue-600 flex items-center">
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+            <span class="w-1 h-6 bg-pink-500 rounded-full mr-2"></span>
+            分区推荐
+          </h2>
+          <button class="text-sm text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 flex items-center group">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
-            换一换
+            <span>换一换</span>
           </button>
         </div>
 
         <!-- 分类标签 -->
-        <div class="flex flex-wrap gap-2">
+        <div class="flex overflow-x-auto scrollbar-hide space-x-3 pb-2 mb-6">
           <button v-for="category in categories" :key="category.id"
                   @click="activeCategory = category.id"
-                  :class="['px-4 py-2 rounded-full text-sm font-medium transition-all duration-300',
+                  :class="['px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap',
                            activeCategory === category.id 
-                             ? 'bg-blue-500 text-white' 
-                             : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200']">
+                             ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md' 
+                             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700']">
             {{ category.name }}
           </button>
         </div>
       </div>
 
       <!-- 视频网格 -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
         <div v-for="video in videos" :key="video.id"
-             class="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer"
+             class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
              @click="router.push(`/video/${video.id}`)">
-          <div class="relative aspect-video">
-            <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover">
-            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
+          <div class="relative aspect-video group">
+            <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+            <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-md">
               {{ video.duration }}
             </div>
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="w-12 h-12 bg-pink-500/90 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+              </div>
+            </div>
           </div>
-          <div class="p-3">
-            <h3 class="text-sm font-medium text-gray-800 mb-2 line-clamp-2">{{ video.title }}</h3>
-            <div class="flex items-center justify-between text-xs text-gray-500">
-              <span>{{ video.uploader }}</span>
+          <div class="p-4">
+            <h3 class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-2 line-clamp-2 h-10">{{ video.title }}</h3>
+            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <span class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z"></path>
+                </svg>
+                {{ video.uploader }}
+              </span>
               <div class="flex items-center space-x-2">
                 <span class="flex items-center">
                   <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
@@ -161,72 +260,135 @@
     </main>
     
     <!-- 登录弹窗 -->
-    <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg w-96 p-6 shadow-xl" @click.stop>
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold text-gray-800">登录</h3>
-          <button @click="closeLoginModal" class="text-gray-500 hover:text-gray-700">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
+    <div v-if="showLoginModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- 背景遮罩 -->
+        <div class="fixed inset-0 bg-black bg-opacity-60 transition-opacity" aria-hidden="true" @click="closeLoginModal"></div>
         
-        <div class="mb-6">
-          <div class="mb-4">
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
-            <input 
-              type="text" 
-              id="username" 
-              v-model="loginForm.username" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="请输入用户名"
+        <!-- 模态框居中技巧 -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <!-- 登录卡片 -->
+        <div 
+          class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full p-6 sm:p-8 animate-fade-in-up"
+          @click.stop
+        >
+          <!-- 标题和关闭按钮 -->
+          <div class="flex justify-between items-center mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white">欢迎回来</h3>
+            <button 
+              @click="closeLoginModal" 
+              class="rounded-full p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
             >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
           </div>
           
-          <div class="mb-4">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
-            <input 
-              type="password" 
-              id="password" 
-              v-model="loginForm.password" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="请输入密码"
+          <!-- 登录表单 -->
+          <div class="space-y-6">
+            <!-- 用户名输入框 -->
+            <div class="space-y-2">
+              <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">用户名</label>
+              <div class="relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  id="username" 
+                  v-model="loginForm.username" 
+                  class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
+                  placeholder="请输入用户名"
+                >
+              </div>
+            </div>
+            
+            <!-- 密码输入框 -->
+            <div class="space-y-2">
+              <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">密码</label>
+              <div class="relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <input 
+                  type="password" 
+                  id="password" 
+                  v-model="loginForm.password" 
+                  class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
+                  placeholder="请输入密码"
+                >
+              </div>
+            </div>
+            
+            <!-- 记住我和忘记密码 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded">
+                <label for="remember-me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">记住我</label>
+              </div>
+              <div class="text-sm">
+                <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">忘记密码?</a>
+              </div>
+            </div>
+            
+            <!-- 错误提示 -->
+            <div v-if="loginError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm rounded-lg border border-red-200 dark:border-red-800/50">
+              <div class="flex">
+                <svg class="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                {{ loginError }}
+              </div>
+            </div>
+            
+            <!-- 登录按钮 -->
+            <button 
+              @click="handleLogin" 
+              class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
             >
-          </div>
-          
-          <div v-if="loginError" class="mb-4 text-sm text-red-500">
-            {{ loginError }}
-          </div>
-          
-          <button 
-            @click="handleLogin" 
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-medium transition-colors duration-300"
-          >
-            登录
-          </button>
-          
-          <div class="mt-4 text-center text-sm text-gray-500">
-            <span>还没有账号？</span>
-            <a href="#" class="text-blue-500 hover:text-blue-600">立即注册</a>
-          </div>
-          
-          <div class="mt-6 flex items-center justify-center space-x-4">
-            <button class="flex items-center justify-center w-10 h-10 rounded-full bg-green-500 text-white">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8.07 16.57l-4.24-4.24 1.41-1.41 2.83 2.83 6.59-6.59 1.41 1.41-8 8z"></path>
-              </svg>
+              登录
             </button>
-            <button class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-400 text-white">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"></path>
-              </svg>
-            </button>
-            <button class="flex items-center justify-center w-10 h-10 rounded-full bg-red-500 text-white">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5.01 4.44c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm3.5 9.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5 1.5.67 1.5 1.5z"></path>
-              </svg>
-            </button>
+            
+            <!-- 注册链接 -->
+            <div class="text-center text-sm text-gray-600 dark:text-gray-400">
+              <span>还没有账号？</span>
+              <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">立即注册</a>
+            </div>
+            
+            <!-- 分隔线 -->
+            <div class="relative my-6">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+              </div>
+              <div class="relative flex justify-center text-sm">
+                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">其他登录方式</span>
+              </div>
+            </div>
+            
+            <!-- 社交登录按钮 -->
+            <div class="flex items-center justify-center space-x-6">
+              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.07 16.57l-4.24-4.24 1.41-1.41 2.83 2.83 6.59-6.59 1.41 1.41-8 8z"></path>
+                </svg>
+              </button>
+              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"></path>
+                </svg>
+              </button>
+              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5.01 4.44c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm3.5 9.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5 1.5.67 1.5 1.5z"></path>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
