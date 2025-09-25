@@ -51,11 +51,110 @@
             </button>
             
             <!-- 搜索框 -->
-            <div class="hidden md:flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2 w-80 transition-colors duration-300 group focus-within:ring-2 focus-within:ring-pink-500 focus-within:ring-opacity-50">
-              <input type="text" placeholder="搜索视频、番剧、UP主..." class="bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none text-sm flex-1 transition-colors duration-300">
-              <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-pointer group-focus-within:text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
+            <div class="hidden md:block relative">
+              <div 
+                class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2 w-80 transition-colors duration-300 group focus-within:ring-2 focus-within:ring-pink-500 focus-within:ring-opacity-50"
+                :class="{'rounded-b-none': showSearchTrending}"
+              >
+                <input 
+                  type="text" 
+                  placeholder="搜索视频、番剧、UP主..." 
+                  class="bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none text-sm flex-1 transition-colors duration-300"
+                  @focus="showSearchTrending = true"
+                  @blur="handleSearchBlur"
+                  v-model="searchQuery"
+                >
+                <svg 
+                  class="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-pointer group-focus-within:text-pink-500" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  @click="handleSearch"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </div>
+              
+              <!-- 搜索热度排行榜 -->
+              <div 
+                v-if="showSearchTrending" 
+                class="absolute top-full left-0 w-full bg-white dark:bg-gray-800 rounded-b-lg shadow-lg z-50 overflow-hidden border border-gray-200 dark:border-gray-700 border-t-0"
+                @mousedown.prevent
+              >
+                <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">热搜榜</h3>
+                    <div class="flex items-center space-x-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">每小时更新</span>
+                      <button class="text-xs text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 flex items-center">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>换一换</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="max-h-80 overflow-y-auto">
+                  <div 
+                    v-for="(item, index) in trendingSearches" 
+                    :key="item.id"
+                    class="flex items-center px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200"
+                    @click="selectTrendingSearch(item)"
+                  >
+                    <!-- 排名 -->
+                    <div 
+                      class="w-6 h-6 flex items-center justify-center mr-3 font-medium text-sm"
+                      :class="[
+                        index < 3 
+                          ? 'text-white' 
+                          : 'text-gray-500 dark:text-gray-400',
+                        index === 0 ? 'bg-red-500' : 
+                        index === 1 ? 'bg-orange-500' : 
+                        index === 2 ? 'bg-yellow-500' : 
+                        'bg-gray-200 dark:bg-gray-600'
+                      ]"
+                    >
+                      {{ index + 1 }}
+                    </div>
+                    
+                    <!-- 内容 -->
+                    <div class="flex-1">
+                      <div class="flex items-center">
+                        <span class="text-sm text-gray-800 dark:text-gray-200 mr-2">{{ item.title }}</span>
+                        <span 
+                          v-if="item.tag" 
+                          :class="[
+                            'text-xs px-1.5 py-0.5 rounded',
+                            item.tag === '新' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                            item.tag === '热' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
+                            item.tag === '推荐' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                          ]"
+                        >
+                          {{ item.tag }}
+                        </span>
+                      </div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {{ item.heat }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                  <button class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    查看完整榜单
+                  </button>
+                  <button 
+                    class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    @click="showSearchTrending = false"
+                  >
+                    关闭
+                  </button>
+                </div>
+              </div>
             </div>
             
             <!-- 通知图标 -->
@@ -405,6 +504,45 @@ const router = useRouter()
 const activeCategory = ref(1)
 const currentSlide = ref(0)
 let slideInterval: NodeJS.Timeout | null = null
+
+// 搜索相关
+const searchQuery = ref('')
+const showSearchTrending = ref(false)
+const trendingSearches = [
+  { id: 1, title: '原神3.0版本更新', heat: '6,582,145热度', tag: '新' },
+  { id: 2, title: '2025年高考志愿填报指南', heat: '5,421,897热度', tag: '热' },
+  { id: 3, title: '华为Mate 60 Pro评测', heat: '4,987,632热度', tag: '热' },
+  { id: 4, title: '周杰伦新歌发布', heat: '3,854,721热度', tag: null },
+  { id: 5, title: '国庆节旅游攻略', heat: '3,245,689热度', tag: '推荐' },
+  { id: 6, title: 'AI绘画教程', heat: '2,987,456热度', tag: null },
+  { id: 7, title: '如何提高编程效率', heat: '2,654,321热度', tag: null },
+  { id: 8, title: '健身减脂30天挑战', heat: '2,321,456热度', tag: '推荐' },
+  { id: 9, title: '最新电影推荐', heat: '1,987,654热度', tag: null },
+  { id: 10, title: '学习方法分享', heat: '1,654,321热度', tag: null }
+]
+
+// 处理搜索框失焦
+const handleSearchBlur = (e: FocusEvent) => {
+  // 使用setTimeout防止点击搜索结果项时因为blur事件导致无法选中
+  setTimeout(() => {
+    showSearchTrending.value = false
+  }, 200)
+}
+
+// 处理搜索
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    console.log('搜索:', searchQuery.value)
+    // 这里可以添加实际的搜索逻辑
+    showSearchTrending.value = false
+  }
+}
+
+// 选择热搜项
+const selectTrendingSearch = (item: any) => {
+  searchQuery.value = item.title
+  handleSearch()
+}
 
 // 登录状态管理
 const isLoggedIn = ref(false)
