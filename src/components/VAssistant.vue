@@ -6,7 +6,6 @@
       class="v-assistant-icon"
       :style="{ left: position.x + 'px', top: position.y + 'px' }"
       @mousedown="startDrag"
-      @click.stop="toggleDialog"
       :class="{ 'is-open': isDialogOpen }"
     >
       <div class="v-icon-wrapper">
@@ -175,16 +174,56 @@ const updateDialogPosition = () => {
 
 // 拖动功能
 const startDrag = (e: MouseEvent) => {
+  // 记录初始点击位置和时间
+  const initialX = e.clientX;
+  const initialY = e.clientY;
+  const startTime = Date.now();
+  
   isDragging = false;
+  if (dragStartTimer) clearTimeout(dragStartTimer);
+  
+  // 设置拖拽检测定时器
   dragStartTimer = window.setTimeout(() => {
     isDragging = true;
     if (assistantIcon.value) {
       dragOffset.x = e.clientX - position.x;
       dragOffset.y = e.clientY - position.y;
       document.addEventListener('mousemove', drag);
-      document.addEventListener('mouseup', stopDrag);
     }
   }, 150);
+  
+  // 添加一次性mouseup事件监听器
+  const mouseUpHandler = (upEvent: MouseEvent) => {
+    document.removeEventListener('mouseup', mouseUpHandler);
+    
+    // 如果拖拽已经开始，则执行stopDrag
+    if (isDragging) {
+      stopDrag();
+      return;
+    }
+    
+    // 清除拖拽定时器
+    if (dragStartTimer) {
+      clearTimeout(dragStartTimer);
+      dragStartTimer = null;
+    }
+    
+    // 计算移动距离和时间差
+    const moveDistance = Math.sqrt(
+      Math.pow(upEvent.clientX - initialX, 2) + 
+      Math.pow(upEvent.clientY - initialY, 2)
+    );
+    const timeDiff = Date.now() - startTime;
+    
+    // 如果移动距离小于5px且时间小于200ms，则视为点击
+    if (moveDistance < 5 && timeDiff < 200) {
+      toggleDialog();
+    }
+  };
+  
+  document.addEventListener('mouseup', mouseUpHandler);
+  document.addEventListener('mousemove', drag);
+  
   e.preventDefault();
 }
 
@@ -193,20 +232,25 @@ const drag = (e: MouseEvent) => {
     position.x = e.clientX - dragOffset.x;
     position.y = e.clientY - dragOffset.y;
     
+    // 限制图标在可视区域内
     position.x = Math.max(10, Math.min(window.innerWidth - 70, position.x));
     position.y = Math.max(10, Math.min(window.innerHeight - 70, position.y));
   }
 }
 
 const stopDrag = () => {
-  if (dragStartTimer) clearTimeout(dragStartTimer);
+  if (dragStartTimer) {
+    clearTimeout(dragStartTimer);
+    dragStartTimer = null;
+  }
   
-  setTimeout(() => {
-    isDragging = false;
-  }, 0);
-
   document.removeEventListener('mousemove', drag);
   document.removeEventListener('mouseup', stopDrag);
+  
+  // 使用短暂延迟确保isDragging状态在click事件之前被重置
+  setTimeout(() => {
+    isDragging = false;
+  }, 10);
 }
 
 // 对话框切换
