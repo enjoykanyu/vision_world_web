@@ -41,6 +41,7 @@
         class="v-assistant-dialog"
         :style="{ left: dialogPosition.x + 'px', top: dialogPosition.y + 'px' }"
         @mousedown.stop
+        @click.stop
       >
         <div class="dialog-header">
           <div class="header-title">
@@ -84,7 +85,7 @@
                 v-for="(question, index) in suggestedQuestions"
                 :key="index"
                 class="question-chip"
-                @click="sendSuggestedQuestion(question)"
+                @click="(event) => sendSuggestedQuestion(question, event)"
               >
                 {{ question }}
               </button>
@@ -182,19 +183,10 @@ const startDrag = (e: MouseEvent) => {
   isDragging = false;
   if (dragStartTimer) clearTimeout(dragStartTimer);
   
-  // 设置拖拽检测定时器
-  dragStartTimer = window.setTimeout(() => {
-    isDragging = true;
-    if (assistantIcon.value) {
-      dragOffset.x = e.clientX - position.x;
-      dragOffset.y = e.clientY - position.y;
-      document.addEventListener('mousemove', drag);
-    }
-  }, 150);
-  
   // 添加一次性mouseup事件监听器
   const mouseUpHandler = (upEvent: MouseEvent) => {
     document.removeEventListener('mouseup', mouseUpHandler);
+    document.removeEventListener('mousemove', mouseMoveHandler);
     
     // 如果拖拽已经开始，则执行stopDrag
     if (isDragging) {
@@ -221,8 +213,48 @@ const startDrag = (e: MouseEvent) => {
     }
   };
   
+  // 鼠标移动处理函数
+  const mouseMoveHandler = (moveEvent: MouseEvent) => {
+    // 如果已经进入拖拽状态，则调用drag函数
+    if (isDragging) {
+      drag(moveEvent);
+    } else {
+      // 计算移动距离
+      const moveDistance = Math.sqrt(
+        Math.pow(moveEvent.clientX - initialX, 2) + 
+        Math.pow(moveEvent.clientY - initialY, 2)
+      );
+      
+      // 如果移动距离超过阈值，立即启动拖拽模式，不等待定时器
+      if (moveDistance > 10) {
+        if (dragStartTimer) {
+          clearTimeout(dragStartTimer);
+          dragStartTimer = null;
+        }
+        
+        isDragging = true;
+        if (assistantIcon.value) {
+          dragOffset.x = moveEvent.clientX - position.x;
+          dragOffset.y = moveEvent.clientY - position.y;
+          drag(moveEvent);
+        }
+      }
+    }
+  };
+  
+  // 设置拖拽检测定时器
+  dragStartTimer = window.setTimeout(() => {
+    if (!isDragging) { // 确保还没有因为移动距离触发拖拽
+      isDragging = true;
+      if (assistantIcon.value) {
+        dragOffset.x = e.clientX - position.x;
+        dragOffset.y = e.clientY - position.y;
+      }
+    }
+  }, 150);
+  
   document.addEventListener('mouseup', mouseUpHandler);
-  document.addEventListener('mousemove', drag);
+  document.addEventListener('mousemove', mouseMoveHandler);
   
   e.preventDefault();
 }
@@ -308,9 +340,19 @@ const sendMessage = async () => {
 }
 
 // 发送预设问题
-const sendSuggestedQuestion = (question: string) => {
+const sendSuggestedQuestion = (question: string, event?: Event) => {
+  // 阻止事件冒泡，防止触发文档级别的点击事件
+  if (event) {
+    event.stopPropagation();
+  }
+  
   userInput.value = question;
   sendMessage();
+  
+  // 使用nextTick确保DOM更新后再滚动到底部
+  nextTick(() => {
+    scrollToBottom();
+  });
 }
 
 // API调用
@@ -369,10 +411,20 @@ const handleResize = () => {
 
 onMounted(() => {
   window.addEventListener('resize', handleResize);
+  
+  // 添加全局点击事件处理器，用于检测点击对话框外部时关闭对话框
   document.addEventListener('click', (e) => {
-    if (isDialogOpen.value && assistantIcon.value && !assistantIcon.value.contains(e.target as Node)) {
+    // 如果对话框已打开
+    if (isDialogOpen.value) {
       const dialog = document.querySelector('.v-assistant-dialog');
-      if (dialog && !dialog.contains(e.target as Node)) {
+      const icon = assistantIcon.value;
+      
+      // 检查点击是否在对话框外部和图标外部
+      const isOutsideDialog = dialog && !dialog.contains(e.target as Node);
+      const isOutsideIcon = icon && !icon.contains(e.target as Node);
+      
+      // 只有当点击在对话框和图标之外时才关闭对话框
+      if (isOutsideDialog && isOutsideIcon) {
         isDialogOpen.value = false;
       }
     }
