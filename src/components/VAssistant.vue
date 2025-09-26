@@ -115,32 +115,32 @@
     
     <!-- 移动端底部导航栏 -->
     <div v-if="isMobile" class="mobile-nav-bar">
-      <button 
+      <div 
         class="nav-item" 
         :class="{ active: currentTab === 'home' }"
-        @click="switchTab('home')"
+        @click.stop="switchTab('home')"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
         <span>首页</span>
-      </button>
-      <button 
+      </div>
+      <div 
         class="nav-item" 
         :class="{ active: currentTab === 'explore' }"
-        @click="switchTab('explore')"
+        @click.stop="switchTab('explore')"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
         </svg>
         <span>发现</span>
-      </button>
-      <button 
+      </div>
+      <div 
         class="nav-item assistant-nav-button"
         :class="{ active: isDialogOpen }"
-        @click="toggleDialog"
+        @click.stop="switchTab('assistant')"
       >
         <div class="assistant-nav-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -148,29 +148,29 @@
           </svg>
         </div>
         <span>助手</span>
-      </button>
-      <button 
+      </div>
+      <div 
         class="nav-item" 
         :class="{ active: currentTab === 'notifications' }"
-        @click="switchTab('notifications')"
+        @click.stop="switchTab('notifications')"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
         <span>通知</span>
-      </button>
-      <button 
+      </div>
+      <div 
         class="nav-item" 
         :class="{ active: currentTab === 'profile' }"
-        @click="switchTab('profile')"
+        @click.stop="switchTab('profile')"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
         <span>我的</span>
-      </button>
+      </div>
     </div>
   </div>
 </template>
@@ -207,10 +207,18 @@ const isMobile = computed(() => {
 
 // 切换导航标签
 const switchTab = (tab: string) => {
+  console.log('切换到标签:', tab); // 添加调试日志
   currentTab.value = tab;
+  
   // 如果点击的是助手标签，则切换对话框状态
   if (tab === 'assistant') {
-    toggleDialog();
+    // 直接设置对话框状态为打开，而不是切换
+    isDialogOpen.value = true;
+    nextTick(() => {
+      updateDialogPosition();
+      scrollToBottom();
+      inputArea.value?.focus();
+    });
   } else if (isDialogOpen.value) {
     // 如果对话框已打开且点击了其他标签，则关闭对话框
     isDialogOpen.value = false;
@@ -979,8 +987,32 @@ onUnmounted(() => {
   font-size: 12px;
   font-weight: 500;
   padding: 8px 0;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+  user-select: none; /* 防止文本被选中 */
+  position: relative; /* 为伪元素定位 */
+  overflow: hidden; /* 限制涟漪效果在按钮内 */
+}
+
+.nav-item::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.nav-item:active::after {
+  transform: translate(-50%, -50%) scale(1.5);
+  opacity: 1;
+  transition: transform 0.3s ease, opacity 0s;
 }
 
 .nav-item svg {
@@ -1024,6 +1056,10 @@ onUnmounted(() => {
 
 .assistant-nav-button.active .assistant-nav-icon {
   transform: scale(1.1);
+}
+
+.assistant-nav-button:active .assistant-nav-icon {
+  transform: scale(0.95);
 }
 
 /* 移动端适配 */
