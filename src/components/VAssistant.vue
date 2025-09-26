@@ -1,7 +1,8 @@
 <template>
   <div class="v-assistant-container">
-    <!-- 小V助手图标 -->
+    <!-- 小V助手图标 - 仅在桌面端显示 -->
     <div
+      v-if="!isMobile"
       ref="assistantIcon"
       class="v-assistant-icon"
       :style="{ left: position.x + 'px', top: position.y + 'px' }"
@@ -35,11 +36,12 @@
     </div>
 
     <!-- 对话框 -->
-    <transition name="dialog-fade">
+    <transition :name="isMobile ? 'dialog-slide' : 'dialog-fade'">
       <div
         v-if="isDialogOpen"
         class="v-assistant-dialog"
-        :style="{ left: dialogPosition.x + 'px', top: dialogPosition.y + 'px' }"
+        :class="{ 'mobile-dialog': isMobile }"
+        :style="isMobile ? {} : { left: dialogPosition.x + 'px', top: dialogPosition.y + 'px' }"
         @mousedown.stop
         @click.stop
       >
@@ -110,11 +112,71 @@
         </div>
       </div>
     </transition>
+    
+    <!-- 移动端底部导航栏 -->
+    <div v-if="isMobile" class="mobile-nav-bar">
+      <button 
+        class="nav-item" 
+        :class="{ active: currentTab === 'home' }"
+        @click="switchTab('home')"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>首页</span>
+      </button>
+      <button 
+        class="nav-item" 
+        :class="{ active: currentTab === 'explore' }"
+        @click="switchTab('explore')"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+        </svg>
+        <span>发现</span>
+      </button>
+      <button 
+        class="nav-item assistant-nav-button"
+        :class="{ active: isDialogOpen }"
+        @click="toggleDialog"
+      >
+        <div class="assistant-nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <span>助手</span>
+      </button>
+      <button 
+        class="nav-item" 
+        :class="{ active: currentTab === 'notifications' }"
+        @click="switchTab('notifications')"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span>通知</span>
+      </button>
+      <button 
+        class="nav-item" 
+        :class="{ active: currentTab === 'profile' }"
+        @click="switchTab('profile')"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>我的</span>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import axios from 'axios'
 import MarkdownIt from 'markdown-it'
 
@@ -136,6 +198,24 @@ const userInput = ref('')
 const messages = ref<Array<{ type: 'user' | 'assistant'; content: string }>>([])
 const chatMessages = ref<HTMLElement | null>(null)
 const inputArea = ref<HTMLTextAreaElement | null>(null)
+const currentTab = ref('home')
+
+// 移动端检测
+const isMobile = computed(() => {
+  return window.innerWidth <= 768;
+});
+
+// 切换导航标签
+const switchTab = (tab: string) => {
+  currentTab.value = tab;
+  // 如果点击的是助手标签，则切换对话框状态
+  if (tab === 'assistant') {
+    toggleDialog();
+  } else if (isDialogOpen.value) {
+    // 如果对话框已打开且点击了其他标签，则关闭对话框
+    isDialogOpen.value = false;
+  }
+}
 
 // 预设问题列表
 const suggestedQuestions = ref([
@@ -154,6 +234,9 @@ const position = reactive({ x: window.innerWidth - 80, y: window.innerHeight - 1
 const dialogPosition = reactive({ x: 0, y: 0 })
 
 const updateDialogPosition = () => {
+  // 移动端不需要计算位置，对话框会全屏显示
+  if (isMobile.value) return;
+  
   const iconRect = assistantIcon.value?.getBoundingClientRect();
   if (!iconRect) return;
 
@@ -289,6 +372,11 @@ const stopDrag = () => {
 const toggleDialog = () => {
   if (isDragging) return;
   isDialogOpen.value = !isDialogOpen.value;
+  
+  // 在移动端，如果打开对话框，则将当前标签设置为assistant
+  if (isMobile.value && isDialogOpen.value) {
+    currentTab.value = 'assistant';
+  }
 }
 
 watch(isDialogOpen, (isOpen) => {
@@ -418,17 +506,22 @@ onMounted(() => {
     if (isDialogOpen.value) {
       const dialog = document.querySelector('.v-assistant-dialog');
       const icon = assistantIcon.value;
+      const navBar = document.querySelector('.mobile-nav-bar');
       
       // 检查点击是否在对话框外部和图标外部
       const isOutsideDialog = dialog && !dialog.contains(e.target as Node);
       const isOutsideIcon = icon && !icon.contains(e.target as Node);
+      const isOutsideNavBar = navBar && !navBar.contains(e.target as Node);
       
-      // 只有当点击在对话框和图标之外时才关闭对话框
-      if (isOutsideDialog && isOutsideIcon) {
+      // 只有当点击在对话框、图标和导航栏之外时才关闭对话框
+      if (isOutsideDialog && isOutsideIcon && (isMobile.value ? isOutsideNavBar : true)) {
         isDialogOpen.value = false;
       }
     }
   });
+  
+  // 初始检测设备类型
+  handleResize();
 })
 
 onUnmounted(() => {
@@ -514,6 +607,18 @@ onUnmounted(() => {
   border: 1px solid var(--assistant-border-color);
 }
 
+/* 移动端对话框样式 */
+.v-assistant-dialog.mobile-dialog {
+  width: 100%;
+  height: calc(100% - 60px); /* 减去底部导航栏的高度 */
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 60px !important;
+  border-radius: 0;
+  border: none;
+}
+
 .dialog-fade-enter-active,
 .dialog-fade-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -523,6 +628,17 @@ onUnmounted(() => {
 .dialog-fade-leave-to {
   opacity: 0;
   transform: scale(0.95);
+}
+
+/* 移动端滑入动画 */
+.dialog-slide-enter-active,
+.dialog-slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.dialog-slide-enter-from,
+.dialog-slide-leave-to {
+  transform: translateY(100%);
 }
 
 .dialog-header {
@@ -832,5 +948,111 @@ onUnmounted(() => {
   padding: 2px 5px;
   border-radius: 4px;
   font-size: 0.9em;
+}
+
+/* 移动端底部导航栏样式 */
+.mobile-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 9998;
+  border-top: 1px solid var(--assistant-border-color);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 20%;
+  height: 100%;
+  background: none;
+  border: none;
+  color: var(--assistant-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  margin-bottom: 4px;
+  stroke-width: 1.5;
+}
+
+.nav-item span {
+  margin-top: 2px;
+}
+
+.nav-item.active {
+  color: var(--assistant-primary-color);
+}
+
+.assistant-nav-button {
+  position: relative;
+}
+
+.assistant-nav-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--assistant-primary-color), var(--assistant-secondary-color));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  color: white;
+  box-shadow: 0 4px 8px rgba(90, 103, 216, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.assistant-nav-icon svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 0;
+}
+
+.assistant-nav-button.active .assistant-nav-icon {
+  transform: scale(1.1);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .v-assistant-dialog {
+    width: 100%;
+    height: calc(100% - 60px);
+    border-radius: 0;
+  }
+  
+  .chat-messages {
+    padding: 16px;
+  }
+  
+  .welcome-view {
+    padding: 60px 16px;
+  }
+  
+  .input-area {
+    padding: 10px;
+  }
+  
+  .suggested-questions {
+    gap: 8px;
+  }
+  
+  .question-chip {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 }
 </style>
