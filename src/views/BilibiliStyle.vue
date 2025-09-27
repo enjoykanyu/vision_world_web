@@ -233,8 +233,147 @@
         </div>
       </div>
 
+      <!-- 移动端全屏Feed（抖音/哔哩哔哩/小红书风格） -->
+      <section v-if="isMobile" class="mobile-feed">
+        <div 
+          ref="feedContainer" 
+          class="feed-container" 
+          @touchstart="handleTouchStart" 
+          @touchmove="handleTouchMove" 
+          @touchend="handleTouchEnd"
+          @scroll="handleScroll"
+        >
+          <div 
+            v-for="(video, index) in displayedVideos" 
+            :key="video.id" 
+            :ref="el => { if (el) videoRefs[index] = el }" 
+            class="feed-item"
+            :class="{ 'active': currentVideoIndex === index }"
+            :style="getVideoStyle(index)"
+          >
+            <!-- 视频/图片区域 -->
+            <div class="feed-media-container">
+              <video 
+                v-if="Math.abs(currentVideoIndex - index) <= 1"
+                class="feed-media" 
+                :src="video.videoUrl || 'https://media.w3.org/2010/05/sintel/trailer.mp4'" 
+                :poster="video.cover"
+                :muted="true"
+                :loop="true"
+                :autoplay="currentVideoIndex === index"
+                :playsinline="true"
+                ref="videoElements"
+                @click="toggleVideoPlay($event, index)"
+              ></video>
+              <img 
+                v-else
+                :src="video.cover" 
+                :alt="video.title" 
+                class="feed-media" 
+              />
+              
+              <!-- 播放按钮覆盖 -->
+              <div class="feed-play-overlay" v-if="!isPlaying[video.id]">
+                <div class="feed-play-btn">
+                  <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="24" fill="white" fill-opacity="0.3"/>
+                    <path d="M32 24L20 32V16L32 24Z" fill="white"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- 进度条 -->
+              <div class="feed-progress">
+                <div class="feed-progress-inner" :style="{width: videoProgress[video.id] || '0%'}"></div>
+              </div>
+            </div>
+            
+            <!-- 内容信息覆盖层 -->
+            <div class="feed-content-overlay">
+              <!-- 底部作者信息和描述 -->
+              <div class="feed-author-info">
+                <div class="feed-avatar">
+                  <img :src="`https://via.placeholder.com/40/FF69B4/FFFFFF?text=${video.uploader.charAt(0)}`" alt="avatar" />
+                </div>
+                <div class="feed-user-info">
+                  <div class="feed-username">@{{ video.uploader }}</div>
+                  <div class="feed-description">{{ video.title }}</div>
+                  <div class="feed-tags">
+                    <span class="feed-tag">#推荐</span>
+                    <span class="feed-tag">#热门</span>
+                  </div>
+                </div>
+                <button class="feed-follow-btn">关注</button>
+              </div>
+              
+              <!-- 右侧操作栏 -->
+              <div class="feed-actions">
+                <button class="action-btn" @click.stop="toggleLike(video.id)">
+                  <div class="action-icon" :class="{ 'liked': isLiked[video.id] }">
+                    <svg viewBox="0 0 24 24"><path d="M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 016.5 4 5.5 5.5 0 0112 6a5.5 5.5 0 015.5-2 4.5 4.5 0 014.5 4.5c0 3.78-3.4 6.86-8.55 11.18L12 21z" /></svg>
+                  </div>
+                  <span class="action-count">{{ formatCount(likeCounts[video.id]) }}</span>
+                </button>
+                
+                <button class="action-btn" @click.stop="openComments(video.id)">
+                  <div class="action-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 01-4 4H7l-4 4V5a4 4 0 014-4h10a4 4 0 014 4v10z" /></svg>
+                  </div>
+                  <span class="action-count">{{ formatCount(commentCounts[video.id]) }}</span>
+                </button>
+                
+                <button class="action-btn" @click.stop="toggleFavorite(video.id)">
+                  <div class="action-icon" :class="{ 'favorited': isFavorited[video.id] }">
+                    <svg viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16l8-4 8 4V4a2 2 0 00-2-2H6z" /></svg>
+                  </div>
+                  <span class="action-count">{{ formatCount(favoriteCounts[video.id]) }}</span>
+                </button>
+                
+                <button class="action-btn">
+                  <div class="action-icon">
+                    <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" /></svg>
+                  </div>
+                  <span class="action-count">分享</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 加载更多指示器 -->
+          <div v-if="isLoading" class="feed-loading">
+            <div class="feed-loading-spinner"></div>
+            <span>加载中...</span>
+          </div>
+        </div>
+        
+        <!-- 底部导航栏 -->
+        <div class="feed-bottom-nav">
+          <div class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+            <span>首页</span>
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" /></svg>
+            <span>发现</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-add-btn">
+              <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
+            </div>
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z" /></svg>
+            <span>动态</span>
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+            <span>我的</span>
+          </div>
+        </div>
+      </section>
+
       <!-- 推荐视频网格 -->
-      <div class="mb-10">
+      <div class="mb-10" v-if="!isMobile">
         <div class="flex items-center justify-between mb-5">
           <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
             <span class="w-1 h-6 bg-pink-500 rounded-full mr-2"></span>
@@ -282,7 +421,7 @@
       </div>
 
       <!-- 分区导航 -->
-      <div class="mb-8">
+      <div class="mb-8" v-if="!isMobile">
         <div class="flex items-center justify-between mb-5">
           <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
             <span class="w-1 h-6 bg-pink-500 rounded-full mr-2"></span>
@@ -310,7 +449,7 @@
       </div>
 
       <!-- 视频网格 -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6" v-if="!isMobile">
         <div v-for="video in videos" :key="video.id"
              class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
              @click="router.push(`/video/${video.id}`)">
@@ -496,7 +635,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -504,6 +643,11 @@ const router = useRouter()
 const activeCategory = ref(1)
 const currentSlide = ref(0)
 let slideInterval: NodeJS.Timeout | null = null
+
+const isMobile = ref(window.innerWidth <= 768)
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
 
 // 搜索相关
 const searchQuery = ref('')
@@ -735,6 +879,340 @@ const videos = [
   }
 ]
 
+/* Feed视频相关状态 */
+// 视频数据源 - 模拟API数据
+const allVideos = ref<any[]>([])
+const pageSize = 5 // 每次加载5条视频
+const currentPage = ref(1)
+const isLoading = ref(false)
+const hasMore = ref(true)
+const feedContainer = ref<HTMLElement | null>(null)
+const videoRefs = ref<HTMLElement[]>([])
+const currentVideoIndex = ref(0)
+const isPlaying = ref<Record<number, boolean>>({})
+const videoProgress = ref<Record<string, string>>({})
+const touchStartY = ref(0)
+const touchDeltaY = ref(0)
+const isDragging = ref(false)
+const dragThreshold = 50 // 拖动阈值，超过这个值才会触发翻页
+const animating = ref(false)
+
+// 生成更多视频数据
+const generateMoreVideos = (page: number, size: number) => {
+  const startId = (page - 1) * size + 1
+  const newVideos = []
+  
+  for (let i = 0; i < size; i++) {
+    const id = startId + i + 100 // 避免ID冲突
+    newVideos.push({
+      id,
+      title: `${page}页第${i+1}个视频 - ${['抖音热门', '哔哩哔哩精选', '小红书爆款'][Math.floor(Math.random() * 3)]}视频内容`,
+      cover: `https://via.placeholder.com/1080x1920/${['FF69B4', '4169E1', '32CD32', 'FF4500', 'FFD700'][Math.floor(Math.random() * 5)]}/FFFFFF?text=视频${id}`,
+      duration: `${Math.floor(Math.random() * 2) + 1}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
+      uploader: ['哔哩哔哩', '抖音达人', '小红书博主', '视频创作者', '热门UP主'][Math.floor(Math.random() * 5)],
+      playCount: `${Math.floor(Math.random() * 100) + 1}万`,
+      danmaku: `${Math.floor(Math.random() * 1000) + 1}`,
+      videoUrl: null // 实际项目中这里应该是真实视频URL
+    })
+  }
+  
+  return newVideos
+}
+
+// 初始化视频数据
+const initVideos = () => {
+  // 首先使用已有的videos数据
+  allVideos.value = [...videos]
+  
+  // 然后添加更多视频以确保有足够数据
+  const additionalVideos = generateMoreVideos(1, pageSize)
+  allVideos.value = [...allVideos.value, ...additionalVideos]
+  
+  // 初始化视频状态
+  allVideos.value.forEach(v => {
+    likeCounts.value[v.id] = Math.floor(Math.random() * 50000) + 1000
+    favoriteCounts.value[v.id] = Math.floor(Math.random() * 30000) + 500
+    commentCounts.value[v.id] = Math.floor(Math.random() * 10000) + 100
+    isLiked.value[v.id] = false
+    isFavorited.value[v.id] = false
+    isPlaying.value[v.id] = false
+    videoProgress.value[v.id] = '0%'
+  })
+}
+
+// 计算当前显示的视频
+const displayedVideos = computed(() => {
+  return allVideos.value.slice(0, currentPage.value * pageSize)
+})
+
+// 加载更多视频
+const loadMoreVideos = async () => {
+  if (isLoading.value || !hasMore.value) return
+  
+  isLoading.value = true
+  
+  try {
+    // 模拟API请求延迟
+    await new Promise(resolve => setTimeout(resolve, 800))
+    
+    const nextPage = currentPage.value + 1
+    const newVideos = generateMoreVideos(nextPage, pageSize)
+    
+    // 如果已经加载了很多页，模拟没有更多数据
+    if (nextPage > 5) {
+      hasMore.value = false
+    } else {
+      allVideos.value = [...allVideos.value, ...newVideos]
+      currentPage.value = nextPage
+      
+      // 初始化新视频的状态
+      newVideos.forEach(v => {
+        likeCounts.value[v.id] = Math.floor(Math.random() * 50000) + 1000
+        favoriteCounts.value[v.id] = Math.floor(Math.random() * 30000) + 500
+        commentCounts.value[v.id] = Math.floor(Math.random() * 10000) + 100
+        isLiked.value[v.id] = false
+        isFavorited.value[v.id] = false
+        isPlaying.value[v.id] = false
+        videoProgress.value[v.id] = '0%'
+      })
+    }
+  } catch (error) {
+    console.error('加载视频失败:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 处理滚动事件，检测是否需要加载更多视频
+const handleScroll = () => {
+  if (!feedContainer.value) return
+  
+  const container = feedContainer.value
+  const scrollPosition = container.scrollTop
+  const containerHeight = container.clientHeight
+  const contentHeight = container.scrollHeight
+  
+  // 当滚动到接近底部时加载更多
+  if (contentHeight - (scrollPosition + containerHeight) < containerHeight * 0.5) {
+    loadMoreVideos()
+  }
+  
+  // 确定当前视频索引
+  const videoHeight = containerHeight
+  const currentIndex = Math.floor(scrollPosition / videoHeight)
+  
+  if (currentVideoIndex.value !== currentIndex && !animating.value) {
+    updateCurrentVideo(currentIndex)
+  }
+}
+
+// 更新当前视频
+const updateCurrentVideo = (index: number) => {
+  if (index < 0 || index >= displayedVideos.value.length) return
+  
+  // 暂停当前视频
+  pauseAllVideos()
+  
+  // 更新索引
+  currentVideoIndex.value = index
+  
+  // 播放新的当前视频
+  nextTick(() => {
+    const videoElements = document.querySelectorAll('.feed-item.active video') as NodeListOf<HTMLVideoElement>
+    if (videoElements && videoElements.length > 0) {
+      const video = videoElements[0]
+      if (video) {
+        video.currentTime = 0
+        video.play()
+          .then(() => {
+            const videoId = displayedVideos.value[index].id
+            isPlaying.value[videoId] = true
+            
+            // 更新进度条
+            updateVideoProgress(video, videoId)
+          })
+          .catch(err => console.error('视频播放失败:', err))
+      }
+    }
+  })
+}
+
+// 暂停所有视频
+const pauseAllVideos = () => {
+  const videos = document.querySelectorAll('.feed-item video') as NodeListOf<HTMLVideoElement>
+  videos.forEach(video => {
+    video.pause()
+    if (video.parentElement?.parentElement) {
+      const feedItem = video.parentElement.parentElement
+      const index = Array.from(feedItem.parentElement?.children || []).indexOf(feedItem)
+      if (index >= 0 && index < displayedVideos.value.length) {
+        const videoId = displayedVideos.value[index].id
+        isPlaying.value[videoId] = false
+      }
+    }
+  })
+}
+
+// 更新视频进度条
+const updateVideoProgress = (video: HTMLVideoElement, videoId: number) => {
+  const updateProgress = () => {
+    if (video.duration) {
+      const progress = (video.currentTime / video.duration) * 100
+      videoProgress.value[videoId] = `${progress}%`
+    }
+    
+    if (!video.paused) {
+      requestAnimationFrame(updateProgress)
+    }
+  }
+  
+  requestAnimationFrame(updateProgress)
+}
+
+// 切换视频播放/暂停
+const toggleVideoPlay = (event: Event, index: number) => {
+  event.stopPropagation()
+  
+  const videoId = displayedVideos.value[index].id
+  const videoElements = document.querySelectorAll(`.feed-item:nth-child(${index + 1}) video`) as NodeListOf<HTMLVideoElement>
+  
+  if (videoElements && videoElements.length > 0) {
+    const video = videoElements[0]
+    
+    if (video.paused) {
+      video.play()
+        .then(() => {
+          isPlaying.value[videoId] = true
+          updateVideoProgress(video, videoId)
+        })
+        .catch(err => console.error('视频播放失败:', err))
+    } else {
+      video.pause()
+      isPlaying.value[videoId] = false
+    }
+  }
+}
+
+// 触摸事件处理
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartY.value = e.touches[0].clientY
+  isDragging.value = true
+  touchDeltaY.value = 0
+}
+
+const handleTouchMove = (e: TouchEvent) => {
+  if (!isDragging.value) return
+  
+  const currentY = e.touches[0].clientY
+  touchDeltaY.value = currentY - touchStartY.value
+  
+  // 如果拖动距离超过阈值，应用变换效果
+  if (Math.abs(touchDeltaY.value) > 20) {
+    e.preventDefault() // 阻止默认滚动
+  }
+}
+
+const handleTouchEnd = () => {
+  if (!isDragging.value) return
+  
+  isDragging.value = false
+  
+  // 如果拖动距离超过阈值，切换视频
+  if (Math.abs(touchDeltaY.value) > dragThreshold) {
+    animating.value = true
+    
+    if (touchDeltaY.value > 0 && currentVideoIndex.value > 0) {
+      // 向下拖动，显示上一个视频
+      smoothScrollToVideo(currentVideoIndex.value - 1)
+    } else if (touchDeltaY.value < 0 && currentVideoIndex.value < displayedVideos.value.length - 1) {
+      // 向上拖动，显示下一个视频
+      smoothScrollToVideo(currentVideoIndex.value + 1)
+    } else {
+      // 回弹到当前视频
+      smoothScrollToVideo(currentVideoIndex.value)
+    }
+  } else {
+    // 拖动距离不够，回弹到当前视频
+    smoothScrollToVideo(currentVideoIndex.value)
+  }
+  
+  touchDeltaY.value = 0
+}
+
+// 平滑滚动到指定视频
+const smoothScrollToVideo = (index: number) => {
+  if (!feedContainer.value) return
+  
+  const targetPosition = index * feedContainer.value.clientHeight
+  
+  feedContainer.value.scrollTo({
+    top: targetPosition,
+    behavior: 'smooth'
+  })
+  
+  // 动画结束后重置状态
+  setTimeout(() => {
+    animating.value = false
+    updateCurrentVideo(index)
+  }, 300)
+}
+
+// 获取视频样式（用于拖动效果）
+const getVideoStyle = (index: number) => {
+  if (!isDragging.value || index !== currentVideoIndex.value) return {}
+  
+  // 计算拖动时的变换效果
+  const translateY = touchDeltaY.value * 0.5 // 减小拖动效果，使其更自然
+  const scale = Math.max(0.95, 1 - Math.abs(touchDeltaY.value) * 0.001) // 缩小效果
+  
+  return {
+    transform: `translateY(${translateY}px) scale(${scale})`,
+    transition: isDragging.value ? 'none' : 'transform 0.3s ease'
+  }
+}
+
+/* 互动计数与操作（示例） */
+const likeCounts = ref<Record<number, number>>({})
+const favoriteCounts = ref<Record<number, number>>({})
+const commentCounts = ref<Record<number, number>>({})
+const isLiked = ref<Record<number, boolean>>({})
+const isFavorited = ref<Record<number, boolean>>({})
+const showComments = ref(false)
+const currentVideoId = ref<number | null>(null)
+
+// 格式化数字显示（例如：1.2k, 3.5w）
+const formatCount = (count: number): string => {
+  if (!count) return '0';
+  if (count < 1000) return String(count);
+  if (count < 10000) return (count / 1000).toFixed(1) + 'k';
+  return (count / 10000).toFixed(1) + 'w';
+}
+
+const toggleLike = (id: number) => {
+  isLiked.value[id] = !isLiked.value[id]
+  if (isLiked.value[id]) {
+    likeCounts.value[id] = (likeCounts.value[id] || 0) + 1
+  } else {
+    likeCounts.value[id] = Math.max(0, (likeCounts.value[id] || 0) - 1)
+  }
+}
+
+const toggleFavorite = (id: number) => {
+  isFavorited.value[id] = !isFavorited.value[id]
+  if (isFavorited.value[id]) {
+    favoriteCounts.value[id] = (favoriteCounts.value[id] || 0) + 1
+  } else {
+    favoriteCounts.value[id] = Math.max(0, (favoriteCounts.value[id] || 0) - 1)
+  }
+}
+
+const openComments = (id: number) => {
+  currentVideoId.value = id
+  showComments.value = true
+  // 这里可以打开评论面板；暂时模拟数量递增
+  commentCounts.value[id] = (commentCounts.value[id] || 0) + 1
+}
+
 const nextSlide = () => {
   currentSlide.value = (currentSlide.value + 1) % carouselSlides.length
 }
@@ -745,12 +1223,27 @@ const startAutoSlide = () => {
 
 onMounted(() => {
   startAutoSlide()
+  window.addEventListener('resize', updateIsMobile)
+  
+  // 初始化Feed视频数据
+  initVideos()
+  
+  // 设置初始视频
+  nextTick(() => {
+    if (isMobile.value) {
+      updateCurrentVideo(0)
+    }
+  })
 })
 
 onUnmounted(() => {
   if (slideInterval) {
     clearInterval(slideInterval)
   }
+  window.removeEventListener('resize', updateIsMobile)
+  
+  // 暂停所有视频
+  pauseAllVideos()
 })
 </script>
 
@@ -760,5 +1253,356 @@ onUnmounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+/* 移动端 Feed 样式 - 抖音/哔哩哔哩/小红书风格 */
+.mobile-feed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background-color: #000;
+}
+
+.feed-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  /* 隐藏滚动条但保留功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.feed-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+.feed-item {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  scroll-snap-align: start;
+  overflow: hidden;
+  will-change: transform; /* 优化性能 */
+  transition: transform 0.3s ease;
+}
+
+.feed-item.active {
+  z-index: 2;
+}
+
+.feed-media-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.feed-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #000;
+}
+
+.feed-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.feed-play-btn {
+  width: 64px;
+  height: 64px;
+  opacity: 0.8;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.feed-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 4;
+}
+
+.feed-progress-inner {
+  height: 100%;
+  background: #FF2B54;
+  transition: width 0.1s linear;
+}
+
+.feed-content-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0) 60%);
+  z-index: 2;
+}
+
+.feed-author-info {
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  margin-bottom: 48px;
+  pointer-events: auto;
+}
+
+.feed-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #fff;
+  margin-right: 12px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.feed-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.feed-user-info {
+  flex: 1;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.feed-username {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.feed-description {
+  font-size: 14px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feed-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feed-tag {
+  font-size: 12px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+.feed-follow-btn {
+  background: #FF2B54;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: 12px;
+  pointer-events: auto;
+  box-shadow: 0 2px 8px rgba(255,43,84,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feed-follow-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 4px rgba(255,43,84,0.5);
+}
+
+.feed-actions {
+  position: absolute;
+  right: 12px;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  pointer-events: auto;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.action-btn:active {
+  transform: scale(0.9);
+}
+
+.action-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  position: relative;
+}
+
+.action-icon svg {
+  width: 32px;
+  height: 32px;
+  fill: #fff;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+.action-count {
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.liked svg {
+  fill: #FF2B54;
+  animation: like-animation 0.5s ease;
+}
+
+.favorited svg {
+  fill: #FFD700;
+  animation: favorite-animation 0.5s ease;
+}
+
+@keyframes like-animation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@keyframes favorite-animation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* 加载更多指示器 */
+.feed-loading {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  gap: 10px;
+}
+
+.feed-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 底部导航栏 */
+.feed-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 50;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.nav-item:active {
+  transform: scale(0.9);
+}
+
+.nav-item svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  margin-bottom: 2px;
+}
+
+.nav-item.active {
+  color: #FF2B54;
+}
+
+.nav-add-btn {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #FF2B54, #FF4F8B);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: -10px;
+  box-shadow: 0 4px 10px rgba(255,43,84,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-add-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 5px rgba(255,43,84,0.5);
+}
+
+.nav-add-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+  margin: 0;
+}
+
+@media (min-width: 769px) {
+  .mobile-feed {
+    display: none;
+  }
 }
 </style>
