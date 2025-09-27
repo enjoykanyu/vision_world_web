@@ -1,191 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <!-- 顶部导航栏 -->
-    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
-      <div class="max-w-screen-xl mx-auto px-4">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo -->
-          <div class="flex items-center space-x-8">
-            <div class="flex items-center">
-              <svg class="w-8 h-8 text-pink-500" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.51.556-2.764 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.920-.373.347 0 .653.124.920.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .160-.213l2.853-2.747c.267-.249.573-.373.920-.373.347 0 .662.151.929.400.267.249.391.551.391.907 0 .356-.124.657-.373.906l-1.174 1.120zM5.333 7.24c-.746.018-1.373.276-1.880.773-.506.498-.769 1.13-.789 1.894v7.52c.02.764.283 1.395.789 1.893.507.498 1.134.756 1.880.773h13.334c.746-.017 1.373-.275 1.880-.773.506-.498.769-1.129.789-1.893v-7.52c-.02-.765-.283-1.396-.789-1.894-.507-.497-1.134-.755-1.880-.773H5.333zM8 11.107c.373 0 .684.124.933.373.249.249.373.560.373.933v1.173c0 .373-.124.684-.373.933-.249.249-.560.373-.933.373s-.684-.124-.933-.373c-.249-.249-.373-.560-.373-.933V12.413c0-.373.124-.684.373-.933.249-.249.560-.373.933-.373zm8 0c.373 0 .684.124.933.373.249.249.373.560.373.933v1.173c0 .373-.124.684-.373.933-.249.249-.560.373-.933.373s-.684-.124-.933-.373c-.249-.249-.373-.560-.373-.933V12.413c0-.373.124-.684.373-.933.249-.249.560-.373.933-.373z"/>
-              </svg>
-              <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">bilibili</span>
-            </div>
-            
-            <!-- 主导航 -->
-            <nav class="hidden md:flex items-center space-x-6 text-sm">
-              <a href="#" class="text-pink-500 font-medium relative group">
-                首页
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
-              </a>
-              <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 relative group">
-                番剧
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
-              </a>
-              <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 relative group">
-                直播
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
-              </a>
-              <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 relative group">
-                游戏中心
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
-              </a>
-              <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 relative group">
-                会员购
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-500 group-hover:w-full transition-all duration-300"></span>
-              </a>
-            </nav>
-          </div>
-
-          <!-- 搜索和用户 -->
-          <div class="flex items-center space-x-4">
-            <!-- 深色模式切换 -->
-            <button @click="toggleDarkMode" class="text-gray-500 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400">
-              <svg v-if="isDarkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
-              </svg>
-              <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-              </svg>
-            </button>
-            
-            <!-- 搜索框 -->
-            <div class="hidden md:block relative">
-              <div 
-                class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2 w-80 transition-colors duration-300 group focus-within:ring-2 focus-within:ring-pink-500 focus-within:ring-opacity-50"
-                :class="{'rounded-b-none': showSearchTrending}"
-              >
-                <input 
-                  type="text" 
-                  placeholder="搜索视频、番剧、UP主..." 
-                  class="bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none text-sm flex-1 transition-colors duration-300"
-                  @focus="showSearchTrending = true"
-                  @blur="handleSearchBlur"
-                  v-model="searchQuery"
-                >
-                <svg 
-                  class="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-pointer group-focus-within:text-pink-500" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                  @click="handleSearch"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-              </div>
-              
-              <!-- 搜索热度排行榜 -->
-              <div 
-                v-if="showSearchTrending" 
-                class="absolute top-full left-0 w-full bg-white dark:bg-gray-800 rounded-b-lg shadow-lg z-50 overflow-hidden border border-gray-200 dark:border-gray-700 border-t-0"
-                @mousedown.prevent
-              >
-                <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-                  <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">热搜榜</h3>
-                    <div class="flex items-center space-x-2">
-                      <span class="text-xs text-gray-500 dark:text-gray-400">每小时更新</span>
-                      <button class="text-xs text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        <span>换一换</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="max-h-80 overflow-y-auto">
-                  <div 
-                    v-for="(item, index) in trendingSearches" 
-                    :key="item.id"
-                    class="flex items-center px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200"
-                    @click="selectTrendingSearch(item)"
-                  >
-                    <!-- 排名 -->
-                    <div 
-                      class="w-6 h-6 flex items-center justify-center mr-3 font-medium text-sm"
-                      :class="[
-                        index < 3 
-                          ? 'text-white' 
-                          : 'text-gray-500 dark:text-gray-400',
-                        index === 0 ? 'bg-red-500' : 
-                        index === 1 ? 'bg-orange-500' : 
-                        index === 2 ? 'bg-yellow-500' : 
-                        'bg-gray-200 dark:bg-gray-600'
-                      ]"
-                    >
-                      {{ index + 1 }}
-                    </div>
-                    
-                    <!-- 内容 -->
-                    <div class="flex-1">
-                      <div class="flex items-center">
-                        <span class="text-sm text-gray-800 dark:text-gray-200 mr-2">{{ item.title }}</span>
-                        <span 
-                          v-if="item.tag" 
-                          :class="[
-                            'text-xs px-1.5 py-0.5 rounded',
-                            item.tag === '新' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
-                            item.tag === '热' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
-                            item.tag === '推荐' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
-                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                          ]"
-                        >
-                          {{ item.tag }}
-                        </span>
-                      </div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {{ item.heat }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                  <button class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                    查看完整榜单
-                  </button>
-                  <button 
-                    class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                    @click="showSearchTrending = false"
-                  >
-                    关闭
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 通知图标 -->
-            <div class="relative hidden sm:block">
-              <button class="text-gray-500 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                </svg>
-              </button>
-              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
-            </div>
-            
-            <!-- 投稿按钮 -->
-            <button class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              投稿
-            </button>
-            
-            <!-- 用户头像 -->
-            <div 
-              class="w-9 h-9 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-800 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-              @click="handleUserIconClick"
-            >
-              <span class="text-white text-sm font-semibold">{{ isLoggedIn ? username.charAt(0).toUpperCase() : 'U' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- 使用导航头组件 -->
+    <NavHeader 
+      :isLoggedIn="userStore.isLoggedIn" 
+      :username="userStore.username" 
+      @login="showLoginModal = true"
+      @toggleDarkMode="toggleDarkMode"
+    />
 
     <!-- 主要内容 -->
     <main class="max-w-screen-xl mx-auto px-4 py-6">
@@ -200,7 +21,7 @@
             <div class="absolute bottom-8 left-8 text-white max-w-lg">
               <h2 class="text-2xl md:text-3xl font-bold mb-2 drop-shadow-md">{{ slide.title }}</h2>
               <p class="text-sm md:text-base opacity-90 drop-shadow-md">{{ slide.subtitle }}</p>
-              <button class="mt-4 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center">
+              <button class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -215,7 +36,7 @@
             <div v-for="(slide, index) in carouselSlides" :key="index" 
                  @click="currentSlide = index"
                  :class="['w-3 h-3 rounded-full transition-all duration-300 cursor-pointer shadow-md', 
-                         currentSlide === index ? 'bg-pink-500 scale-110' : 'bg-white/70 hover:bg-white']">
+                         currentSlide === index ? 'bg-purple-600 scale-110' : 'bg-white/70 hover:bg-white']">
             </div>
           </div>
           
@@ -253,18 +74,26 @@
           >
             <!-- 视频/图片区域 -->
             <div class="feed-media-container">
-              <video 
-                v-if="Math.abs(currentVideoIndex - index) <= 1"
-                class="feed-media" 
-                :src="video.videoUrl || 'https://media.w3.org/2010/05/sintel/trailer.mp4'" 
-                :poster="video.cover"
-                :muted="true"
-                :loop="true"
-                :autoplay="currentVideoIndex === index"
-                :playsinline="true"
-                ref="videoElements"
-                @click="toggleVideoPlay($event, index)"
-              ></video>
+              <template v-if="Math.abs(currentVideoIndex - index) <= 1">
+                <video 
+                  class="feed-media" 
+                  :src="video.videoUrl || 'https://media.w3.org/2010/05/sintel/trailer.mp4'" 
+                  :poster="video.cover"
+                  :muted="isMuted"
+                  :loop="true"
+                  :autoplay="currentVideoIndex === index"
+                  :playsinline="true"
+                  ref="videoElements"
+                ></video>
+                
+                <!-- 添加一个覆盖层用于捕获点击和触摸事件 -->
+                <div 
+                  class="feed-video-overlay"
+                  @click="toggleVideoPlay($event, index)"
+                  @touchstart="handleVideoTouchStart($event, index)"
+                  @touchend="handleVideoTouchEnd($event, index)"
+                ></div>
+              </template>
               <img 
                 v-else
                 :src="video.cover" 
@@ -282,8 +111,37 @@
                 </div>
               </div>
               
+              <!-- 音量控制按钮 -->
+              <div class="feed-volume-control" @click.stop="toggleMute">
+                <svg v-if="isMuted" viewBox="0 0 24 24" fill="white">
+                  <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="white">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+              </div>
+              
+              <!-- 音量调节滑块 (显示在非静音状态) -->
+              <div class="feed-volume-slider" v-if="showVolumeSlider && !isMuted" @click.stop>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1" 
+                  step="0.1" 
+                  v-model="volumeLevel" 
+                  @input="updateVolume"
+                  class="volume-range"
+                >
+              </div>
+              
               <!-- 进度条 -->
-              <div class="feed-progress">
+              <div 
+                class="feed-progress" 
+                @click="handleProgressClick($event, video.id)"
+                @mousedown="startProgressDrag($event, video.id)"
+                @touchstart="startProgressDrag($event, video.id)"
+                :class="{'dragging': isDraggingProgress && currentDraggingVideoId === video.id}"
+              >
                 <div class="feed-progress-inner" :style="{width: videoProgress[video.id] || '0%'}"></div>
               </div>
             </div>
@@ -308,21 +166,36 @@
               
               <!-- 右侧操作栏 -->
               <div class="feed-actions">
-                <button class="action-btn" @click.stop="toggleLike(video.id)">
+                <button 
+                  class="action-btn" 
+                  @click.stop="toggleLike(video.id)"
+                  @touchstart.stop="handleActionTouchStart"
+                  @touchend.stop="(e) => handleActionTouchEnd(e, () => toggleLike(video.id))"
+                >
                   <div class="action-icon" :class="{ 'liked': isLiked[video.id] }">
                     <svg viewBox="0 0 24 24"><path d="M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 016.5 4 5.5 5.5 0 0112 6a5.5 5.5 0 015.5-2 4.5 4.5 0 014.5 4.5c0 3.78-3.4 6.86-8.55 11.18L12 21z" /></svg>
                   </div>
                   <span class="action-count">{{ formatCount(likeCounts[video.id]) }}</span>
                 </button>
                 
-                <button class="action-btn" @click.stop="openComments(video.id)">
+                <button 
+                  class="action-btn" 
+                  @click.stop="openComments(video.id)"
+                  @touchstart.stop="handleActionTouchStart"
+                  @touchend.stop="(e) => handleActionTouchEnd(e, () => openComments(video.id))"
+                >
                   <div class="action-icon">
                     <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 01-4 4H7l-4 4V5a4 4 0 014-4h10a4 4 0 014 4v10z" /></svg>
                   </div>
                   <span class="action-count">{{ formatCount(commentCounts[video.id]) }}</span>
                 </button>
                 
-                <button class="action-btn" @click.stop="toggleFavorite(video.id)">
+                <button 
+                  class="action-btn" 
+                  @click.stop="toggleFavorite(video.id)"
+                  @touchstart.stop="handleActionTouchStart"
+                  @touchend.stop="(e) => handleActionTouchEnd(e, () => toggleFavorite(video.id))"
+                >
                   <div class="action-icon" :class="{ 'favorited': isFavorited[video.id] }">
                     <svg viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16l8-4 8 4V4a2 2 0 00-2-2H6z" /></svg>
                   </div>
@@ -376,10 +249,10 @@
       <div class="mb-10" v-if="!isMobile">
         <div class="flex items-center justify-between mb-5">
           <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
-            <span class="w-1 h-6 bg-pink-500 rounded-full mr-2"></span>
+            <span class="w-1 h-6 bg-purple-600 rounded-full mr-2"></span>
             热门推荐
           </h2>
-          <button class="text-sm text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 flex items-center group">
+          <button class="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 flex items-center group">
             <span>查看更多</span>
             <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -398,7 +271,7 @@
                 {{ video.duration }}
               </div>
               <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div class="w-12 h-12 bg-pink-500/90 rounded-full flex items-center justify-center">
+                <div class="w-12 h-12 bg-purple-600/90 rounded-full flex items-center justify-center">
                   <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"></path>
                   </svg>
@@ -424,10 +297,10 @@
       <div class="mb-8" v-if="!isMobile">
         <div class="flex items-center justify-between mb-5">
           <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
-            <span class="w-1 h-6 bg-pink-500 rounded-full mr-2"></span>
+            <span class="w-1 h-6 bg-purple-600 rounded-full mr-2"></span>
             分区推荐
           </h2>
-          <button class="text-sm text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 flex items-center group">
+          <button class="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 flex items-center group">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
@@ -441,7 +314,7 @@
                   @click="activeCategory = category.id"
                   :class="['px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap',
                            activeCategory === category.id 
-                             ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md' 
+                             ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md' 
                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700']">
             {{ category.name }}
           </button>
@@ -637,6 +510,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import NavHeader from '../components/NavHeader.vue'
+import { useUserStore } from '../stores/userStore'
+
+// 使用全局用户状态
+const userStore = useUserStore()
 
 const router = useRouter()
 
@@ -688,9 +566,19 @@ const selectTrendingSearch = (item: any) => {
   handleSearch()
 }
 
-// 登录状态管理
-const isLoggedIn = ref(false)
-const username = ref('')
+// 深色模式状态
+const isDarkMode = ref(false)
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+  // 这里可以添加实际的深色模式切换逻辑，如修改document.documentElement.classList
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+// 登录相关
 const showLoginModal = ref(false)
 const loginForm = ref({
   username: '',
@@ -700,11 +588,11 @@ const loginError = ref('')
 
 // 处理用户头像点击
 const handleUserIconClick = () => {
-  if (!isLoggedIn.value) {
+  if (!userStore.isLoggedIn) {
     showLoginModal.value = true
   } else {
     // 已登录状态下跳转到用户主页
-    router.push(`/user/${isLoggedIn.value ? '12345678' : ''}`)
+    router.push(`/user/${userStore.userId || '12345678'}`)
   }
 }
 
@@ -714,8 +602,11 @@ const handleLogin = () => {
   // 这里使用模拟登录逻辑
   if (loginForm.value.username && loginForm.value.password) {
     if (loginForm.value.password === '123456') { // 简单的密码验证
-      isLoggedIn.value = true
-      username.value = loginForm.value.username
+      // 使用全局用户状态存储
+      userStore.login({
+        username: loginForm.value.username,
+        userId: '12345678' // 模拟用户ID
+      })
       showLoginModal.value = false
       loginError.value = ''
       loginForm.value = { username: '', password: '' }
@@ -897,6 +788,17 @@ const isDragging = ref(false)
 const dragThreshold = 50 // 拖动阈值，超过这个值才会触发翻页
 const animating = ref(false)
 
+// 视频点击相关变量
+const touchStartTime = ref(0)
+const touchStartX = ref(0)
+const touchMoved = ref(false)
+
+// 音频控制相关状态
+const isMuted = ref(false) // 默认不静音
+const volumeLevel = ref(0.7) // 默认音量70%
+const showVolumeSlider = ref(false) // 控制音量滑块显示
+let volumeSliderTimeout: number | null = null // 用于控制音量滑块自动隐藏
+
 // 生成更多视频数据
 const generateMoreVideos = (page: number, size: number) => {
   const startId = (page - 1) * size + 1
@@ -1022,7 +924,11 @@ const updateCurrentVideo = (index: number) => {
     if (videoElements && videoElements.length > 0) {
       const video = videoElements[0]
       if (video) {
+        // 设置音量和静音状态
+        video.muted = isMuted.value
+        video.volume = parseFloat(volumeLevel.value.toString())
         video.currentTime = 0
+        
         video.play()
           .then(() => {
             const videoId = displayedVideos.value[index].id
@@ -1069,28 +975,274 @@ const updateVideoProgress = (video: HTMLVideoElement, videoId: number) => {
   requestAnimationFrame(updateProgress)
 }
 
-// 切换视频播放/暂停
-const toggleVideoPlay = (event: Event, index: number) => {
+// 进度条拖动相关变量
+const isDraggingProgress = ref(false)
+const currentDraggingVideoId = ref<number | null>(null)
+let currentDraggingVideo: HTMLVideoElement | null = null
+
+// 处理进度条点击
+const handleProgressClick = (event: MouseEvent | TouchEvent, videoId: number) => {
   event.stopPropagation()
   
+  // 获取当前视频元素
+  const videoElements = document.querySelectorAll(`.feed-item.active video`) as NodeListOf<HTMLVideoElement>
+  if (!videoElements || videoElements.length === 0) return
+  
+  const video = videoElements[0]
+  if (!video || !video.duration) return
+  
+  // 获取进度条元素
+  const progressBar = (event.currentTarget as HTMLElement)
+  const rect = progressBar.getBoundingClientRect()
+  
+  // 计算点击位置相对于进度条的百分比
+  let clientX: number
+  if ('touches' in event) {
+    // 触摸事件
+    clientX = event.touches[0].clientX
+  } else {
+    // 鼠标事件
+    clientX = event.clientX
+  }
+  
+  const clickPosition = (clientX - rect.left) / rect.width
+  const newTime = video.duration * Math.max(0, Math.min(1, clickPosition))
+  
+  // 更新视频时间
+  video.currentTime = newTime
+  
+  // 更新进度条显示
+  const progress = (newTime / video.duration) * 100
+  videoProgress.value[videoId] = `${progress}%`
+}
+
+// 开始拖动进度条
+const startProgressDrag = (event: MouseEvent | TouchEvent, videoId: number) => {
+  event.stopPropagation()
+  event.preventDefault()
+  
+  // 获取当前视频元素
+  const videoElements = document.querySelectorAll(`.feed-item.active video`) as NodeListOf<HTMLVideoElement>
+  if (!videoElements || videoElements.length === 0) return
+  
+  const video = videoElements[0]
+  if (!video) return
+  
+  // 设置拖动状态
+  isDraggingProgress.value = true
+  currentDraggingVideoId.value = videoId
+  currentDraggingVideo = video
+  
+  // 暂停视频播放
+  const wasPlaying = !video.paused
+  if (wasPlaying) {
+    video.pause()
+    isPlaying.value[videoId] = false
+  }
+  
+  // 添加拖动样式
+  const progressBar = (event.currentTarget as HTMLElement)
+  progressBar.classList.add('dragging')
+  
+  // 添加事件监听
+  const handleMove = (e: MouseEvent | TouchEvent) => updateProgressDrag(e, videoId, progressBar)
+  const handleEnd = (e: MouseEvent | TouchEvent) => endProgressDrag(e, videoId, wasPlaying, progressBar)
+  
+  document.addEventListener('mousemove', handleMove as any)
+  document.addEventListener('touchmove', handleMove as any, { passive: false })
+  document.addEventListener('mouseup', handleEnd as any)
+  document.addEventListener('touchend', handleEnd as any)
+  
+  // 初始更新位置
+  updateProgressDrag(event, videoId, progressBar)
+}
+
+// 更新拖动中的进度条
+const updateProgressDrag = (event: MouseEvent | TouchEvent, videoId: number, progressBar: HTMLElement) => {
+  if (!isDraggingProgress.value || !currentDraggingVideo || currentDraggingVideoId.value !== videoId) return
+  
+  event.preventDefault()
+  
+  const rect = progressBar.getBoundingClientRect()
+  
+  // 获取触摸/鼠标位置
+  let clientX: number
+  if ('touches' in event) {
+    clientX = event.touches[0].clientX
+  } else {
+    clientX = event.clientX
+  }
+  
+  // 计算新的进度
+  const position = (clientX - rect.left) / rect.width
+  const clampedPosition = Math.max(0, Math.min(1, position))
+  
+  // 更新视频时间
+  if (currentDraggingVideo.duration) {
+    const newTime = currentDraggingVideo.duration * clampedPosition
+    currentDraggingVideo.currentTime = newTime
+    
+    // 更新进度条显示
+    const progress = (newTime / currentDraggingVideo.duration) * 100
+    videoProgress.value[videoId] = `${progress}%`
+  }
+}
+
+// 结束拖动进度条
+const endProgressDrag = (event: MouseEvent | TouchEvent, videoId: number, wasPlaying: boolean, progressBar: HTMLElement) => {
+  if (!isDraggingProgress.value || currentDraggingVideoId.value !== videoId) return
+  
+  // 移除事件监听
+  document.removeEventListener('mousemove', updateProgressDrag as any)
+  document.removeEventListener('touchmove', updateProgressDrag as any)
+  document.removeEventListener('mouseup', endProgressDrag as any)
+  document.removeEventListener('touchend', endProgressDrag as any)
+  
+  // 重置状态
+  isDraggingProgress.value = false
+  currentDraggingVideoId.value = null
+  
+  // 移除拖动样式
+  progressBar.classList.remove('dragging')
+  
+  // 如果之前在播放，则恢复播放
+  if (wasPlaying && currentDraggingVideo) {
+    currentDraggingVideo.play()
+      .then(() => {
+        isPlaying.value[videoId] = true
+      })
+      .catch(err => console.error('恢复视频播放失败:', err))
+  }
+  
+  currentDraggingVideo = null
+}
+
+// 切换视频播放/暂停
+const toggleVideoPlay = (event: Event, index: number) => {
+  // 阻止事件冒泡，防止触发其他点击事件
+  event.stopPropagation()
+  
+  // 如果正在拖动进度条，不处理点击事件
+  if (isDraggingProgress.value) return
+  
+  // 获取当前视频ID和元素
   const videoId = displayedVideos.value[index].id
-  const videoElements = document.querySelectorAll(`.feed-item:nth-child(${index + 1}) video`) as NodeListOf<HTMLVideoElement>
+  
+  // 使用更可靠的选择器，确保在移动端也能正确找到视频元素
+  const videoElements = document.querySelectorAll(`.feed-item.active video`) as NodeListOf<HTMLVideoElement>
   
   if (videoElements && videoElements.length > 0) {
     const video = videoElements[0]
     
+    console.log('切换视频播放状态:', video.paused ? '播放' : '暂停')
+    
     if (video.paused) {
+      // 播放视频
       video.play()
         .then(() => {
           isPlaying.value[videoId] = true
           updateVideoProgress(video, videoId)
+          console.log('视频开始播放')
         })
-        .catch(err => console.error('视频播放失败:', err))
+        .catch(err => {
+          console.error('视频播放失败:', err)
+          // 在移动端，可能需要用户交互才能播放
+          // 显示提示或其他反馈
+        })
     } else {
+      // 暂停视频
       video.pause()
       isPlaying.value[videoId] = false
+      console.log('视频已暂停')
     }
+  } else {
+    console.warn('未找到视频元素')
   }
+}
+
+// 处理视频触摸开始事件
+const handleVideoTouchStart = (event: TouchEvent, index: number) => {
+  // 记录触摸开始时间和位置
+  touchStartTime.value = Date.now()
+  touchStartX.value = event.touches[0].clientX
+  touchStartY.value = event.touches[0].clientY
+  touchMoved.value = false
+}
+
+// 处理视频触摸结束事件
+const handleVideoTouchEnd = (event: TouchEvent, index: number) => {
+  // 如果触摸移动距离很小，且时间短，则视为点击
+  const touchEndTime = Date.now()
+  const touchDuration = touchEndTime - touchStartTime.value
+  
+  // 如果触摸时间小于300ms且没有明显移动，则视为点击
+  if (touchDuration < 300 && !touchMoved.value) {
+    event.preventDefault()
+    event.stopPropagation()
+    toggleVideoPlay(event, index)
+  }
+}
+
+// 处理操作按钮的触摸事件
+const handleActionTouchStart = (event: TouchEvent) => {
+  event.stopPropagation()
+  touchStartTime.value = Date.now()
+  touchMoved.value = false
+}
+
+const handleActionTouchEnd = (event: TouchEvent, callback: () => void) => {
+  event.stopPropagation()
+  const touchEndTime = Date.now()
+  const touchDuration = touchEndTime - touchStartTime.value
+  
+  if (touchDuration < 300 && !touchMoved.value) {
+    callback()
+  }
+}
+
+// 切换静音状态
+const toggleMute = (event: Event) => {
+  event.stopPropagation()
+  isMuted.value = !isMuted.value
+  
+  // 更新所有视频的静音状态
+  const videos = document.querySelectorAll('.feed-item video') as NodeListOf<HTMLVideoElement>
+  videos.forEach(video => {
+    video.muted = isMuted.value
+  })
+  
+  // 显示音量滑块
+  if (!isMuted.value) {
+    showVolumeSlider.value = true
+    
+    // 5秒后自动隐藏音量滑块
+    if (volumeSliderTimeout) {
+      clearTimeout(volumeSliderTimeout)
+    }
+    
+    volumeSliderTimeout = window.setTimeout(() => {
+      showVolumeSlider.value = false
+    }, 5000)
+  } else {
+    showVolumeSlider.value = false
+  }
+}
+
+// 更新音量
+const updateVolume = () => {
+  const videos = document.querySelectorAll('.feed-item video') as NodeListOf<HTMLVideoElement>
+  videos.forEach(video => {
+    video.volume = parseFloat(volumeLevel.value.toString())
+  })
+  
+  // 重置自动隐藏计时器
+  if (volumeSliderTimeout) {
+    clearTimeout(volumeSliderTimeout)
+  }
+  
+  volumeSliderTimeout = window.setTimeout(() => {
+    showVolumeSlider.value = false
+  }, 5000)
 }
 
 // 触摸事件处理
@@ -1232,6 +1384,21 @@ onMounted(() => {
   nextTick(() => {
     if (isMobile.value) {
       updateCurrentVideo(0)
+      
+      // 初始化音频控制
+      // 由于自动播放策略，首次可能需要用户交互才能播放声音
+      const videos = document.querySelectorAll('.feed-item video') as NodeListOf<HTMLVideoElement>
+      videos.forEach(video => {
+        video.muted = isMuted.value
+        video.volume = parseFloat(volumeLevel.value.toString())
+      })
+      
+      // 添加音量滑块自动隐藏
+      document.addEventListener('click', () => {
+        if (showVolumeSlider.value) {
+          showVolumeSlider.value = false
+        }
+      })
     }
   })
 })
@@ -1244,6 +1411,11 @@ onUnmounted(() => {
   
   // 暂停所有视频
   pauseAllVideos()
+  
+  // 清理音量滑块计时器
+  if (volumeSliderTimeout) {
+    clearTimeout(volumeSliderTimeout)
+  }
 })
 </script>
 
@@ -1308,6 +1480,18 @@ onUnmounted(() => {
   background-color: #000;
 }
 
+.feed-video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3; /* 确保覆盖层在视频上方，但在其他控件下方 */
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+  touch-action: manipulation; /* 优化触摸响应 */
+}
+
 .feed-play-overlay {
   position: absolute;
   inset: 0;
@@ -1331,20 +1515,138 @@ onUnmounted(() => {
   100% { transform: scale(1); opacity: 0.8; }
 }
 
+/* 音量控制样式 */
+.feed-volume-control {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.feed-volume-control svg {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+.feed-volume-slider {
+  position: absolute;
+  bottom: 20px;
+  left: 65px;
+  width: 100px;
+  height: 36px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  padding: 0 10px;
+  pointer-events: auto;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.volume-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  outline: none;
+}
+
+.volume-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #FF2B54;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.volume-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #FF2B54;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
 .feed-progress {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.2);
+  height: 4px; /* 移动端适中的高度 */
+  background: rgba(255, 255, 255, 0.3);
   z-index: 4;
+  cursor: pointer;
+  padding: 12px 0; /* 增大触摸区域 */
+  margin-bottom: -12px; /* 负边距补偿 */
+  -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+}
+
+/* 移动端进度条增强 */
+@media (max-width: 768px) {
+  .feed-progress {
+    height: 6px; /* 移动端稍微增加高度 */
+    padding: 15px 0; /* 更大的触摸区域 */
+    margin-bottom: -15px;
+    background: rgba(255, 255, 255, 0.4); /* 增加可见度 */
+  }
+  
+  .feed-progress-inner::after {
+    width: 16px !important; /* 移动端更大的拖动手柄 */
+    height: 16px !important;
+    right: -8px !important;
+    display: block !important; /* 移动端始终显示拖动手柄 */
+  }
 }
 
 .feed-progress-inner {
   height: 100%;
   background: #FF2B54;
   transition: width 0.1s linear;
+  border-radius: 5px; /* 圆角边框 */
+  position: relative;
+}
+
+.feed-progress-inner::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: #FF2B54;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(255, 43, 84, 0.8);
+  display: none; /* 默认隐藏，拖动时显示 */
+}
+
+.feed-progress:hover .feed-progress-inner::after,
+.feed-progress.dragging .feed-progress-inner::after {
+  display: block; /* 悬停或拖动时显示拖动手柄 */
 }
 
 .feed-content-overlay {
@@ -1421,7 +1723,7 @@ onUnmounted(() => {
 }
 
 .feed-follow-btn {
-  background: #FF2B54;
+  background: #7C3AED;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -1430,13 +1732,13 @@ onUnmounted(() => {
   font-weight: 600;
   margin-left: 12px;
   pointer-events: auto;
-  box-shadow: 0 2px 8px rgba(255,43,84,0.5);
+  box-shadow: 0 2px 8px rgba(124,58,237,0.5);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .feed-follow-btn:active {
   transform: scale(0.95);
-  box-shadow: 0 1px 4px rgba(255,43,84,0.5);
+  box-shadow: 0 1px 4px rgba(124,58,237,0.5);
 }
 
 .feed-actions {
@@ -1490,12 +1792,12 @@ onUnmounted(() => {
 }
 
 .liked svg {
-  fill: #FF2B54;
+  fill: #7C3AED;
   animation: like-animation 0.5s ease;
 }
 
 .favorited svg {
-  fill: #FFD700;
+  fill: #4F46E5;
   animation: favorite-animation 0.5s ease;
 }
 

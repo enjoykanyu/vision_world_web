@@ -1,41 +1,12 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-    <!-- B站风格顶部导航 -->
-    <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo区域 -->
-          <div class="flex items-center space-x-4">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <span class="text-white font-bold text-lg">V</span>
-              </div>
-              <div class="hidden sm:block">
-                <h1 class="text-2xl font-bold bg-gradient-to-r from-bilibili-primary to-bilibili-secondary bg-clip-text text-transparent">
-                  Vision World
-                </h1>
-                <p class="text-xs text-gray-500 -mt-1">探索视觉世界</p>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 右侧操作区 -->
-          <div class="flex items-center space-x-4">
-            <div class="hidden md:flex items-center bg-gray-50 hover:bg-gray-100 border border-gray-200 hover:border-bilibili-primary/30 rounded-full px-4 py-2 transition-all duration-300 focus-within:border-bilibili-primary focus-within:shadow-lg focus-within:shadow-bilibili-primary/10">
-              <svg class="w-4 h-4 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-              <input type="text" placeholder="搜索风格模板..." class="bg-transparent text-gray-700 placeholder-gray-400 outline-none text-sm w-48">
-            </div>
-            <button class="w-10 h-10 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- 使用共用导航头组件 -->
+    <NavHeader 
+      :isLoggedIn="userStore.isLoggedIn" 
+      :username="userStore.username" 
+      @login="showLoginModal = true"
+      @toggleDarkMode="toggleDarkMode"
+    />
 
     <!-- 主要内容区域 -->
     <main class="relative">
@@ -274,6 +245,55 @@
       </section>
     </main>
 
+    <!-- 登录弹窗 -->
+    <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-96 p-6 shadow-xl" @click.stop>
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-gray-800">登录</h3>
+          <button @click="showLoginModal = false" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <div class="mb-4">
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+            <input 
+              type="text" 
+              id="username" 
+              v-model="loginForm.username" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="请输入用户名"
+            >
+          </div>
+          
+          <div class="mb-4">
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+            <input 
+              type="password" 
+              id="password" 
+              v-model="loginForm.password" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="请输入密码"
+            >
+          </div>
+          
+          <div v-if="loginError" class="mb-4 text-sm text-red-500">
+            {{ loginError }}
+          </div>
+          
+          <button 
+            @click="handleLogin" 
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-medium transition-colors duration-300"
+          >
+            登录
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 底部区域 -->
     <footer class="bg-white border-t border-gray-100 py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -299,10 +319,49 @@
 </template>
 
 <script setup lang="ts">
+import { ref, h } from 'vue'
 import { useRouter } from 'vue-router'
-import { h } from 'vue'
+import NavHeader from '../components/NavHeader.vue'
+import { useUserStore } from '../stores/userStore'
 
 const router = useRouter()
+
+/** 全局用户状态 */
+const userStore = useUserStore()
+
+/** 深色模式（供 NavHeader 触发） */
+const isDarkMode = ref(false)
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+/** 登录弹窗与登录逻辑（使用全局 userStore） */
+const showLoginModal = ref(false)
+const loginForm = ref({ username: '', password: '' })
+const loginError = ref('')
+
+const handleLogin = () => {
+  if (loginForm.value.username && loginForm.value.password) {
+    if (loginForm.value.password === '123456') {
+      userStore.login({
+        username: loginForm.value.username,
+        userId: '12345678'
+      })
+      showLoginModal.value = false
+      loginError.value = ''
+      loginForm.value = { username: '', password: '' }
+    } else {
+      loginError.value = '用户名或密码错误'
+    }
+  } else {
+    loginError.value = '请输入用户名和密码'
+  }
+}
 
 const navigateToStyle = (style: string) => {
   router.push({ name: style })

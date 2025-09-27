@@ -1,81 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- 顶部导航栏 -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div class="max-w-screen-xl mx-auto px-4">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo -->
-          <div class="flex items-center space-x-8">
-            <div class="flex items-center">
-              <svg class="w-8 h-8 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.51.556-2.764 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.920-.373.347 0 .653.124.920.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .160-.213l2.853-2.747c.267-.249.573-.373.920-.373.347 0 .662.151.929.400.267.249.391.551.391.907 0 .356-.124.657-.373.906l-1.174 1.120zM5.333 7.24c-.746.018-1.373.276-1.880.773-.506.498-.769 1.13-.789 1.894v7.52c.02.764.283 1.395.789 1.893.507.498 1.134.756 1.880.773h13.334c.746-.017 1.373-.275 1.880-.773.506-.498.769-1.129.789-1.893v-7.52c-.02-.765-.283-1.396-.789-1.894-.507-.497-1.134-.755-1.880-.773H5.333zM8 11.107c.373 0 .684.124.933.373.249.249.373.560.373.933v1.173c0 .373-.124.684-.373.933-.249.249-.56.373-.933.373s-.684-.124-.933-.373c-.249-.249-.373-.56-.373-.933V12.413c0-.373.124-.684.373-.933.249-.249.56-.373.933-.373zm8 0c.373 0 .684.124.933.373.249.249.373.56.373.933v1.173c0 .373-.124.684-.373.933-.249.249-.56.373-.933.373s-.684-.124-.933-.373c-.249-.249-.373-.56-.373-.933V12.413c0-.373.124-.684.373-.933.249-.249.56-.373.933-.373z"/>
-              </svg>
-              <span class="ml-2 text-xl font-bold text-gray-900">bilibili</span>
-            </div>
-            
-            <!-- 主导航 -->
-            <nav class="hidden md:flex items-center space-x-6 text-sm">
-              <a href="#" class="text-gray-600 hover:text-blue-500" @click.prevent="router.push('/bilibili')">首页</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">番剧</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">直播</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">游戏中心</a>
-            </nav>
-          </div>
-
-          <!-- 搜索和用户 -->
-          <div class="flex items-center space-x-4">
-            <!-- 搜索框 -->
-            <div class="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-80">
-              <input type="text" placeholder="搜索视频、番剧、UP主..." class="bg-transparent text-gray-700 placeholder-gray-500 outline-none text-sm flex-1">
-              <svg class="w-4 h-4 text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-            </div>
-            
-            <!-- 移动端菜单按钮 -->
-            <button class="md:hidden text-gray-500" @click="toggleMobileMenu">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path v-if="!showMobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-            
-            <!-- 投稿按钮 -->
-            <button class="hidden md:block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium">
-              投稿
-            </button>
-            
-            <!-- 用户头像 -->
-            <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center cursor-pointer">
-              <span class="text-white text-sm font-semibold">{{ username.charAt(0).toUpperCase() }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 移动端菜单 -->
-      <div v-if="showMobileMenu" class="md:hidden bg-white border-t border-gray-200 py-2">
-        <div class="px-4 py-2">
-          <div class="flex items-center bg-gray-100 rounded-full px-4 py-2">
-            <input type="text" placeholder="搜索视频、番剧、UP主..." class="bg-transparent text-gray-700 placeholder-gray-500 outline-none text-sm flex-1">
-            <svg class="w-4 h-4 text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-          </div>
-        </div>
-        <nav class="px-4 py-2">
-          <a href="#" class="block py-2 text-blue-500 font-medium" @click.prevent="router.push('/bilibili')">首页</a>
-          <a href="#" class="block py-2 text-gray-600 hover:text-blue-500">番剧</a>
-          <a href="#" class="block py-2 text-gray-600 hover:text-blue-500">直播</a>
-          <a href="#" class="block py-2 text-gray-600 hover:text-blue-500">游戏中心</a>
-        </nav>
-        <div class="px-4 py-2">
-          <button class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded text-sm font-medium">
-            投稿
-          </button>
-        </div>
-      </div>
-    </header>
+    <!-- 使用共用导航头组件 -->
+    <NavHeader 
+      :isLoggedIn="userStore.isLoggedIn" 
+      :username="userStore.username" 
+      @login="showLoginModal = true"
+      @toggleDarkMode="toggleDarkMode"
+    />
 
     <!-- 用户主页内容 -->
     <main class="max-w-screen-xl mx-auto px-4 py-6">
@@ -94,15 +25,15 @@
           <!-- 头像 -->
           <div class="absolute -top-16 left-6 w-24 h-24 md:w-28 md:h-28 bg-white rounded-full p-1 shadow-md">
             <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
-              <span class="text-white text-3xl font-bold">{{ username.charAt(0).toUpperCase() }}</span>
+              <span class="text-white text-3xl font-bold">{{ userStore.username.charAt(0).toUpperCase() }}</span>
             </div>
           </div>
           
           <!-- 用户名和关注信息 -->
           <div class="ml-28 md:ml-32 flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ username }}</h1>
-              <p class="text-sm text-gray-500">UID: {{ userId }}</p>
+              <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ userStore.username }}</h1>
+              <p class="text-sm text-gray-500">UID: {{ userStore.userId }}</p>
               <div class="mt-2 flex items-center space-x-4 text-sm">
                 <span class="flex items-center">
                   <span class="font-medium text-gray-900">{{ userStats.following }}</span>
@@ -191,20 +122,118 @@
         </div>
       </div>
     </main>
+    
+    <!-- 登录弹窗 -->
+    <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-96 p-6 shadow-xl" @click.stop>
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-gray-800">登录</h3>
+          <button @click="closeLoginModal" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <div class="mb-4">
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+            <input 
+              type="text" 
+              id="username" 
+              v-model="loginForm.username" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="请输入用户名"
+            >
+          </div>
+          
+          <div class="mb-4">
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+            <input 
+              type="password" 
+              id="password" 
+              v-model="loginForm.password" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="请输入密码"
+            >
+          </div>
+          
+          <div v-if="loginError" class="mb-4 text-sm text-red-500">
+            {{ loginError }}
+          </div>
+          
+          <button 
+            @click="handleLogin" 
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-medium transition-colors duration-300"
+          >
+            登录
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import NavHeader from '../components/NavHeader.vue'
+import { useUserStore } from '../stores/userStore'
+
+// 使用全局用户状态
+const userStore = useUserStore()
+
+// 深色模式状态
+const isDarkMode = ref(false)
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+// 登录相关
+const showLoginModal = ref(false)
+const loginForm = ref({
+  username: '',
+  password: ''
+})
+const loginError = ref('')
+
+// 处理登录
+const handleLogin = () => {
+  if (loginForm.value.username && loginForm.value.password) {
+    if (loginForm.value.password === '123456') {
+      // 使用全局用户状态存储
+      userStore.login({
+        username: loginForm.value.username,
+        userId: '12345678' // 模拟用户ID
+      })
+      showLoginModal.value = false
+      loginError.value = ''
+      loginForm.value = { username: '', password: '' }
+    } else {
+      loginError.value = '用户名或密码错误'
+    }
+  } else {
+    loginError.value = '请输入用户名和密码'
+  }
+}
+
+// 关闭登录弹窗
+const closeLoginModal = () => {
+  showLoginModal.value = false
+  loginError.value = ''
+  loginForm.value = { username: '', password: '' }
+}
 
 const router = useRouter()
 const showMobileMenu = ref(false)
 const activeTab = ref('videos')
 
-// 用户信息
-const username = ref('哔哩哔哩用户')
-const userId = ref('12345678')
+// 用户信息 - 使用全局状态
 const userInfo = ref({
   bio: '哔哩哔哩 (゜-゜)つロ 干杯~'
 })

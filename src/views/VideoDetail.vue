@@ -1,48 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- 顶部导航栏 - 复用BilibiliStyle.vue的导航栏 -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div class="max-w-screen-xl mx-auto px-4">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo -->
-          <div class="flex items-center space-x-8">
-            <div class="flex items-center">
-              <svg class="w-8 h-8 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.51.556-2.764 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.920-.373.347 0 .653.124.920.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .160-.213l2.853-2.747c.267-.249.573-.373.920-.373.347 0 .662.151.929.400.267.249.391.551.391.907 0 .356-.124.657-.373.906l-1.174 1.120zM5.333 7.24c-.746.018-1.373.276-1.880.773-.506.498-.769 1.13-.789 1.894v7.52c.02.764.283 1.395.789 1.893.507.498 1.134.756 1.880.773h13.334c.746-.017 1.373-.275 1.880-.773.506-.498.769-1.129.789-1.893v-7.52c-.02-.765-.283-1.396-.789-1.894-.507-.497-1.134-.755-1.880-.773H5.333z"/>
-              </svg>
-              <span class="ml-2 text-xl font-bold text-gray-900">bilibili</span>
-            </div>
-            
-            <!-- 主导航 -->
-            <nav class="hidden md:flex items-center space-x-6 text-sm">
-              <router-link to="/bilibili" class="text-blue-500 font-medium">首页</router-link>
-              <a href="#" class="text-gray-600 hover:text-blue-500">番剧</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">直播</a>
-              <a href="#" class="text-gray-600 hover:text-blue-500">游戏中心</a>
-            </nav>
-          </div>
-
-          <!-- 搜索和用户 -->
-          <div class="flex items-center space-x-4">
-            <!-- 搜索框 -->
-            <div class="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-80">
-              <input type="text" placeholder="搜索视频、番剧、UP主..." class="bg-transparent text-gray-700 placeholder-gray-500 outline-none text-sm flex-1">
-              <svg class="w-4 h-4 text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-            </div>
-            
-            <!-- 用户头像 -->
-            <div 
-              class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center cursor-pointer"
-              @click="handleUserIconClick"
-            >
-              <span class="text-white text-sm font-semibold">{{ isLoggedIn ? username.charAt(0).toUpperCase() : 'U' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- 使用共用导航头组件 -->
+    <NavHeader 
+      :isLoggedIn="userStore.isLoggedIn" 
+      :username="userStore.username" 
+      @login="showLoginModal = true"
+      @toggleDarkMode="toggleDarkMode"
+    />
 
     <!-- 主要内容 -->
     <main class="max-w-screen-xl mx-auto px-4 py-6">
@@ -51,19 +15,126 @@
         <div class="lg:w-9/12">
           <!-- 视频播放器 -->
           <div class="bg-black rounded-lg overflow-hidden mb-4">
-            <div class="aspect-video relative">
+            <div class="aspect-video relative group">
+              <!-- 视频元素或图片 -->
+              <video 
+                v-if="isPlaying"
+                ref="videoRef"
+                :src="videoData.videoUrl"
+                class="w-full h-full object-cover"
+                @timeupdate="updateProgress"
+                @loadedmetadata="onVideoLoaded"
+                @touchstart="onVideoTouchStart"
+                @touchmove="onVideoTouchMove"
+                @touchend="onVideoTouchEnd"
+                @click="onVideoClick"
+              ></video>
               <img 
+                v-else
                 :src="videoData.cover" 
                 :alt="videoData.title" 
-                class="w-full h-full object-cover"
+                class="w-full h-full object-cover cursor-pointer"
+                @click="startPlay"
+                @touchstart="onVideoTouchStart"
+                @touchmove="onVideoTouchMove"
+                @touchend="onVideoTouchEnd"
               >
-              <!-- 播放按钮 -->
-              <div class="absolute inset-0 flex items-center justify-center">
-                <button class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-300">
-                  <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+              
+              <!-- 播放/暂停按钮 -->
+              <div 
+                v-if="!isPlaying || showControls" 
+                class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                @touchstart.passive="onControlTouchStart"
+                @touchend.passive="onControlTouchEnd"
+              >
+                <button 
+                  @click="togglePlay" 
+                  class="w-16 h-16 md:w-20 md:h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-300 pointer-events-auto"
+                >
+                  <svg v-if="!isPlaying" class="w-8 h-8 md:w-12 md:h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
+                  <svg v-else class="w-8 h-8 md:w-12 md:h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                  </svg>
                 </button>
+              </div>
+              
+              <!-- 视频控制栏 -->
+              <div 
+                v-if="isPlaying && (showControls || isProgressVisible)"
+                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 md:p-4 transition-opacity duration-300"
+                :class="{ 'opacity-0': !showControls && !isDragging }"
+              >
+                <!-- 进度条 -->
+                <div class="mb-2 md:mb-3">
+                  <div 
+                    ref="progressBarRef"
+                    class="relative h-1 md:h-2 bg-white/30 rounded-full cursor-pointer touch-action-none"
+                    @click="seekToPosition"
+                    @touchstart="startDrag"
+                    @touchmove="onDrag"
+                    @touchend="endDrag"
+                    @mousedown="startDrag"
+                    @mousemove="onDrag"
+                    @mouseup="endDrag"
+                    @mouseleave="endDrag"
+                  >
+                    <!-- 缓冲进度 -->
+                    <div 
+                      class="absolute top-0 left-0 h-full bg-white/50 rounded-full"
+                      :style="{ width: bufferedProgress + '%' }"
+                    ></div>
+                    
+                    <!-- 播放进度 -->
+                    <div 
+                      class="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
+                      :style="{ width: playProgress + '%' }"
+                    ></div>
+                    
+                    <!-- 拖拽圆点 -->
+                    <div 
+                      class="absolute top-1/2 w-3 h-3 md:w-4 md:h-4 bg-blue-500 rounded-full transform -translate-y-1/2 -translate-x-1/2 transition-transform duration-200"
+                      :class="{ 'scale-125': isDragging }"
+                      :style="{ left: playProgress + '%' }"
+                    ></div>
+                  </div>
+                </div>
+                
+                <!-- 控制按钮和时间 -->
+                <div class="flex items-center justify-between text-white text-xs md:text-sm">
+                  <div class="flex items-center space-x-2 md:space-x-4">
+                    <button @click="togglePlay" class="hover:text-blue-400 transition-colors">
+                      <svg v-if="!isPlaying" class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                      <svg v-else class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                      </svg>
+                    </button>
+                    
+                    <span>{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
+                  </div>
+                  
+                  <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 音量控制 -->
+                    <button @click="toggleMute" class="hover:text-blue-400 transition-colors">
+                      <svg v-if="!isMuted" class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                      </svg>
+                      <svg v-else class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                      </svg>
+                    </button>
+                    
+                    <!-- 全屏按钮 -->
+                    <button @click="toggleFullscreen" class="hover:text-blue-400 transition-colors">
+                      <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -299,16 +370,50 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import NavHeader from '../components/NavHeader.vue'
+import { useUserStore } from '../stores/userStore'
+
+// 使用全局用户状态
+const userStore = useUserStore()
+
+// 深色模式状态
+const isDarkMode = ref(false)
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
 
 const route = useRoute()
 const router = useRouter()
 const videoId = ref(route.params.id)
 
-// 登录状态管理
-const isLoggedIn = ref(false)
-const username = ref('')
+// 视频播放相关状态
+const videoRef = ref<HTMLVideoElement | null>(null)
+const progressBarRef = ref<HTMLDivElement | null>(null)
+const isPlaying = ref(false)
+const currentTime = ref(0)
+const duration = ref(0)
+const playProgress = ref(0)
+const bufferedProgress = ref(0)
+const isMuted = ref(false)
+const showControls = ref(true)
+const isProgressVisible = ref(true)
+const isDragging = ref(false)
+const controlsTimer = ref<number | null>(null)
+
+// 触摸相关
+const touchStartTime = ref(0)
+const touchStartX = ref(0)
+const touchStartY = ref(0)
+const isTouchMove = ref(false)
+
+// 登录相关
 const showLoginModal = ref(false)
 const loginForm = ref({
   username: '',
@@ -318,7 +423,7 @@ const loginError = ref('')
 
 // 处理用户头像点击
 const handleUserIconClick = () => {
-  if (!isLoggedIn.value) {
+  if (!userStore.isLoggedIn) {
     showLoginModal.value = true
   } else {
     console.log('用户已登录，显示用户菜单')
@@ -329,8 +434,11 @@ const handleUserIconClick = () => {
 const handleLogin = () => {
   if (loginForm.value.username && loginForm.value.password) {
     if (loginForm.value.password === '123456') {
-      isLoggedIn.value = true
-      username.value = loginForm.value.username
+      // 使用全局用户状态存储
+      userStore.login({
+        username: loginForm.value.username,
+        userId: '12345678' // 模拟用户ID
+      })
       showLoginModal.value = false
       loginError.value = ''
       loginForm.value = { username: '', password: '' }
@@ -354,11 +462,276 @@ const goToVideo = (id: number) => {
   router.push(`/video/${id}`)
 }
 
+// 视频播放功能
+const startPlay = () => {
+  isPlaying.value = true
+  nextTick(() => {
+    if (videoRef.value) {
+      videoRef.value.play()
+      resetControlsTimer()
+    }
+  })
+}
+
+const togglePlay = () => {
+  if (!videoRef.value) {
+    startPlay()
+    return
+  }
+  
+  if (videoRef.value.paused) {
+    videoRef.value.play()
+    isPlaying.value = true
+  } else {
+    videoRef.value.pause()
+    isPlaying.value = false
+  }
+  
+  showControls.value = true
+  resetControlsTimer()
+}
+
+// 视频点击事件（桌面端）
+const onVideoClick = (e: MouseEvent) => {
+  // 如果不是触摸设备才响应点击事件
+  if (!('ontouchstart' in window)) {
+    e.preventDefault()
+    togglePlay()
+  }
+}
+
+// 视频触摸事件处理
+const onVideoTouchStart = (e: TouchEvent) => {
+  touchStartTime.value = Date.now()
+  touchStartX.value = e.touches[0].clientX
+  touchStartY.value = e.touches[0].clientY
+  isTouchMove.value = false
+}
+
+const onVideoTouchMove = (e: TouchEvent) => {
+  if (e.touches.length > 0) {
+    const touch = e.touches[0]
+    const deltaX = Math.abs(touch.clientX - touchStartX.value)
+    const deltaY = Math.abs(touch.clientY - touchStartY.value)
+    
+    // 如果移动距离超过10px，认为是滑动而不是点击
+    if (deltaX > 10 || deltaY > 10) {
+      isTouchMove.value = true
+    }
+  }
+}
+
+const onVideoTouchEnd = (e: TouchEvent) => {
+  const touchEndTime = Date.now()
+  const touchDuration = touchEndTime - touchStartTime.value
+  
+  // 如果是短暂点击且没有移动，则切换播放状态
+  if (touchDuration < 500 && !isTouchMove.value) {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!isPlaying.value) {
+      startPlay()
+    } else {
+      togglePlay()
+    }
+  }
+}
+
+// 控制按钮触摸事件处理
+const onControlTouchStart = (e: TouchEvent) => {
+  // 阻止事件冒泡，防止触发视频的触摸事件
+  e.stopPropagation()
+}
+
+const onControlTouchEnd = (e: TouchEvent) => {
+  // 阻止事件冒泡
+  e.stopPropagation()
+}
+
+// 原有的触摸事件处理（用于进度条等其他元素）
+const onTouchStart = (e: TouchEvent) => {
+  touchStartTime.value = Date.now()
+  touchStartX.value = e.touches[0].clientX
+  touchStartY.value = e.touches[0].clientY
+  isTouchMove.value = false
+}
+
+const onTouchEnd = (e: TouchEvent) => {
+  const touchEndTime = Date.now()
+  const touchDuration = touchEndTime - touchStartTime.value
+  
+  // 如果是短暂点击且没有移动，则切换播放状态
+  if (touchDuration < 300 && !isTouchMove.value) {
+    e.preventDefault()
+    togglePlay()
+  }
+}
+
+// 视频加载完成
+const onVideoLoaded = () => {
+  if (videoRef.value) {
+    duration.value = videoRef.value.duration
+  }
+}
+
+// 更新播放进度
+const updateProgress = () => {
+  if (videoRef.value && !isDragging.value) {
+    currentTime.value = videoRef.value.currentTime
+    playProgress.value = (currentTime.value / duration.value) * 100
+    
+    // 更新缓冲进度
+    if (videoRef.value.buffered.length > 0) {
+      const bufferedEnd = videoRef.value.buffered.end(videoRef.value.buffered.length - 1)
+      bufferedProgress.value = (bufferedEnd / duration.value) * 100
+    }
+  }
+}
+
+// 进度条拖拽功能
+const startDrag = (e: MouseEvent | TouchEvent) => {
+  isDragging.value = true
+  showControls.value = true
+  updateProgressFromEvent(e)
+  
+  if (e.type === 'mousedown') {
+    document.addEventListener('mousemove', onDrag)
+    document.addEventListener('mouseup', endDrag)
+  }
+}
+
+const onDrag = (e: MouseEvent | TouchEvent) => {
+  if (!isDragging.value) return
+  
+  e.preventDefault()
+  updateProgressFromEvent(e)
+  
+  // 检测触摸移动
+  if (e.type === 'touchmove') {
+    const touch = (e as TouchEvent).touches[0]
+    const deltaX = Math.abs(touch.clientX - touchStartX.value)
+    const deltaY = Math.abs(touch.clientY - touchStartY.value)
+    if (deltaX > 5 || deltaY > 5) {
+      isTouchMove.value = true
+    }
+  }
+}
+
+const endDrag = () => {
+  if (isDragging.value && videoRef.value) {
+    videoRef.value.currentTime = (playProgress.value / 100) * duration.value
+  }
+  
+  isDragging.value = false
+  resetControlsTimer()
+  
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', endDrag)
+}
+
+// 点击进度条跳转
+const seekToPosition = (e: MouseEvent) => {
+  if (isDragging.value) return
+  updateProgressFromEvent(e)
+  
+  if (videoRef.value) {
+    videoRef.value.currentTime = (playProgress.value / 100) * duration.value
+  }
+}
+
+// 从事件更新进度
+const updateProgressFromEvent = (e: MouseEvent | TouchEvent) => {
+  if (!progressBarRef.value) return
+  
+  const rect = progressBarRef.value.getBoundingClientRect()
+  let clientX: number
+  
+  if (e.type.startsWith('touch')) {
+    clientX = (e as TouchEvent).touches[0]?.clientX || (e as TouchEvent).changedTouches[0].clientX
+  } else {
+    clientX = (e as MouseEvent).clientX
+  }
+  
+  const progress = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100))
+  playProgress.value = progress
+}
+
+// 静音控制
+const toggleMute = () => {
+  if (videoRef.value) {
+    videoRef.value.muted = !videoRef.value.muted
+    isMuted.value = videoRef.value.muted
+  }
+}
+
+// 全屏控制
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    videoRef.value?.requestFullscreen()
+  } else {
+    document.exitFullscreen()
+  }
+}
+
+// 控制栏显示/隐藏
+const resetControlsTimer = () => {
+  if (controlsTimer.value) {
+    clearTimeout(controlsTimer.value)
+  }
+  
+  showControls.value = true
+  
+  if (isPlaying.value) {
+    controlsTimer.value = setTimeout(() => {
+      showControls.value = false
+    }, 3000)
+  }
+}
+
+// 检查进度条是否可见
+const checkProgressVisibility = () => {
+  if (!progressBarRef.value) return
+  
+  const rect = progressBarRef.value.getBoundingClientRect()
+  const viewportHeight = window.innerHeight
+  
+  isProgressVisible.value = rect.top < viewportHeight && rect.bottom > 0
+}
+
+// 时间格式化
+const formatTime = (seconds: number): string => {
+  if (isNaN(seconds) || seconds < 0) return '0:00'
+  
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+// 监听滚动事件检查进度条可见性
+const handleScroll = () => {
+  checkProgressVisibility()
+}
+
+// 生命周期
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+  checkProgressVisibility()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  if (controlsTimer.value) {
+    clearTimeout(controlsTimer.value)
+  }
+})
+
 // 视频数据
 const videoData = ref({
   id: videoId.value,
   title: 'B站唯一一次得最高Claude Code人！AI编程能力测试',
   cover: 'https://via.placeholder.com/800x450/32CD32/FFFFFF?text=视频3',
+  videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', // 示例视频URL
   duration: '06:40',
   uploader: 'AI学习TV',
   followerCount: '128.5万',
@@ -434,5 +807,71 @@ const recommendedVideos = [
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .aspect-video {
+    border-radius: 0;
+  }
+  
+  .bg-black.rounded-lg {
+    border-radius: 0;
+    margin-bottom: 0;
+  }
+  
+  /* 移动端视频控制栏优化 */
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+  }
+  
+  /* 触摸友好的进度条 */
+  .touch-action-none {
+    touch-action: none;
+  }
+  
+  /* 移动端按钮大小调整 */
+  .mobile-control-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* 移动端视频播放区域优化 */
+  .aspect-video {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  
+  /* 移动端触摸优化 */
+  video, img {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* 进度条拖拽动画 */
+.progress-bar {
+  transition: transform 0.2s ease;
+}
+
+.progress-bar:active {
+  transform: scaleY(1.5);
+}
+
+/* 控制栏渐显动画 */
+.controls-fade {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* 全屏模式样式 */
+:fullscreen .aspect-video {
+  aspect-ratio: unset;
+  height: 100vh;
+}
+
+:fullscreen .bg-black.rounded-lg {
+  border-radius: 0;
+  height: 100vh;
 }
 </style>
