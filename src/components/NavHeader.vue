@@ -4,28 +4,32 @@
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <div class="flex items-center space-x-8">
-          <div class="flex items-center">
+          <router-link to="/" class="flex items-center cursor-pointer">
             <svg class="w-8 h-8 text-purple-600" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm-1 14.5v-9l7 4.5-7 4.5z"/>
               <path d="M12 5.5c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5 6.5-2.91 6.5-6.5-2.91-6.5-6.5-6.5zm3.5 6.5l-5 3v-6l5 3z" fill-opacity="0.6"/>
             </svg>
             <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">VisionWorld</span>
-          </div>
+          </router-link>
           
           <!-- 主导航 -->
           <nav class="hidden md:flex items-center space-x-6 text-sm">
-            <a href="#" class="text-purple-600 font-medium relative group">
+            <router-link to="/" class="text-purple-600 font-medium relative group">
               首页
               <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 group-hover:w-full transition-all duration-300"></span>
-            </a>
-            <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 relative group">
-              发现
+            </router-link>
+            <router-link to="/bilibili" class="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 relative group">
+              B站风格
               <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 group-hover:w-full transition-all duration-300"></span>
-            </a>
-            <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 relative group">
-              直播
+            </router-link>
+            <router-link to="/video-assistant" class="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 relative group">
+              视频助手
               <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 group-hover:w-full transition-all duration-300"></span>
-            </a>
+            </router-link>
+            <router-link to="/messages" class="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 relative group">
+              私信
+              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 group-hover:w-full transition-all duration-300"></span>
+            </router-link>
             <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 relative group">
               创作者
               <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 group-hover:w-full transition-all duration-300"></span>

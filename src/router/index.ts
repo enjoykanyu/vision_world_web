@@ -4,6 +4,7 @@ import BilibiliStyle from '@/views/BilibiliStyle.vue'
 import VideoAssistant from '@/views/VideoAssistant.vue'
 import VideoDetail from '@/views/VideoDetail.vue'
 import UserProfile from '@/views/UserProfile.vue'
+import Messages from '@/views/Messages.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +47,14 @@ const router = createRouter({
       component: UserProfile,
       meta: {
         title: '用户主页 - Vision World'
+      }
+    },
+    {
+      path: '/messages',
+      name: 'messages',
+      component: Messages,
+      meta: {
+        title: '私信 - Vision World'
       }
     }
   ]

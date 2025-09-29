@@ -11,7 +11,15 @@
         <!-- Left side: Video Player and Info -->
         <div class="lg:col-span-2">
           <div class="aspect-w-16 aspect-h-9 mb-4">
-            <video :src="video.src" :poster="video.poster" controls class="w-full rounded-lg shadow-lg"></video>
+            <video 
+              ref="videoPlayer"
+              :src="video.src" 
+              :poster="video.poster" 
+              controls 
+              autoplay
+              class="w-full rounded-lg shadow-lg"
+              @loadstart="handleVideoLoad"
+            ></video>
           </div>
           <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ video.title }}</h1>
           <div class="flex items-center text-sm text-gray-500 mb-4">
@@ -57,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavHeader from '../components/NavHeader.vue'
 import { useUserStore } from '../stores/userStore'
@@ -69,6 +77,7 @@ const userStore = useUserStore()
 
 const videoId = ref(route.params.id as string)
 const showLoginModal = ref(false)
+const videoPlayer = ref<HTMLVideoElement | null>(null)
 
 const video = computed(() => {
   return mockVideos.find(v => v.id === videoId.value)
@@ -82,9 +91,39 @@ const goToVideo = (id: string) => {
   router.push({ name: 'videoDetail', params: { id } })
 }
 
-watch(() => route.params.id, (newId) => {
+const handleVideoLoad = () => {
+  // 视频开始加载时的处理
+  console.log('视频开始加载')
+}
+
+const playVideo = async () => {
+  if (videoPlayer.value) {
+    try {
+      await videoPlayer.value.play()
+      console.log('视频开始播放')
+    } catch (error) {
+      console.log('自动播放被阻止，用户需要手动点击播放:', error)
+    }
+  }
+}
+
+// 监听路由变化，切换视频时自动播放
+watch(() => route.params.id, async (newId) => {
   videoId.value = newId as string
   window.scrollTo(0, 0)
+  
+  // 等待DOM更新后尝试播放视频
+  await nextTick()
+  setTimeout(() => {
+    playVideo()
+  }, 500) // 给视频一些时间加载
+})
+
+// 组件挂载时尝试播放视频
+onMounted(() => {
+  setTimeout(() => {
+    playVideo()
+  }, 500)
 })
 </script>
 
