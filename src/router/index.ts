@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '@/views/Home.vue'
+import VisionWorld from '@/views/VisionWorld.vue'
 import BilibiliStyle from '@/views/BilibiliStyle.vue'
 import VideoAssistant from '@/views/VideoAssistant.vue'
 import VideoDetail from '@/views/VideoDetail.vue'
@@ -12,9 +12,9 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: Home,
+      component: VisionWorld,
       meta: {
-        title: 'Vision World - 选择你的风格'
+        title: 'Vision World 官网'
       }
     },
     {
