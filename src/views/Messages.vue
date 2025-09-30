@@ -377,15 +377,13 @@
                       </span>
                     </div>
                     
-                    <!-- 我的头像 -->
-                    <div 
+                    <!-- 我的头像（真实图片） -->
+                    <img 
                       v-if="message.senderId === userStore.userId" 
-                      class="w-8 h-8 bg-gradient-to-br from-bilibili-primary to-pink-500 rounded-full flex items-center justify-center flex-shrink-0"
+                      :src="myAvatar" 
+                      :alt="userStore.username || '我'" 
+                      class="w-8 h-8 rounded-full flex-shrink-0"
                     >
-                      <span class="text-white text-xs font-semibold">
-                        {{ userStore.username?.charAt(0).toUpperCase() || 'M' }}
-                      </span>
-                    </div>
                   </div>
                 </template>
               </div>
@@ -491,7 +489,7 @@ const contacts = ref<Contact[]>([
   {
     id: '1',
     name: '技术肥肥虾',
-    avatar: 'https://i.pravatar.cc/40?u=user1',
+    avatar: 'https://randomuser.me/api/portraits/men/12.jpg',
     online: true,
     lastSeen: '2024-09-29 21:45',
     lastMessage: '自动回复：感谢您的留言！',
@@ -502,7 +500,7 @@ const contacts = ref<Contact[]>([
   {
     id: '2',
     name: '抵抗Resistance',
-    avatar: 'https://i.pravatar.cc/40?u=user2',
+    avatar: 'https://randomuser.me/api/portraits/women/22.jpg',
     online: false,
     lastSeen: '2024-09-29 20:30',
     lastMessage: '自动回复：感谢您对我们的关注！',
@@ -513,7 +511,7 @@ const contacts = ref<Contact[]>([
   {
     id: '3',
     name: '黑ww63',
-    avatar: 'https://i.pravatar.cc/40?u=user3',
+    avatar: 'https://randomuser.me/api/portraits/men/31.jpg',
     online: true,
     lastSeen: '2024-09-29 21:50',
     lastMessage: '自动回复：感谢您先看完视频的分享！',
@@ -524,7 +522,7 @@ const contacts = ref<Contact[]>([
   {
     id: '4',
     name: '御风大世界',
-    avatar: 'https://i.pravatar.cc/40?u=user4',
+    avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
     online: false,
     lastSeen: '2024-09-29 18:20',
     lastMessage: '自动回复：感谢您的Hello投稿意见！',
@@ -535,7 +533,7 @@ const contacts = ref<Contact[]>([
   {
     id: '5',
     name: '堂主lee',
-    avatar: 'https://i.pravatar.cc/40?u=user5',
+    avatar: 'https://randomuser.me/api/portraits/women/55.jpg',
     online: false,
     lastSeen: '2024-09-29 16:15',
     lastMessage: '自动回复：感谢您留言支持我们！',
@@ -546,7 +544,7 @@ const contacts = ref<Contact[]>([
   {
     id: '6',
     name: '黑马实验室',
-    avatar: 'https://i.pravatar.cc/40?u=user6',
+    avatar: 'https://randomuser.me/api/portraits/men/66.jpg',
     online: true,
     lastSeen: '2024-09-29 21:30',
     lastMessage: '自动回复：感谢！充电，你的好！',
@@ -557,7 +555,7 @@ const contacts = ref<Contact[]>([
   {
     id: '7',
     name: '成田工作室',
-    avatar: 'https://i.pravatar.cc/40?u=user7',
+    avatar: 'https://randomuser.me/api/portraits/men/77.jpg',
     online: false,
     lastSeen: '2024-09-29 15:45',
     lastMessage: '自动回复：感谢您对我们关注支持！',
@@ -656,6 +654,11 @@ const systemNotificationCount = computed(() => {
 const currentMessages = computed(() => {
   if (!selectedContact.value) return []
   return messages.value[selectedContact.value.id] || []
+})
+
+const myAvatar = computed(() => {
+  // 优先使用用户自身头像；没有则给一个真实头像作为回退
+  return (userStore as any).avatar || 'https://randomuser.me/api/portraits/men/75.jpg'
 })
 
 // 方法
