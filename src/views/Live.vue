@@ -11,9 +11,23 @@
 
     <!-- 直播页面内容 -->
     <main class="max-w-screen-xl mx-auto px-4 py-8">
-      <header class="mb-8">
-        <h1 class="text-4xl font-bold text-white tracking-wider">正在直播</h1>
-        <p class="text-lg text-gray-400 mt-2">探索充满活力的直播世界</p>
+      <header class="mb-8 flex justify-between items-center">
+        <div>
+          <h1 class="text-4xl font-bold text-white tracking-wider">正在直播</h1>
+          <p class="text-lg text-gray-400 mt-2">探索充满活力的直播世界</p>
+        </div>
+        <button 
+          @click="goToStreamSetup"
+          class="start-streaming-btn group relative overflow-hidden"
+        >
+          <div class="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10 flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/>
+            </svg>
+            <span class="font-semibold">开始直播</span>
+          </div>
+        </button>
       </header>
 
       <!-- 直播列表 -->
@@ -168,6 +182,10 @@ const goToLiveRoom = (id: string) => {
   console.log(`Navigating to live room: ${id}`)
   // router.push(`/live/${id}`)
 }
+
+const goToStreamSetup = () => {
+  router.push('/stream-setup')
+}
 </script>
 
 <style scoped>
@@ -191,5 +209,13 @@ const goToLiveRoom = (id: string) => {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.start-streaming-btn {
+  @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg;
+}
+.start-streaming-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
 }
 </style>

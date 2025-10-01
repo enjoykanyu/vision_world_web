@@ -6,6 +6,7 @@ import VideoDetail from '@/views/VideoDetail.vue'
 import UserProfile from '@/views/UserProfile.vue'
 import Messages from '@/views/Messages.vue'
 import Live from '@/views/Live.vue'
+import StreamSetup from '@/views/StreamSetup.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +25,14 @@ const router = createRouter({
       component: Live,
       meta: {
         title: '正在直播 - Vision World'
+      }
+    },
+    {
+      path: '/stream-setup',
+      name: 'streamSetup',
+      component: StreamSetup,
+      meta: {
+        title: '开播设置 - Vision World'
       }
     },
     {
