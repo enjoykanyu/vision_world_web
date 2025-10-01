@@ -60,19 +60,16 @@
       </div>
       
       <!-- 内容导航栏 -->
-      <div class="mb-8">
-        <div class="flex overflow-x-auto scrollbar-hide border-b border-gray-700">
-          <button 
-            v-for="tab in tabs" 
+      <div class="mb-8 flex justify-center">
+        <div class="glass-tab-container p-1 flex space-x-1">
+          <button
+            v-for="tab in tabs"
             :key="tab.id"
             @click="activeTab = tab.id"
-            :class="['tab-button', activeTab === tab.id ? 'active' : '']"
+            :class="['tab-segment', { 'active': activeTab === tab.id }]"
           >
-            {{ tab.name }}
-            <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-mono"
-                  :class="activeTab === tab.id ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300'">
-              {{ tab.count }}
-            </span>
+            <span>{{ tab.name }}</span>
+            <span class="tab-count">{{ tab.count }}</span>
           </button>
         </div>
       </div>
@@ -241,12 +238,35 @@ const userVideos = [
   @apply border border-gray-600 hover:bg-gray-700/50 text-gray-300 hover:text-white w-10 h-10 rounded-full text-sm flex items-center justify-center transition-all duration-300 transform hover:scale-105;
 }
 
-.tab-button {
-  @apply px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-300;
-  @apply border-transparent text-gray-400 hover:text-white hover:border-blue-400;
+.glass-tab-container {
+  background: rgba(31, 41, 55, 0.5); /* bg-gray-800/50 */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 9999px; /* rounded-full */
+  border: 1px solid rgba(55, 65, 81, 0.7); /* border-gray-700/70 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
-.tab-button.active {
-  @apply border-blue-500 text-white;
+
+.tab-segment {
+  @apply relative px-5 py-2.5 text-sm font-semibold text-gray-300 rounded-full transition-colors duration-300 ease-in-out flex items-center space-x-2;
+}
+
+.tab-segment:not(.active):hover {
+  background-color: rgba(55, 65, 81, 0.5); /* bg-gray-700/50 */
+}
+
+.tab-segment.active {
+  @apply bg-blue-500 text-white shadow-md;
+}
+
+.tab-count {
+  @apply ml-2 min-w-[24px] px-1.5 py-0.5 text-xs font-mono rounded-full transition-colors duration-300;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.tab-segment.active .tab-count {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
 .video-card {
