@@ -337,23 +337,6 @@
       </div>
     </div>
 
-    <!-- 登录成功动画 -->
-    <transition name="login-success">
-      <div v-if="showLoginSuccessAnimation" 
-           class="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
-        <div class="login-success-animation bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-lg shadow-2xl transform animate-bounce">
-          <div class="flex items-center space-x-3">
-            <svg class="w-8 h-8 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-            <div>
-              <h3 class="text-lg font-bold">登录成功！</h3>
-              <p class="text-sm opacity-90">欢迎回到 Vision World</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
   </header>
 </template>
 
@@ -373,9 +356,6 @@ const showSearchTrending = ref(false)
 // 用户悬浮弹窗相关
 const showUserDropdown = ref(false)
 let dropdownTimer: NodeJS.Timeout | null = null
-
-// 登录成功动画相关
-const showLoginSuccessAnimation = ref(false)
 
 // 用户统计数据
 const userStats = ref({
@@ -487,13 +467,7 @@ const handleUserIconClick = () => {
   toggleUserDropdown()
 }
 
-// 触发登录成功动画
-const triggerLoginAnimation = () => {
-  showLoginSuccessAnimation.value = true
-  setTimeout(() => {
-    showLoginSuccessAnimation.value = false
-  }, 3000) // 动画持续3秒
-}
+
 
 // 深色模式
 const isDarkMode = ref(false)
@@ -656,94 +630,4 @@ onUnmounted(() => {
   }
 }
 
-/* 登录成功动画样式 */
-.login-success-enter-active,
-.login-success-leave-active {
-  transition: all 0.5s ease;
-}
-
-.login-success-enter-from {
-  opacity: 0;
-  transform: scale(0.8) translateY(-50px);
-}
-
-.login-success-leave-to {
-  opacity: 0;
-  transform: scale(0.8) translateY(-50px);
-}
-
-.login-success-animation {
-  animation: loginSuccessFloat 3s ease-in-out;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-@keyframes loginSuccessFloat {
-  0% {
-    transform: scale(0.8) translateY(20px);
-    opacity: 0;
-  }
-  10% {
-    transform: scale(1.1) translateY(-10px);
-    opacity: 1;
-  }
-  20% {
-    transform: scale(1) translateY(0);
-  }
-  80% {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-  90% {
-    transform: scale(1.05) translateY(-5px);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(0.9) translateY(10px);
-    opacity: 0;
-  }
-}
-
-/* 登录成功动画中的图标旋转 */
-.login-success-animation svg {
-  animation: checkmarkSpin 0.6s ease-in-out;
-}
-
-@keyframes checkmarkSpin {
-  0% {
-    transform: rotate(-180deg) scale(0);
-  }
-  50% {
-    transform: rotate(0deg) scale(1.2);
-  }
-  100% {
-    transform: rotate(0deg) scale(1);
-  }
-}
-
-/* 登录成功动画的光效 */
-.login-success-animation::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4, #3b82f6);
-  border-radius: inherit;
-  z-index: -1;
-  animation: borderGlow 2s linear infinite;
-}
-
-@keyframes borderGlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+
     <NavHeader 
       :isLoggedIn="userStore.isLoggedIn" 
       :username="userStore.username" 
@@ -78,6 +79,7 @@ const userStore = useUserStore()
 const videoId = ref(route.params.id as string)
 const showLoginModal = ref(false)
 const videoPlayer = ref<HTMLVideoElement | null>(null)
+
 
 const video = computed(() => {
   return mockVideos.find(v => v.id === videoId.value)

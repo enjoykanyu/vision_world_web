@@ -8,11 +8,37 @@
     
     <!-- 全局小V助手组件 -->
     <VAssistant />
+
+    <!-- 全局登录成功动画（公共组件，全局触发，在当前视口中心展示） -->
+    <LoginSuccessAnimation 
+      :visible="showLoginAnimation" 
+      :consecutive-days="consecutiveLoginDays"
+      @close="closeLoginAnimation" 
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
 import VAssistant from './components/VAssistant.vue'
+import LoginSuccessAnimation from './components/LoginSuccessAnimation.vue'
+import { useLoginAnimation } from '@/composables/useLoginAnimation'
+
+const { showLoginAnimation, consecutiveLoginDays, closeLoginAnimation, triggerLoginSuccessAnimation } = useLoginAnimation()
+
+// 方案B：在全局监听登录成功事件，统一触发动画
+const handleLoginSuccessEvent = (e: Event) => {
+  // 可根据 e.detail 做个性化展示
+  triggerLoginSuccessAnimation()
+}
+
+onMounted(() => {
+  window.addEventListener('login-success', handleLoginSuccessEvent as EventListener)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('login-success', handleLoginSuccessEvent as EventListener)
+})
 // App组件逻辑
 </script>
 

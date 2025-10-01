@@ -22,6 +22,11 @@ export const useUserStore = defineStore('user', () => {
       userId: userId.value,
       avatar: avatar.value
     }))
+
+    // 方案B：派发全局登录成功事件，由 App 统一触发动画
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('login-success', { detail: { username: username.value, userId: userId.value } }))
+    }
   }
 
   function logout() {
