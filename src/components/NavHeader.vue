@@ -19,6 +19,11 @@
               <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 group-hover:w-full transition-all duration-300"></span>
             </router-link>
 
+            <router-link to="/live" class="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 relative group">
+              直播
+              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 group-hover:w-full transition-all duration-300"></span>
+            </router-link>
+
             <router-link to="/video-assistant" class="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 relative group">
               视频助手
               <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 group-hover:w-full transition-all duration-300"></span>

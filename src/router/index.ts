@@ -5,6 +5,7 @@ import VideoAssistant from '@/views/VideoAssistant.vue'
 import VideoDetail from '@/views/VideoDetail.vue'
 import UserProfile from '@/views/UserProfile.vue'
 import Messages from '@/views/Messages.vue'
+import Live from '@/views/Live.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,6 +16,14 @@ const router = createRouter({
       component: Index,
       meta: {
         title: 'B站风格 - Vision World'
+      }
+    },
+    {
+      path: '/live',
+      name: 'live',
+      component: Live,
+      meta: {
+        title: '正在直播 - Vision World'
       }
     },
     {
