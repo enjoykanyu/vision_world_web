@@ -256,40 +256,40 @@ const tabs = [
 // 用户视频
 const userVideos = [
   {
-    id: 101,
-    title: '【原神】3.0版本全任务攻略合集',
-    cover: 'https://via.placeholder.com/300x200/FF69B4/FFFFFF?text=原神攻略',
-    duration: '18:24',
+    id: 1,
+    title: '人工智能如何改变我们的未来生活',
+    cover: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=300&q=80',
+    duration: '15:42',
     uploadTime: '2周前',
-    playCount: '12.5万',
-    danmaku: '3452'
+    playCount: '102万',
+    danmaku: '1.8万'
   },
   {
-    id: 102,
-    title: '5分钟学会Vue3的10个实用技巧',
-    cover: 'https://via.placeholder.com/300x200/4169E1/FFFFFF?text=Vue3技巧',
-    duration: '05:16',
+    id: 2,
+    title: '2025年最受欢迎的十大游戏',
+    cover: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=300&q=80',
+    duration: '20:18',
     uploadTime: '1个月前',
-    playCount: '8.7万',
-    danmaku: '1024'
+    playCount: '78万',
+    danmaku: '2.5万'
   },
   {
-    id: 103,
-    title: '2025年值得关注的十大科技趋势',
-    cover: 'https://via.placeholder.com/300x200/32CD32/FFFFFF?text=科技趋势',
-    duration: '12:42',
+    id: 3,
+    title: '现代流行音乐制作全攻略',
+    cover: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=300&q=80',
+    duration: '32:10',
     uploadTime: '3个月前',
-    playCount: '32.1万',
-    danmaku: '5689'
+    playCount: '45万',
+    danmaku: '9800'
   },
   {
-    id: 104,
-    title: '自制超简单美味的日式咖喱饭',
-    cover: 'https://via.placeholder.com/300x200/FF4500/FFFFFF?text=咖喱饭',
-    duration: '08:37',
+    id: 4,
+    title: '量子计算机入门教程',
+    cover: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80',
+    duration: '28:45',
     uploadTime: '4个月前',
-    playCount: '15.3万',
-    danmaku: '2341'
+    playCount: '32万',
+    danmaku: '1.1万'
   }
 ]
 

@@ -628,59 +628,59 @@ const closeLoginModal = () => {
 const carouselSlides = [
   {
     id: 1,
-    title: '千杯音乐节官宣啦！',
-    subtitle: '2025.10.18-19 上海静安·星梦PARK',
-    image: 'https://via.placeholder.com/800x300/3B82F6/FFFFFF?text=千杯音乐节官宣啦！'
+    title: '探索宇宙的奥秘',
+    subtitle: '跟随NASA最新探测器，揭开太阳系外行星的神秘面纱',
+    image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: 2,
-    title: '餐饮企业"国改"梦永活',
-    subtitle: '17万赞 · 老北京Official · 11小时前',
-    image: 'https://via.placeholder.com/800x300/10B981/FFFFFF?text=餐饮企业国改梦永活'
+    title: '2025全球科技峰会',
+    subtitle: '直播全球顶尖科技公司的最新产品发布会',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: 3,
-    title: '静音&无线缆等的标准答案',
-    subtitle: '3590 · 8 · Metalion · 12小时前',
-    image: 'https://via.placeholder.com/800x300/EF4444/FFFFFF?text=Spark+Neo无线耳机'
+    title: '自然纪录片：深海探秘',
+    subtitle: '潜入海洋最深处，探索未知的海底世界',
+    image: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=800&q=80'
   }
 ]
 
 const recommendedVideos = [
   {
     id: 1,
-    title: '老婆第一次测魅力，如何得后悔了！！！',
-    cover: 'https://via.placeholder.com/300x200/FF69B4/FFFFFF?text=视频1',
-    duration: '10:44',
-    uploader: '哔哩哔哩'
+    title: '2025年最值得期待的十大科技产品',
+    cover: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300&q=80',
+    duration: '12:34',
+    uploader: '科技前沿'
   },
   {
     id: 2,
-    title: '餐饮企业"国改"梦永活',
-    cover: 'https://via.placeholder.com/300x200/4169E1/FFFFFF?text=视频2',
-    duration: '13:17',
-    uploader: '老北京Official'
+    title: '如何在30天内掌握Vue 3和TypeScript',
+    cover: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=300&q=80',
+    duration: '25:12',
+    uploader: '编程学院'
   },
   {
     id: 3,
-    title: '静音&无线缆等的标准答案',
-    cover: 'https://via.placeholder.com/300x200/32CD32/FFFFFF?text=视频3',
-    duration: '11:36',
-    uploader: 'Metalion'
+    title: '探秘世界上最神奇的十大自然现象',
+    cover: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=300&q=80',
+    duration: '18:45',
+    uploader: '自然探索'
   },
   {
     id: 4,
-    title: '在从生活的脚步当导游！',
-    cover: 'https://via.placeholder.com/300x200/FF4500/FFFFFF?text=视频4',
-    duration: '08:19',
-    uploader: '竹鼠洞洞的向导'
+    title: '2025年最热门的旅游目的地推荐',
+    cover: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=300&q=80',
+    duration: '14:22',
+    uploader: '环球旅行'
   },
   {
     id: 5,
-    title: '第一次犯罪测谎仪得么准！',
-    cover: 'https://via.placeholder.com/300x200/FFD700/FFFFFF?text=视频5',
-    duration: '12:34',
-    uploader: '十五里堡'
+    title: '美食博主带你探店：城市里的隐藏菜单',
+    cover: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80',
+    duration: '09:55',
+    uploader: '吃货小分队'
   }
 ]
 
@@ -698,75 +698,75 @@ const categories = [
 const videos = [
   {
     id: 1,
-    title: '老婆第一次测魅力，如何得后悔了！！！',
-    cover: 'https://via.placeholder.com/300x200/FF69B4/FFFFFF?text=视频1',
-    duration: '04:15',
-    uploader: '哔哩哔哩',
-    playCount: '10万',
-    danmaku: '774'
+    title: '人工智能如何改变我们的未来生活',
+    cover: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=300&q=80',
+    duration: '15:42',
+    uploader: '未来科技',
+    playCount: '102万',
+    danmaku: '1.8万'
   },
   {
     id: 2,
-    title: '小林信一 吉他他入门只需两周！',
-    cover: 'https://via.placeholder.com/300x200/4169E1/FFFFFF?text=视频2',
-    duration: '28:04',
-    uploader: '吉他情报长',
-    playCount: '9807',
-    danmaku: '0'
+    title: '2025年最受欢迎的十大游戏',
+    cover: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=300&q=80',
+    duration: '20:18',
+    uploader: '游戏玩家',
+    playCount: '78万',
+    danmaku: '2.5万'
   },
   {
     id: 3,
-    title: 'B站唯一一次得最高Claude Code人！',
-    cover: 'https://via.placeholder.com/300x200/32CD32/FFFFFF?text=视频3',
-    duration: '06:40',
-    uploader: 'AI学习TV',
-    playCount: '3万',
-    danmaku: '163'
+    title: '现代流行音乐制作全攻略',
+    cover: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=300&q=80',
+    duration: '32:10',
+    uploader: '音乐制作人',
+    playCount: '45万',
+    danmaku: '9800'
   },
   {
     id: 4,
-    title: '一瞬间，我似乎明白了她的意义所在！',
-    cover: 'https://via.placeholder.com/300x200/FF4500/FFFFFF?text=视频4',
-    duration: '08:19',
-    uploader: '竹鼠洞洞的向导',
-    playCount: '817万',
-    danmaku: '162'
+    title: '量子计算机入门教程',
+    cover: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80',
+    duration: '28:45',
+    uploader: '量子科学',
+    playCount: '32万',
+    danmaku: '1.1万'
   },
   {
     id: 5,
-    title: '【原神】雷电将军：10小时前更新',
-    cover: 'https://via.placeholder.com/300x200/FFD700/FFFFFF?text=视频5',
-    duration: '12:34',
-    uploader: '原神官方',
-    playCount: '145万',
-    danmaku: '3.2万'
+    title: '2025年春季时尚趋势预测',
+    cover: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=300&q=80',
+    duration: '16:20',
+    uploader: '时尚前沿',
+    playCount: '67万',
+    danmaku: '2.3万'
   },
   {
     id: 6,
-    title: '【音乐MV】最新热门歌曲合集',
-    cover: 'https://via.placeholder.com/300x200/9370DB/FFFFFF?text=视频6',
-    duration: '15:30',
-    uploader: '音乐分享',
-    playCount: '92万',
-    danmaku: '1.5万'
+    title: '世界杯精彩瞬间回顾',
+    cover: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=300&q=80',
+    duration: '22:30',
+    uploader: '体育频道',
+    playCount: '120万',
+    danmaku: '5.6万'
   },
   {
     id: 7,
-    title: '【科技评测】最新黑科技产品体验',
-    cover: 'https://via.placeholder.com/300x200/20B2AA/FFFFFF?text=视频7',
-    duration: '18:45',
-    uploader: '科技博主',
-    playCount: '178万',
-    danmaku: '4.1万'
+    title: '亚洲美食之旅：日本篇',
+    cover: 'https://images.unsplash.com/photo-1540648639573-8c848de23f0a?auto=format&fit=crop&w=300&q=80',
+    duration: '19:15',
+    uploader: '美食家',
+    playCount: '56万',
+    danmaku: '1.9万'
   },
   {
     id: 8,
-    title: '【搞笑合集】爆笑视频精选',
-    cover: 'https://via.placeholder.com/300x200/FF6347/FFFFFF?text=视频8',
-    duration: '25:18',
-    uploader: '搞笑日常',
-    playCount: '234万',
-    danmaku: '6.7万'
+    title: '探索北欧隐秘的自然风光',
+    cover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=300&q=80',
+    duration: '24:50',
+    uploader: '旅行达人',
+    playCount: '43万',
+    danmaku: '1.4万'
   }
 ]
 
@@ -809,7 +809,7 @@ const generateMoreVideos = (page: number, size: number) => {
     newVideos.push({
       id,
       title: `${page}页第${i+1}个视频 - ${['抖音热门', '哔哩哔哩精选', '小红书爆款'][Math.floor(Math.random() * 3)]}视频内容`,
-      cover: `https://via.placeholder.com/1080x1920/${['FF69B4', '4169E1', '32CD32', 'FF4500', 'FFD700'][Math.floor(Math.random() * 5)]}/FFFFFF?text=视频${id}`,
+      cover: `https://picsum.photos/1080/1920?random=${id}`,
       duration: `${Math.floor(Math.random() * 2) + 1}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
       uploader: ['哔哩哔哩', '抖音达人', '小红书博主', '视频创作者', '热门UP主'][Math.floor(Math.random() * 5)],
       playCount: `${Math.floor(Math.random() * 100) + 1}万`,
