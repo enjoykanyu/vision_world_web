@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import VisionWorld from '@/views/VisionWorld.vue'
-import BilibiliStyle from '@/views/BilibiliStyle.vue'
+import Index from '@/views/Index.vue'
 import VideoAssistant from '@/views/VideoAssistant.vue'
 import VideoDetail from '@/views/VideoDetail.vue'
 import UserProfile from '@/views/UserProfile.vue'
@@ -11,16 +11,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: VisionWorld,
-      meta: {
-        title: 'Vision World 官网'
-      }
-    },
-    {
-      path: '/bilibili',
-      name: 'bilibili',
-      component: BilibiliStyle,
+      name: 'index',
+      component: Index,
       meta: {
         title: 'B站风格 - Vision World'
       }
