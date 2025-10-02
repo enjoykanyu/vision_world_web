@@ -121,12 +121,21 @@
         </div>
         <div class="mb-6">
           <div class="mb-4">
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
-            <input type="text" id="username" v-model="loginForm.username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="请输入用户名">
+            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+            <input type="tel" id="phone" v-model="loginForm.phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="请输入手机号">
           </div>
           <div class="mb-4">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
-            <input type="password" id="password" v-model="loginForm.password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="请输入密码">
+            <label for="verificationCode" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+            <div class="flex space-x-3">
+              <input type="text" id="verificationCode" v-model="loginForm.verificationCode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="请输入验证码">
+              <button 
+                @click="sendVerificationCode" 
+                :disabled="isSendingCode || countdown > 0"
+                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm font-medium transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ countdown > 0 ? `${countdown}秒后重试` : '发送验证码' }}
+              </button>
+            </div>
           </div>
           <div v-if="loginError" class="mb-4 text-sm text-red-500">{{ loginError }}</div>
           <button @click="handleLogin" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-medium transition-colors duration-300">登录</button>
@@ -163,31 +172,68 @@ const toggleDarkMode = () => {
 
 // 登录相关
 const showLoginModal = ref(false)
-const loginForm = ref({ username: '', password: '' })
+const loginForm = ref({ phone: '', verificationCode: '' })
 const loginError = ref('')
+const isSendingCode = ref(false)
+const countdown = ref(0)
 
-const handleLogin = () => {
-  if (loginForm.value.username && loginForm.value.password) {
-    if (loginForm.value.password === '123456') {
-      userStore.login({
-        username: loginForm.value.username,
-        userId: '12345678'
-      })
-      showLoginModal.value = false
-      loginError.value = ''
-      loginForm.value = { username: '', password: '' }
-    } else {
-      loginError.value = '用户名或密码错误'
-    }
-  } else {
-    loginError.value = '请输入用户名和密码'
+const handleLogin = async () => {
+  if (!loginForm.value.phone || !loginForm.value.verificationCode) {
+    loginError.value = '请输入手机号和验证码'
+    return
+  }
+
+  try {
+    await userStore.login({
+      phone: loginForm.value.phone,
+      verificationCode: loginForm.value.verificationCode
+    })
+    showLoginModal.value = false
+    loginError.value = ''
+    loginForm.value = { phone: '', verificationCode: '' }
+  } catch (error) {
+    loginError.value = '登录失败，请检查手机号和验证码'
+  }
+}
+
+const sendVerificationCode = async () => {
+  if (!loginForm.value.phone) {
+    loginError.value = '请输入手机号'
+    return
+  }
+
+  if (!/^1[3-9]\d{9}$/.test(loginForm.value.phone)) {
+    loginError.value = '请输入正确的手机号'
+    return
+  }
+
+  isSendingCode.value = true
+  loginError.value = ''
+
+  try {
+    // 模拟发送验证码
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // 开始倒计时
+    countdown.value = 60
+    const timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
+  } catch (error) {
+    loginError.value = '发送验证码失败'
+  } finally {
+    isSendingCode.value = false
   }
 }
 
 const closeLoginModal = () => {
   showLoginModal.value = false
   loginError.value = ''
-  loginForm.value = { username: '', password: '' }
+  loginForm.value = { phone: '', verificationCode: '' }
+  countdown.value = 0
 }
 
 const router = useRouter()

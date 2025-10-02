@@ -1,8 +1,13 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import App from './App.vue'
 import router from './router'
-import './assets/css/main.css'
+import App from './App.vue'
+import './assets/css/tailwind.css'
+
+// 引入mock数据（开发环境）
+if (import.meta.env.DEV) {
+  import('@/mock/index')
+}
 
 const app = createApp(App)
 

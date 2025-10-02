@@ -435,28 +435,19 @@ const closeDropdown = () => {
 // 退出登录
 const handleLogout = async () => {
   try {
-    // 发送退出登录请求到后端
-    await axios.post('/api/auth/logout', {}, {
-      withCredentials: true // 确保发送cookie
-    })
-    
-    // 清除前端状态
-    userStore.logout()
+    // 调用退出登录API
+    await userStore.logout()
     
     // 隐藏弹窗
     showUserDropdown.value = false
     
-    // 可选：显示退出成功提示
-    console.log('退出登录成功')
-    
-    // 可选：跳转到首页
+    // 跳转到首页
     router.push('/')
     
   } catch (error) {
     console.error('退出登录失败:', error)
     
-    // 即使后端请求失败，也清除前端状态
-    userStore.logout()
+    // 即使API调用失败，也清除前端状态
     showUserDropdown.value = false
     router.push('/')
   }
