@@ -218,6 +218,36 @@
         </div>
       </section>
 
+      <!-- 测试视频区域 -->
+      <section class="py-16 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              <span class="text-bilibili-primary">测试视频</span>
+            </h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+              这里是一些测试视频，用于展示首页和详情页的效果。
+            </p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+            <div v-for="video in testVideos" :key="video.id" @click="goToVideoDetail(video.id)"
+                 class="group cursor-pointer bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+              <div class="relative">
+                <img :src="video.poster" :alt="video.title" class="w-full h-40 object-cover">
+                <div class="absolute bottom-0 right-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-tl-lg">
+                  {{ video.duration }}
+                </div>
+              </div>
+              <div class="p-4">
+                <h3 class="font-semibold text-gray-800 group-hover:text-bilibili-primary transition-colors duration-300 truncate">{{ video.title }}</h3>
+                <p class="text-sm text-gray-500 mt-1">{{ video.author }}</p>
+                <p class="text-sm text-gray-500">{{ video.views }} 观看</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 特性展示区域 -->
       <section class="py-16 lg:py-24 bg-gradient-to-r from-bilibili-primary/5 via-purple-50 to-bilibili-secondary/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -246,49 +276,42 @@
     </main>
 
     <!-- 登录弹窗 -->
-    <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg w-96 p-6 shadow-xl" @click.stop>
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold text-gray-800">登录</h3>
-          <button @click="showLoginModal = false" class="text-gray-500 hover:text-gray-700">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="mb-6">
-          <div class="mb-4">
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
-            <input 
-              type="text" 
-              id="username" 
-              v-model="loginForm.username" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="请输入用户名"
+    <div v-if="showLoginModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showLoginModal = false">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-80">
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">手机号登录</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">手机号</label>
+            <input
+              v-model="loginPhone"
+              type="tel"
+              placeholder="请输入手机号"
+              maxlength="11"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="flex gap-2">
+            <input
+              v-model="verificationCode"
+              type="text"
+              placeholder="验证码"
+              maxlength="6"
+              class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              @click="sendVerificationCode"
+              :disabled="isSendingCode || countdown > 0"
+              class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm whitespace-nowrap"
             >
+              {{ countdown > 0 ? `${countdown}s` : '发送' }}
+            </button>
           </div>
-          
-          <div class="mb-4">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
-            <input 
-              type="password" 
-              id="password" 
-              v-model="loginForm.password" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="请输入密码"
-            >
-          </div>
-          
-          <div v-if="loginError" class="mb-4 text-sm text-red-500">
-            {{ loginError }}
-          </div>
-          
-          <button 
-            @click="handleLogin" 
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-medium transition-colors duration-300"
+          <button
+            @click="handleLogin"
+            :disabled="loginLoading"
+            class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            登录
+            {{ loginLoading ? '登录中...' : '登录' }}
           </button>
         </div>
       </div>
@@ -323,11 +346,39 @@ import { ref, h } from 'vue'
 import { useRouter } from 'vue-router'
 import NavHeader from '../components/NavHeader.vue'
 import { useUserStore } from '../stores/userStore'
+import { mockVideos } from '../stores/mockVideos'
 
 const router = useRouter()
+const videoStore = useVideoStore()
+
+const testVideos = ref(videoStore.testVideos)
+
+const goToVideoDetail = (id: string) => {
+  router.push({ name: 'videoDetail', params: { id } })
+}
+
+const goToMobileVideo = () => {
+  router.push('/mobile-video')
+}
 
 /** 全局用户状态 */
 const userStore = useUserStore()
+
+/** 加载推荐视频 */
+const loadRecommendedVideos = async () => {
+  try {
+    const result = await videoStore.fetchRecommendedVideos({ page: 1, pageSize: 6, refresh: true })
+    if (result.success) {
+      testVideos.value = result.data
+    }
+  } catch (error) {
+    console.error('加载推荐视频失败:', error)
+  }
+}
+
+onMounted(() => {
+  loadRecommendedVideos()
+})
 
 /** 深色模式（供 NavHeader 触发） */
 const isDarkMode = ref(false)
@@ -340,26 +391,68 @@ const toggleDarkMode = () => {
   }
 }
 
-/** 登录弹窗与登录逻辑（使用全局 userStore） */
+/** 登录弹窗与登录逻辑（手机号验证码登录） */
 const showLoginModal = ref(false)
-const loginForm = ref({ username: '', password: '' })
-const loginError = ref('')
+const loginPhone = ref('')
+const verificationCode = ref('')
+const isSendingCode = ref(false)
+const countdown = ref(0)
+const loginLoading = ref(false)
 
-const handleLogin = () => {
-  if (loginForm.value.username && loginForm.value.password) {
-    if (loginForm.value.password === '123456') {
-      userStore.login({
-        username: loginForm.value.username,
-        userId: '12345678'
-      })
-      showLoginModal.value = false
-      loginError.value = ''
-      loginForm.value = { username: '', password: '' }
+/** 发送验证码 */
+const sendVerificationCode = async () => {
+  if (!loginPhone.value.trim()) {
+    alert('请输入手机号')
+    return
+  }
+  const phoneRegex = /^1[3-9]\d{9}$/
+  if (!phoneRegex.test(loginPhone.value)) {
+    alert('请输入正确的手机号')
+    return
+  }
+  isSendingCode.value = true
+  try {
+    const result = await userStore.sendVerificationCode(loginPhone.value)
+    if (result.success) {
+      alert('验证码已发送')
+      countdown.value = result.expireSeconds || 60
+      const timer = setInterval(() => {
+        countdown.value--
+        if (countdown.value <= 0) clearInterval(timer)
+      }, 1000)
     } else {
-      loginError.value = '用户名或密码错误'
+      alert(result.error || '发送验证码失败')
     }
-  } else {
-    loginError.value = '请输入用户名和密码'
+  } catch (error) {
+    alert('发送验证码失败')
+  } finally {
+    isSendingCode.value = false
+  }
+}
+
+const handleLogin = async () => {
+  if (!loginPhone.value.trim()) {
+    alert('请输入手机号')
+    return
+  }
+  if (!verificationCode.value.trim()) {
+    alert('请输入验证码')
+    return
+  }
+  loginLoading.value = true
+  try {
+    await userStore.login({
+      phone: loginPhone.value,
+      verificationCode: verificationCode.value
+    })
+    showLoginModal.value = false
+    loginPhone.value = ''
+    verificationCode.value = ''
+    countdown.value = 0
+  } catch (error: any) {
+    alert(error.message || '登录失败')
+  } finally {
+    loginLoading.value = false
   }
 }
 
