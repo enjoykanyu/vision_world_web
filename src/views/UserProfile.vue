@@ -211,17 +211,19 @@ const sendVerificationCode = async () => {
   loginError.value = ''
 
   try {
-    // 模拟发送验证码
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 开始倒计时
-    countdown.value = 60
-    const timer = setInterval(() => {
-      countdown.value--
-      if (countdown.value <= 0) {
-        clearInterval(timer)
-      }
-    }, 1000)
+    const result = await userStore.sendVerificationCode(loginForm.value.phone)
+    if (result.success) {
+      // 开始倒计时
+      countdown.value = result.expireSeconds || 60
+      const timer = setInterval(() => {
+        countdown.value--
+        if (countdown.value <= 0) {
+          clearInterval(timer)
+        }
+      }, 1000)
+    } else {
+      loginError.value = result.error || '发送验证码失败'
+    }
   } catch (error) {
     loginError.value = '发送验证码失败'
   } finally {

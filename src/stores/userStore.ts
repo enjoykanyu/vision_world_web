@@ -24,6 +24,31 @@ export const useUserStore = defineStore('user', () => {
     return false
   })
 
+  // 发送验证码
+  async function sendVerificationCode(phone: string) {
+    loading.value = true
+    try {
+      const response = await authAPI.sendCode({
+        phone,
+        sms_type: 'login'
+      })
+      
+      console.log('验证码发送成功')
+      return { 
+        success: true, 
+        expireSeconds: response.data.data.expire_seconds 
+      }
+    } catch (error: any) {
+      console.error('发送验证码失败:', error)
+      return { 
+        success: false, 
+        error: error.message || '发送验证码失败，请重试'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 登录
   async function login(loginData: { phone: string; verificationCode: string }) {
     loading.value = true
