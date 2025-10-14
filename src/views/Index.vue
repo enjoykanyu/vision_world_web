@@ -429,23 +429,31 @@ const sendVerificationCode = async () => {
     return
   }
   
+  if (!/^1[3-9]\d{9}$/.test(loginForm.value.phone)) {
+    loginError.value = '请输入正确的手机号'
+    return
+  }
+  
   isSendingCode.value = true
   
-  // 模拟发送验证码
   try {
-    // 这里应该调用实际的短信API
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 调用真实的短信API
+    const result = await userStore.sendVerificationCode(loginForm.value.phone)
     
-    // 开始倒计时
-    countdown.value = 60
-    const timer = setInterval(() => {
-      countdown.value--
-      if (countdown.value <= 0) {
-        clearInterval(timer)
-      }
-    }, 1000)
-    
-    loginError.value = ''
+    if (result.success) {
+      // 开始倒计时
+      countdown.value = result.expireSeconds || 60
+      const timer = setInterval(() => {
+        countdown.value--
+        if (countdown.value <= 0) {
+          clearInterval(timer)
+        }
+      }, 1000)
+      
+      loginError.value = ''
+    } else {
+      loginError.value = result.error || '发送验证码失败'
+    }
   } catch (error) {
     loginError.value = '发送验证码失败'
   } finally {
