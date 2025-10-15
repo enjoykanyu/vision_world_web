@@ -412,6 +412,8 @@ const sendVerificationCode = async () => {
   }
   isSendingCode.value = true
   try {
+                console.log('验证码发送成功')
+
     const result = await userStore.sendVerificationCode(loginPhone.value)
     if (result.success) {
       alert('验证码已发送')

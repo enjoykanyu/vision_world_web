@@ -26,6 +26,7 @@ export const useUserStore = defineStore('user', () => {
 
   // 发送验证码
   async function sendVerificationCode(phone: string) {
+    console.log('开始发送验证码，手机号:', phone)
     loading.value = true
     try {
       const response = await authAPI.sendCode({
@@ -33,13 +34,26 @@ export const useUserStore = defineStore('user', () => {
         sms_type: 'login'
       })
       
-      console.log('验证码发送成功')
+      console.log('验证码发送成功，完整响应:', response)
+      console.log('响应数据结构:', JSON.stringify(response, null, 2))
+      
+      // 尝试不同的数据访问路径
+      let expireSeconds = 60 // 默认值
+      if (response && response.data) {
+        if (response.data.expire_seconds) {
+          expireSeconds = response.data.expire_seconds
+        } else if (response.data.data && response.data.data.expire_seconds) {
+          expireSeconds = response.data.data.expire_seconds
+        }
+      }
+      
       return { 
         success: true, 
-        expireSeconds: response.data.data.expire_seconds 
+        expireSeconds 
       }
     } catch (error: any) {
       console.error('发送验证码失败:', error)
+      console.error('错误详情:', JSON.stringify(error, null, 2))
       return { 
         success: false, 
         error: error.message || '发送验证码失败，请重试'
@@ -284,6 +298,7 @@ export const useUserStore = defineStore('user', () => {
     // 方法
     login,
     logout,
+    sendVerificationCode,
     refreshAccessToken,
     fetchUserInfo,
     init
