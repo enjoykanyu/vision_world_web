@@ -36,16 +36,16 @@ const handleLoginSuccessEvent = (e: Event) => {
 onMounted(() => {
   window.addEventListener('login-success', handleLoginSuccessEvent as EventListener)
   
-  // 初始化mock数据（开发环境）
-  if (import.meta.env.DEV) {
-    import('@/mock/index').then(() => {
-      console.log('Mock数据已初始化')
-    }).catch((error) => {
-      console.error('Mock数据初始化失败:', error)
-      // 使用原生alert替代ElementPlus的消息提示
-      alert('Mock数据初始化失败')
-    })
-  }
+  // 注释掉mock数据初始化 - 使用真实后端
+  // if (import.meta.env.DEV) {
+  //   import('@/mock/index').then(() => {
+  //     console.log('Mock数据已初始化')
+  //   }).catch((error) => {
+  //     console.error('Mock数据初始化失败:', error)
+  //     // 使用原生alert替代ElementPlus的消息提示
+  //     alert('Mock数据初始化失败')
+  //   })
+  // }
 })
 
 onUnmounted(() => {

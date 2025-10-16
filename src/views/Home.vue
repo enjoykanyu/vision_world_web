@@ -346,7 +346,7 @@ import { ref, h } from 'vue'
 import { useRouter } from 'vue-router'
 import NavHeader from '../components/NavHeader.vue'
 import { useUserStore } from '../stores/userStore'
-import { mockVideos } from '../stores/mockVideos'
+// import { mockVideos } from '../stores/mockVideos' // 注释掉mock数据
 
 const router = useRouter()
 const videoStore = useVideoStore()

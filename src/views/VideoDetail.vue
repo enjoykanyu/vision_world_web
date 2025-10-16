@@ -119,6 +119,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavHeader from '../components/NavHeader.vue'
 import { useUserStore } from '../stores/userStore'
+import { useVideoStore } from '../stores/videoStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -128,63 +129,29 @@ const videoId = ref(route.params.id as string)
 const videoPlayer = ref<HTMLVideoElement | null>(null)
 const loading = ref(false)
 
-// Mock 视频数据
+// 视频数据
 const video = ref(null)
 const recommendedVideos = ref([])
 
-// 获取 Mock 视频详情
-const getMockVideoDetail = (id: string) => {
-  return {
-    id: id,
-    title: `精彩视频内容 - ${id}`,
-    src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    poster: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=600&q=80',
-    views: '1.2M',
-    publishedAt: '2天前',
-    author: '创作者名称',
-    authorAvatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-    description: '这是一个精彩的视频内容，展示了令人惊叹的画面和故事。视频制作精良，内容丰富，值得观看和分享。在这个视频中，您将看到精美的画面、动人的故事情节，以及专业的制作水准。',
-    tags: ['精彩', '推荐', '热门', '必看'],
-    likes: 8520,
-    comments: 156,
-    shares: 89,
-    isLiked: false,
-    isFollowed: false
-  }
-}
-
-// 获取 Mock 推荐视频
-const getMockRecommendedVideos = () => {
-  return [
-    {
-      id: '2',
-      title: '另一个精彩视频',
-      poster: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=600&q=80',
-      author: '音乐创作者',
-      views: '890K'
-    },
-    {
-      id: '3',
-      title: '街头艺术表演',
-      poster: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
-      author: '街头艺术家',
-      views: '3.5M'
-    },
-    {
-      id: '4',
-      title: '电子音乐混音',
-      poster: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
-      author: 'DJ制作人',
-      views: '450K'
-    },
-    {
-      id: '5',
-      title: '自然风光纪录片',
-      poster: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=600&q=80',
-      author: '自然频道',
-      views: '1.1M'
+// 获取推荐视频 - 使用真实后端API
+const getRecommendedVideos = async () => {
+  try {
+    const videoStore = useVideoStore()
+    const result = await videoStore.fetchRecommendedVideos({ page: 1, pageSize: 4 })
+    if (result.success && result.data) {
+      return result.data.map(video => ({
+        id: video.video_id,
+        title: video.title,
+        poster: video.thumbnail_url,
+        author: video.author_name,
+        views: video.view_count ? `${(video.view_count / 1000).toFixed(1)}K` : '0'
+      }))
     }
-  ]
+    return []
+  } catch (error) {
+    console.error('获取推荐视频失败:', error)
+    return []
+  }
 }
 
 // 处理登录
@@ -198,12 +165,32 @@ const fetchVideoData = async () => {
   
   loading.value = true
   try {
-    // 模拟 API 延迟
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // 使用真实后端API获取视频详情
+    const videoStore = useVideoStore()
+    const videoDetail = await videoStore.fetchVideoDetail(videoId.value)
     
-    // 使用 Mock 数据
-    video.value = getMockVideoDetail(videoId.value)
-    recommendedVideos.value = getMockRecommendedVideos()
+    if (videoDetail) {
+      video.value = {
+        id: videoDetail.video_id,
+        title: videoDetail.title,
+        src: videoDetail.video_url,
+        poster: videoDetail.thumbnail_url,
+        views: videoDetail.view_count ? `${(videoDetail.view_count / 1000).toFixed(1)}K` : '0',
+        publishedAt: videoDetail.created_at,
+        author: videoDetail.author_name,
+        authorAvatar: videoDetail.author_avatar,
+        description: videoDetail.description,
+        tags: videoDetail.tags || [],
+        likes: videoDetail.like_count || 0,
+        comments: videoDetail.comment_count || 0,
+        shares: videoDetail.share_count || 0,
+        isLiked: videoDetail.is_liked || false,
+        isFollowed: videoDetail.is_followed || false
+      }
+    }
+    
+    // 获取推荐视频
+    recommendedVideos.value = await getRecommendedVideos()
     
   } catch (error: any) {
     console.error('获取视频数据失败:', error)
