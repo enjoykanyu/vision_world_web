@@ -56,21 +56,21 @@
           </button>
           
           <!-- 搜索框 -->
-          <div class="hidden md:block relative">
+          <div class="hidden md:block relative search-container">
             <div 
-              class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2 w-80 transition-colors duration-300 group focus-within:ring-2 focus-within:ring-purple-600 focus-within:ring-opacity-50"
+              class="search-input-group flex items-center bg-gray-100 dark:bg-gray-700 px-4 py-2 w-64 lg:w-72 xl:w-80 transition-all duration-300 group focus-within:ring-2 focus-within:ring-purple-600 focus-within:ring-opacity-50 focus-within:bg-white dark:focus-within:bg-gray-600 focus-within:shadow-md"
               :class="{'rounded-b-none': showSearchTrending}"
             >
               <input 
                 type="text" 
                 placeholder="搜索视频、创作者..." 
-                class="bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none text-sm flex-1 transition-colors duration-300"
+                class="search-input bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none text-sm flex-1 transition-all duration-300 group-focus-within:placeholder-purple-400 dark:group-focus-within:placeholder-purple-300 group-focus-within:text-purple-700 dark:group-focus-within:text-purple-300"
                 @focus="showSearchTrending = true"
                 @blur="handleSearchBlur"
                 v-model="searchQuery"
               >
               <svg 
-                class="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-pointer group-focus-within:text-purple-600" 
+                class="search-icon w-4 h-4 text-gray-400 dark:text-gray-500 cursor-pointer transition-all duration-300 group-focus-within:text-purple-600 group-focus-within:scale-110" 
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -83,7 +83,7 @@
             <!-- 搜索热度排行榜 -->
             <div 
               v-if="showSearchTrending" 
-              class="absolute top-full left-0 w-full bg-white dark:bg-gray-800 rounded-b-lg shadow-lg z-50 overflow-hidden border border-gray-200 dark:border-gray-700 border-t-0"
+              class="search-trending absolute top-full left-0 w-full bg-white dark:bg-gray-800 rounded-b-lg shadow-lg z-50 overflow-hidden border border-gray-200 dark:border-gray-700 border-t-0"
               @mousedown.prevent
             >
               <div class="p-3 border-b border-gray-200 dark:border-gray-700">
@@ -618,6 +618,82 @@ onUnmounted(() => {
   .user-dropdown {
     width: 90vw;
     right: -10px;
+  }
+}
+
+/* 搜索框样式优化 */
+.search-container {
+  position: relative;
+}
+
+.search-input-group {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 1rem; /* 16px - 更柔和的圆角 */
+  border: 2px solid transparent;
+}
+
+.search-input-group:focus-within {
+  transform: translateY(-1px);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-color: rgba(147, 51, 234, 0.3);
+  box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.1), 0 10px 10px -5px rgba(147, 51, 234, 0.04);
+}
+
+.search-input {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 搜索框悬停效果 */
+.search-input-group:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 暗色模式下的搜索框优化 */
+.dark .search-input-group {
+  border-color: rgba(75, 85, 99, 0.3);
+}
+
+.dark .search-input-group:focus-within {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(99, 102, 241, 0.1));
+  border-color: rgba(147, 51, 234, 0.5);
+}
+
+/* 热搜榜容器样式优化 */
+.search-trending {
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin-top: -2px; /* 确保与搜索框无缝连接 */
+  border: 2px solid rgba(147, 51, 234, 0.3);
+  border-top: none;
+  box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.1), 0 10px 10px -5px rgba(147, 51, 234, 0.04);
+}
+
+.dark .search-trending {
+  border-color: rgba(147, 51, 234, 0.5);
+}
+
+/* 响应式搜索框宽度 */
+@media (max-width: 1280px) {
+  .search-input-group {
+    width: 18rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .search-input-group {
+    width: 16rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-input-group {
+    width: 14rem;
   }
 }
 
