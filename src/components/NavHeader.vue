@@ -190,7 +190,7 @@
                 @mouseenter="showUserDropdown = true"
                 @mouseleave="handleUserDropdownLeave"
               >
-                <span class="text-white text-sm font-semibold">{{ userStore.username.charAt(0).toUpperCase() }}</span>
+                <span class="text-white text-sm font-semibold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
               </div>
               
               <!-- B站风格用户信息悬浮弹窗 -->
@@ -206,7 +206,7 @@
                     <div class="flex items-center space-x-3">
                       <div class="relative">
                         <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                          <span class="text-lg font-bold">{{ userStore.username.charAt(0).toUpperCase() }}</span>
+                          <span class="text-lg font-bold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
                         </div>
                         <!-- 官方认证标识 -->
                         <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -216,7 +216,7 @@
                         </div>
                       </div>
                       <div class="flex-1">
-                        <h3 class="font-semibold text-base">{{ userStore.username }}</h3>
+                        <h3 class="font-semibold text-base">{{ userStore.username || '用户' }}</h3>
                         <p class="text-blue-100 text-sm">{{ userStore.userId || 'ID: 12345678' }}</p>
                       </div>
                     </div>

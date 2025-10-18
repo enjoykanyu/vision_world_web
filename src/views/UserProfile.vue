@@ -26,7 +26,7 @@
 
           <!-- 用户信息 -->
           <div class="md:ml-6 mt-4 md:mt-0 text-center md:text-left flex-grow">
-            <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wider">{{ userStore.username }}</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wider">{{ userStore.username || '用户' }}</h1>
             <p class="text-sm text-blue-300 font-mono mt-1">UID: {{ userStore.userId }}</p>
             <div class="mt-4 flex items-center justify-center md:justify-start space-x-6 text-sm">
               <span class="flex flex-col items-center">

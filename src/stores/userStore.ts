@@ -38,6 +38,7 @@ export const useUserStore = defineStore('user', () => {
     // 这里简化处理，实际应该解析JWT token的过期时间
     return false
   })
+  const avatar = computed(() => avatarUrl.value || `https://i.pravatar.cc/150?u=${userId.value}`)
 
   // 发送验证码
   async function sendVerificationCode(phone: string) {
@@ -95,10 +96,28 @@ export const useUserStore = defineStore('user', () => {
 
       // 调用登录API
       const response = await authAPI.login(deviceInfo)
-      const loginDataRes: LoginResponse = response.data.data
+      console.log('登录API响应:', response)
+      
+      // 检查响应数据结构
+      if (!response || !response.data) {
+        throw new Error('登录响应数据格式错误')
+      }
+      
+      const loginDataRes = response.data.data
+      if (!loginDataRes) {
+        throw new Error('登录响应数据缺少data字段')
+      }
+      
+      if (!loginDataRes.user) {
+        throw new Error('登录响应数据缺少用户信息')
+      }
+      
+      if (!loginDataRes.token) {
+        throw new Error('登录响应数据缺少token信息')
+      }
       
       // 保存用户信息
-      updateUserInfo(loginDataRes.user, loginDataRes.tokens)
+      updateUserInfo(loginDataRes.user, loginDataRes.token)
       
       // 保存到localStorage
       saveUserToLocalStorage()
@@ -177,14 +196,11 @@ export const useUserStore = defineStore('user', () => {
     try {
       const response = await authAPI.getUserInfo()
       const userInfo: { user: UserInfo } = response.data.data
-      
-      // 更新用户信息（保持token不变）
-      updateUserInfo(userInfo.user, {
-        access_token: accessToken.value,
-        refresh_token: refreshToken.value,
-        expires_in: expiresIn.value
-      })
-      
+      console.log(userInfo)
+      // const token = response.data
+      // // 更新用户信息（保持token不变）
+      // updateUserInfo(userInfo.user, )
+      //
       saveUserToLocalStorage()
       return true
     } catch (error) {
@@ -194,32 +210,39 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 更新用户信息
-  function updateUserInfo(user: UserInfo, tokens: { access_token: string; refresh_token: string; expires_in: number }) {
+  function updateUserInfo(user: UserInfo, token:"") {
     isLoggedIn.value = true
-    username.value = user.username
-    nickname.value = user.nickname
-    userId.value = user.id
-    email.value = user.email
-    avatarUrl.value = user.avatar_url
-    backgroundImage.value = user.background_image
-    signature.value = user.signature
-    gender.value = user.gender
-    birthday.value = user.birthday
-    followingCount.value = user.following_count
-    followersCount.value = user.followers_count
-    totalFavorited.value = user.total_favorited
-    workCount.value = user.work_count
-    favoriteCount.value = user.favorite_count
-    isVerified.value = user.is_verified
-    userType.value = user.user_type
-    status.value = user.status
-    lastLoginAt.value = user.last_login_at
-    createdAt.value = user.created_at
-    updatedAt.value = user.updated_at
-    phone.value = user.phone
-    accessToken.value = tokens.access_token
-    refreshToken.value = tokens.refresh_token
-    expiresIn.value = tokens.expires_in
+    username.value = user.username || ''
+    nickname.value = user.nickname || ''
+    userId.value = user.id || 0
+    email.value = user.email || ''
+    avatarUrl.value = user.avatar_url || ''
+    backgroundImage.value = user.background_image || ''
+    signature.value = user.signature || ''
+    gender.value = user.gender || 0
+    birthday.value = user.birthday || ''
+    followingCount.value = user.following_count || 0
+    followersCount.value = user.followers_count || 0
+    totalFavorited.value = user.total_favorited || 0
+    workCount.value = user.work_count || 0
+    favoriteCount.value = user.favorite_count || 0
+    isVerified.value = user.is_verified || false
+    userType.value = user.user_type || 'normal'
+    status.value = user.status || 0
+    lastLoginAt.value = user.last_login_at || 0
+    createdAt.value = user.created_at || 0
+    updatedAt.value = user.updated_at || 0
+    phone.value = user.phone || ''
+    
+    // 添加对tokens的空值检查
+    if (token) {
+      accessToken.value = token
+    } else {
+      console.error('Tokens is undefined in updateUserInfo')
+      accessToken.value = ''
+      // refreshToken.value = ''
+      // expiresIn.value = 0
+    }
   }
 
   // 清除用户信息
@@ -380,6 +403,7 @@ export const useUserStore = defineStore('user', () => {
     // 计算属性
     isAuthenticated,
     tokenExpired,
+    avatar,
     
     // 方法
     login,

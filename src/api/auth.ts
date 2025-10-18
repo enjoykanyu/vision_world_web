@@ -16,11 +16,7 @@ export interface LoginRequest {
 // 用户登录响应数据接口
 export interface LoginResponse {
   user: UserInfo
-  tokens: {
-    access_token: string
-    refresh_token: string
-    expires_in: number
-  }
+  token: ""
 }
 
 // 用户信息接口
