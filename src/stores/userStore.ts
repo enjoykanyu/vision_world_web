@@ -70,7 +70,7 @@ export const useUserStore = defineStore('user', () => {
       // 构建设备信息
       const deviceInfo: LoginRequest = {
         phone: loginData.phone,
-        verification_code: loginData.verificationCode,
+        code: loginData.verificationCode,
         device_id: generateDeviceId(),
         device_info: {
           platform: 'web',

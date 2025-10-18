@@ -3,7 +3,7 @@ import { http } from '@/utils/request'
 // 用户登录请求参数接口
 export interface LoginRequest {
   phone: string
-  verification_code: string
+  code: string
   device_id: string
   device_info: {
     platform: string
@@ -96,5 +96,39 @@ export const authAPI = {
    */
   getUserInfo() {
     return http.get<{ user: UserInfo }>('/api/auth/userinfo')
+  },
+
+  /**
+   * 验证访问令牌
+   * @param token 访问令牌
+   * @returns 验证结果，包含是否有效、用户ID和过期时间
+   */
+  verifyToken(token: string) {
+    return http.post<{ 
+      valid: boolean; 
+      user_id: number; 
+      expire_time: number;
+      status_code: number;
+      status_msg: string;
+    }>('/api/user/token/verify', {
+      token
+    })
+  },
+
+  /**
+   * 直接刷新访问令牌（使用后端API路径）
+   * @param refreshToken 刷新令牌
+   * @returns 新的访问令牌和相关信息
+   */
+  directRefreshToken(refreshToken: string) {
+    return http.post<{ 
+      token: string;
+      expire_time: number;
+      refresh_token?: string;
+      status_code: number;
+      status_msg: string;
+    }>('/api/user/token/refresh', {
+      refresh_token: refreshToken
+    })
   }
 }

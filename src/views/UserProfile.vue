@@ -127,7 +127,7 @@
           <div class="mb-4">
             <label for="verificationCode" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
             <div class="flex space-x-3">
-              <input type="text" id="verificationCode" v-model="loginForm.verificationCode" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="请输入验证码">
+              <input type="text" id="verificationCode" v-model="loginForm.code" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="请输入验证码">
               <button 
                 @click="sendVerificationCode" 
                 :disabled="isSendingCode || countdown > 0"
@@ -172,13 +172,13 @@ const toggleDarkMode = () => {
 
 // 登录相关
 const showLoginModal = ref(false)
-const loginForm = ref({ phone: '', verificationCode: '' })
+const loginForm = ref({ phone: '', code: '' })
 const loginError = ref('')
 const isSendingCode = ref(false)
 const countdown = ref(0)
 
 const handleLogin = async () => {
-  if (!loginForm.value.phone || !loginForm.value.verificationCode) {
+  if (!loginForm.value.phone || !loginForm.value.code) {
     loginError.value = '请输入手机号和验证码'
     return
   }
@@ -186,11 +186,11 @@ const handleLogin = async () => {
   try {
     await userStore.login({
       phone: loginForm.value.phone,
-      verificationCode: loginForm.value.verificationCode
+      verificationCode: loginForm.value.code
     })
     showLoginModal.value = false
     loginError.value = ''
-    loginForm.value = { phone: '', verificationCode: '' }
+    loginForm.value = { phone: '', code: '' }
   } catch (error) {
     loginError.value = '登录失败，请检查手机号和验证码'
   }
@@ -234,7 +234,7 @@ const sendVerificationCode = async () => {
 const closeLoginModal = () => {
   showLoginModal.value = false
   loginError.value = ''
-  loginForm.value = { phone: '', verificationCode: '' }
+  loginForm.value = { phone: '', code: '' }
   countdown.value = 0
 }
 
