@@ -15,14 +15,7 @@ export interface LoginRequest {
 
 // 用户登录响应数据接口
 export interface LoginResponse {
-  user: {
-    user_id: string
-    username: string
-    phone: string
-    avatar: string
-    status: number
-    created_at: string
-  }
+  user: UserInfo
   tokens: {
     access_token: string
     refresh_token: string
@@ -32,12 +25,27 @@ export interface LoginResponse {
 
 // 用户信息接口
 export interface UserInfo {
-  user_id: string
+  id: number
   username: string
+  nickname: string
   phone: string
-  avatar: string
-  status: number
-  created_at: string
+  email: string
+  avatar_url: string
+  background_image: string
+  signature: string
+  gender: number // 0-未知,1-男,2-女
+  birthday: string // YYYY-MM-DD格式
+  following_count: number
+  followers_count: number
+  total_favorited: number
+  work_count: number
+  favorite_count: number
+  is_verified: boolean
+  user_type: string // normal, verified, official
+  status: number // 0-禁用,1-正常
+  last_login_at: number // 时间戳
+  created_at: number // 时间戳
+  updated_at: number // 时间戳
 }
 
 // 发送验证码请求参数接口

@@ -1,16 +1,32 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI, LoginRequest, LoginResponse, UserInfo } from '@/api/auth'
+import * as console from "node:console";
 
 export const useUserStore = defineStore('user', () => {
   // 状态
   const isLoggedIn = ref(false)
   const username = ref('')
-  const userId = ref('')
-  const avatar = ref('')
+  const nickname = ref('')
+  const userId = ref(0)
+  const email = ref('')
+  const avatarUrl = ref('')
+  const backgroundImage = ref('')
+  const signature = ref('')
+  const gender = ref(0) // 0-未知,1-男,2-女
+  const birthday = ref('')
+  const followingCount = ref(0)
+  const followersCount = ref(0)
+  const totalFavorited = ref(0)
+  const workCount = ref(0)
+  const favoriteCount = ref(0)
+  const isVerified = ref(false)
+  const userType = ref('normal') // normal, verified, official
+  const status = ref(0) // 0-禁用,1-正常
+  const lastLoginAt = ref(0) // 时间戳
+  const createdAt = ref(0) // 时间戳
+  const updatedAt = ref(0) // 时间戳
   const phone = ref('')
-  const status = ref(0)
-  const createdAt = ref('')
   const accessToken = ref('')
   const refreshToken = ref('')
   const expiresIn = ref(0)
@@ -39,17 +55,17 @@ export const useUserStore = defineStore('user', () => {
       
       // 尝试不同的数据访问路径
       let expireSeconds = 60 // 默认值
-      if (response && response.data) {
-        if (response.data.expire_seconds) {
-          expireSeconds = response.data.expire_seconds
-        } else if (response.data.data && response.data.data.expire_seconds) {
-          expireSeconds = response.data.data.expire_seconds
-        }
-      }
+      // if (response && response.data) {
+      //   if (response.data.expire_seconds) {
+      //     expireSeconds = response.data.expire_seconds
+      //   } else if (response.data.data && response.data.data.expire_seconds) {
+      //     expireSeconds = response.data.data.expire_seconds
+      //   }
+      // }
       
       return { 
         success: true, 
-        expireSeconds 
+        expireSeconds
       }
     } catch (error: any) {
       console.error('发送验证码失败:', error)
@@ -99,7 +115,7 @@ export const useUserStore = defineStore('user', () => {
         window.dispatchEvent(new CustomEvent('login-success', { 
           detail: { 
             username: loginDataRes.user.username, 
-            userId: loginDataRes.user.user_id 
+            userId: loginDataRes.user.id
           } 
         }))
       }
@@ -143,7 +159,6 @@ export const useUserStore = defineStore('user', () => {
     try {
       const response = await authAPI.refreshToken(refreshToken.value)
       const tokenData = response.data.data
-      
       accessToken.value = tokenData.access_token
       expiresIn.value = tokenData.expires_in
       
@@ -186,11 +201,26 @@ export const useUserStore = defineStore('user', () => {
   function updateUserInfo(user: UserInfo, tokens: { access_token: string; refresh_token: string; expires_in: number }) {
     isLoggedIn.value = true
     username.value = user.username
-    userId.value = user.user_id
-    avatar.value = user.avatar
-    phone.value = user.phone
+    nickname.value = user.nickname
+    userId.value = user.id
+    email.value = user.email
+    avatarUrl.value = user.avatar_url
+    backgroundImage.value = user.background_image
+    signature.value = user.signature
+    gender.value = user.gender
+    birthday.value = user.birthday
+    followingCount.value = user.following_count
+    followersCount.value = user.followers_count
+    totalFavorited.value = user.total_favorited
+    workCount.value = user.work_count
+    favoriteCount.value = user.favorite_count
+    isVerified.value = user.is_verified
+    userType.value = user.user_type
     status.value = user.status
+    lastLoginAt.value = user.last_login_at
     createdAt.value = user.created_at
+    updatedAt.value = user.updated_at
+    phone.value = user.phone
     accessToken.value = tokens.access_token
     refreshToken.value = tokens.refresh_token
     expiresIn.value = tokens.expires_in
@@ -200,11 +230,26 @@ export const useUserStore = defineStore('user', () => {
   function clearUserInfo() {
     isLoggedIn.value = false
     username.value = ''
-    userId.value = ''
-    avatar.value = ''
-    phone.value = ''
+    nickname.value = ''
+    userId.value = 0
+    email.value = ''
+    avatarUrl.value = ''
+    backgroundImage.value = ''
+    signature.value = ''
+    gender.value = 0
+    birthday.value = ''
+    followingCount.value = 0
+    followersCount.value = 0
+    totalFavorited.value = 0
+    workCount.value = 0
+    favoriteCount.value = 0
+    isVerified.value = false
+    userType.value = 'normal'
     status.value = 0
-    createdAt.value = ''
+    lastLoginAt.value = 0
+    createdAt.value = 0
+    updatedAt.value = 0
+    phone.value = ''
     accessToken.value = ''
     refreshToken.value = ''
     expiresIn.value = 0
@@ -215,11 +260,26 @@ export const useUserStore = defineStore('user', () => {
     const userData = {
       isLoggedIn: isLoggedIn.value,
       username: username.value,
+      nickname: nickname.value,
       userId: userId.value,
-      avatar: avatar.value,
-      phone: phone.value,
+      email: email.value,
+      avatarUrl: avatarUrl.value,
+      backgroundImage: backgroundImage.value,
+      signature: signature.value,
+      gender: gender.value,
+      birthday: birthday.value,
+      followingCount: followingCount.value,
+      followersCount: followersCount.value,
+      totalFavorited: totalFavorited.value,
+      workCount: workCount.value,
+      favoriteCount: favoriteCount.value,
+      isVerified: isVerified.value,
+      userType: userType.value,
       status: status.value,
+      lastLoginAt: lastLoginAt.value,
       createdAt: createdAt.value,
+      updatedAt: updatedAt.value,
+      phone: phone.value,
       accessToken: accessToken.value,
       refreshToken: refreshToken.value,
       expiresIn: expiresIn.value
@@ -236,11 +296,26 @@ export const useUserStore = defineStore('user', () => {
         if (userInfo.isLoggedIn) {
           isLoggedIn.value = userInfo.isLoggedIn
           username.value = userInfo.username || ''
-          userId.value = userInfo.userId || ''
-          avatar.value = userInfo.avatar || ''
-          phone.value = userInfo.phone || ''
+          nickname.value = userInfo.nickname || ''
+          userId.value = userInfo.userId || 0
+          email.value = userInfo.email || ''
+          avatarUrl.value = userInfo.avatarUrl || ''
+          backgroundImage.value = userInfo.backgroundImage || ''
+          signature.value = userInfo.signature || ''
+          gender.value = userInfo.gender || 0
+          birthday.value = userInfo.birthday || ''
+          followingCount.value = userInfo.followingCount || 0
+          followersCount.value = userInfo.followersCount || 0
+          totalFavorited.value = userInfo.totalFavorited || 0
+          workCount.value = userInfo.workCount || 0
+          favoriteCount.value = userInfo.favoriteCount || 0
+          isVerified.value = userInfo.isVerified || false
+          userType.value = userInfo.userType || 'normal'
           status.value = userInfo.status || 0
-          createdAt.value = userInfo.createdAt || ''
+          lastLoginAt.value = userInfo.lastLoginAt || 0
+          createdAt.value = userInfo.createdAt || 0
+          updatedAt.value = userInfo.updatedAt || 0
+          phone.value = userInfo.phone || ''
           accessToken.value = userInfo.accessToken || ''
           refreshToken.value = userInfo.refreshToken || ''
           expiresIn.value = userInfo.expiresIn || 0
@@ -281,11 +356,26 @@ export const useUserStore = defineStore('user', () => {
     // 状态
     isLoggedIn,
     username,
+    nickname,
     userId,
-    avatar,
-    phone,
+    email,
+    avatarUrl,
+    backgroundImage,
+    signature,
+    gender,
+    birthday,
+    followingCount,
+    followersCount,
+    totalFavorited,
+    workCount,
+    favoriteCount,
+    isVerified,
+    userType,
     status,
+    lastLoginAt,
     createdAt,
+    updatedAt,
+    phone,
     accessToken,
     refreshToken,
     expiresIn,
