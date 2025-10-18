@@ -438,6 +438,7 @@ const sendVerificationCode = async () => {
   
   try {
     // 调用真实的短信API
+    console.log(loginForm)
     const result = await userStore.sendVerificationCode(loginForm.value.phone)
     
     if (result.success) {
@@ -452,10 +453,10 @@ const sendVerificationCode = async () => {
       
       loginError.value = ''
     } else {
-      loginError.value = result.error || '发送验证码失败'
+      loginError.value = result.error || '发送验证码失败服务校验报错'
     }
   } catch (error) {
-    loginError.value = '发送验证码失败'
+    loginError.value = '发送验证码失败333'
   } finally {
     isSendingCode.value = false
   }

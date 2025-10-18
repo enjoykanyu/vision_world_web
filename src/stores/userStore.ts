@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI, LoginRequest, LoginResponse, UserInfo } from '@/api/auth'
-import * as console from "node:console";
 
 export const useUserStore = defineStore('user', () => {
   // 状态
@@ -42,16 +41,16 @@ export const useUserStore = defineStore('user', () => {
 
   // 发送验证码
   async function sendVerificationCode(phone: string) {
-    console.log('开始发送验证码，手机号:', phone)
     loading.value = true
     try {
+      alert(333)
       const response = await authAPI.sendCode({
         phone,
         sms_type: 'login'
       })
       
-      console.log('验证码发送成功，完整响应:', response)
-      console.log('响应数据结构:', JSON.stringify(response, null, 2))
+      // console.log('验证码发送成功，完整响应:', response)
+      // console.log('响应数据结构:', JSON.stringify(response, null, 2))
       
       // 尝试不同的数据访问路径
       let expireSeconds = 60 // 默认值
@@ -68,9 +67,7 @@ export const useUserStore = defineStore('user', () => {
         expireSeconds
       }
     } catch (error: any) {
-      console.error('发送验证码失败:', error)
-      console.error('错误详情:', JSON.stringify(error, null, 2))
-      return { 
+      return {
         success: false, 
         error: error.message || '发送验证码失败，请重试'
       }
@@ -107,7 +104,6 @@ export const useUserStore = defineStore('user', () => {
       saveUserToLocalStorage()
       
       // 使用自定义通知或console.log替代ElementPlus的消息提示
-      console.log('登录成功')
       // 可以在这里添加自定义的成功通知组件
       
       // 派发全局登录成功事件
