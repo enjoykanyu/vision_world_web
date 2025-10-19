@@ -79,11 +79,25 @@ export const useVideoStore = defineStore('video', () => {
     recommendedVideos.value.loading = true
     
     try {
-      const response = await videoAPI.getRecommendedVideos({
+      // 导入userStore
+      const { isAuthenticated, getRecommendedTags } = useUserStore()
+      
+      // 构建请求参数
+      const requestParams: any = {
         page,
         page_size: pageSize,
         request_id: generateRequestId()
-      })
+      }
+      
+      // 如果用户已登录，添加用户标签参数
+      if (isAuthenticated.value) {
+        const userRecommendedTags = getRecommendedTags(5) // 获取前5个推荐标签
+        if (userRecommendedTags.length > 0) {
+          requestParams.user_tags = userRecommendedTags.join(',')
+        }
+      }
+      
+      const response = await videoAPI.getRecommendedVideos(requestParams)
       
       const { videos, pagination } = response.data.data
       

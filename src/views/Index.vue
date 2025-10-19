@@ -74,7 +74,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
           <div v-for="video in recommendedVideos" :key="video.id"
                class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
-               @click="router.push(`/video/${video.id}`)">
+               @click="handleVideoClick(video); router.push(`/video/${video.id}`)">
             <div class="relative aspect-video group">
               <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
               <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
@@ -82,7 +82,7 @@
                 {{ video.duration }}
               </div>
               <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div class="w-12 h-12 bg-purple-600/90 rounded-full flex items-center justify-center">
+                <div class="w-12 h-12 bg-purple-600/90 rounded-full flex items-center justify-center" @click.stop="handleVideoPlay(video)">
                   <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"></path>
                   </svg>
@@ -132,11 +132,94 @@
         </div>
       </div>
 
+      <!-- 用户标签区域 -->
+      <div class="mb-8" v-if="userStore.isLoggedIn">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+              <span class="w-1 h-5 bg-purple-600 rounded-full mr-2"></span>
+              我的兴趣标签
+            </h3>
+            <button @click="toggleTagPanel" 
+                    class="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              管理标签
+            </button>
+          </div>
+          
+          <!-- 用户标签展示 -->
+          <div class="flex flex-wrap gap-2 mb-4" v-if="userStore.userTags.length > 0">
+            <span v-for="tag in userStore.userTags" :key="tag"
+                  class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+              {{ tag }}
+              <button @click="handleRemoveTag(tag)" class="ml-2 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+              </button>
+            </span>
+          </div>
+          
+          <div v-else class="text-gray-500 dark:text-gray-400 text-sm mb-4">
+            您还没有添加任何兴趣标签，点击"管理标签"添加您的兴趣标签
+          </div>
+          
+          <!-- 标签管理面板 -->
+          <div v-if="showTagPanel" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="mb-4">
+              <div class="flex space-x-2">
+                <input v-model="newTag" 
+                       @keyup.enter="handleAddTag"
+                       type="text" 
+                       placeholder="输入新标签" 
+                       class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                <button @click="handleAddTag" 
+                        class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                  添加
+                </button>
+              </div>
+            </div>
+            
+            <!-- 推荐标签 -->
+            <div class="mb-4">
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">推荐标签</h4>
+              <div class="flex flex-wrap gap-2">
+                <button v-for="tag in recommendedTags" :key="tag"
+                        @click="userStore.addUserTag(tag)"
+                        :class="['px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
+                                 userStore.userTags.includes(tag) 
+                                   ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' 
+                                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600']">
+                  {{ tag }}
+                </button>
+              </div>
+            </div>
+            
+            <!-- 所有可用标签 -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">所有标签</h4>
+              <div class="flex flex-wrap gap-2">
+                <button v-for="tag in availableTags" :key="tag"
+                        @click="userStore.addUserTag(tag)"
+                        :class="['px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
+                                 userStore.userTags.includes(tag) 
+                                   ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' 
+                                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600']">
+                  {{ tag }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 视频网格 -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6" v-if="!isMobile">
         <div v-for="video in videos" :key="video.id"
              class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
-             @click="router.push(`/video/${video.id}`)">
+             @click="handleVideoClick(video); router.push(`/video/${video.id}`)">
           <div class="relative aspect-video group">
             <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
             <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
@@ -144,7 +227,7 @@
               {{ video.duration }}
             </div>
             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div class="w-12 h-12 bg-pink-500/90 rounded-full flex items-center justify-center">
+              <div class="w-12 h-12 bg-pink-500/90 rounded-full flex items-center justify-center" @click.stop="handleVideoPlay(video)">
                 <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z"></path>
                 </svg>
@@ -332,10 +415,76 @@ import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import NavHeader from '../components/NavHeader.vue'
 import { useUserStore } from '../stores/userStore'
+import { homeAPI } from '../api/home'
 
 
 // 使用全局用户状态
 const userStore = useUserStore()
+
+// 用户标签相关状态
+const showTagPanel = ref(false)
+const newTag = ref('')
+const availableTags = [
+  '科技', '娱乐', '音乐', '游戏', '美食', '旅行', 
+  '教育', '体育', '动漫', '电影', '时尚', '生活',
+  '编程', '设计', '摄影', '健身', '财经', '历史'
+]
+
+// 用户标签相关方法
+const toggleTagPanel = () => {
+  showTagPanel.value = !showTagPanel.value
+}
+
+const handleAddTag = () => {
+  if (newTag.value.trim() && !userStore.userTags.includes(newTag.value.trim())) {
+    userStore.addUserTag(newTag.value.trim())
+    newTag.value = ''
+  }
+}
+
+const handleRemoveTag = (tag: string) => {
+  userStore.removeUserTag(tag)
+}
+
+const handleVideoClick = (video: any) => {
+  // 当用户点击视频时，更新标签偏好权重
+  if (video.tags && video.tags.length > 0) {
+    video.tags.forEach((tag: string) => {
+      userStore.updateTagPreference(tag, 1)
+    })
+  }
+}
+
+const handleVideoPlay = (video: any) => {
+  // 当用户播放视频时，增加标签偏好权重
+  if (video.tags && video.tags.length > 0) {
+    video.tags.forEach((tag: string) => {
+      userStore.updateTagPreference(tag, 2)
+    })
+  }
+}
+
+// 推荐标签计算属性
+const recommendedTags = computed(() => {
+  if (!userStore.isLoggedIn) return []
+  
+  // 获取用户偏好权重最高的标签
+  const sortedTags = Object.entries(userStore.tagPreferences)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([tag]) => tag)
+  
+  // 如果用户标签少于5个，补充可用标签
+  if (sortedTags.length < 5) {
+    const additionalTags = availableTags
+      .filter(tag => !sortedTags.includes(tag) && !userStore.userTags.includes(tag))
+      .slice(0, 5 - sortedTags.length)
+    
+    return [...sortedTags, ...additionalTags]
+  }
+  
+  return sortedTags
+})
 
 const router = useRouter()
 
@@ -516,35 +665,40 @@ const recommendedVideos = [
     title: '2025年最值得期待的十大科技产品',
     cover: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300&q=80',
     duration: '12:34',
-    uploader: '科技前沿'
+    uploader: '科技前沿',
+    tags: ['科技', '创新', '数码']
   },
   {
     id: 2,
     title: '如何在30天内掌握Vue 3和TypeScript',
     cover: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=300&q=80',
     duration: '25:12',
-    uploader: '编程学院'
+    uploader: '编程学院',
+    tags: ['编程', '教育', '技术']
   },
   {
     id: 3,
     title: '探秘世界上最神奇的十大自然现象',
     cover: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=300&q=80',
     duration: '18:45',
-    uploader: '自然探索'
+    uploader: '自然探索',
+    tags: ['自然', '旅行', '科普']
   },
   {
     id: 4,
     title: '2025年最热门的旅游目的地推荐',
     cover: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=300&q=80',
     duration: '14:22',
-    uploader: '环球旅行'
+    uploader: '环球旅行',
+    tags: ['旅行', '美食', '文化']
   },
   {
     id: 5,
     title: '美食博主带你探店：城市里的隐藏菜单',
     cover: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80',
     duration: '09:55',
-    uploader: '吃货小分队'
+    uploader: '吃货小分队',
+    tags: ['美食', '生活', '探店']
   }
 ]
 
@@ -567,7 +721,8 @@ const videos = [
     duration: '15:42',
     uploader: '未来科技',
     playCount: '102万',
-    danmaku: '1.8万'
+    danmaku: '1.8万',
+    tags: ['科技', '人工智能', '未来']
   },
   {
     id: 2,
@@ -576,7 +731,8 @@ const videos = [
     duration: '20:18',
     uploader: '游戏玩家',
     playCount: '78万',
-    danmaku: '2.5万'
+    danmaku: '2.5万',
+    tags: ['游戏', '娱乐', '评测']
   },
   {
     id: 3,
@@ -585,7 +741,8 @@ const videos = [
     duration: '32:10',
     uploader: '音乐制作人',
     playCount: '45万',
-    danmaku: '9800'
+    danmaku: '9800',
+    tags: ['音乐', '制作', '教程']
   },
   {
     id: 4,
@@ -594,7 +751,8 @@ const videos = [
     duration: '28:45',
     uploader: '量子科学',
     playCount: '32万',
-    danmaku: '1.1万'
+    danmaku: '1.1万',
+    tags: ['科技', '教育', '量子物理']
   },
   {
     id: 5,
@@ -603,7 +761,8 @@ const videos = [
     duration: '16:20',
     uploader: '时尚前沿',
     playCount: '67万',
-    danmaku: '2.3万'
+    danmaku: '2.3万',
+    tags: ['时尚', '潮流', '预测']
   },
   {
     id: 6,
@@ -612,7 +771,8 @@ const videos = [
     duration: '22:30',
     uploader: '体育频道',
     playCount: '120万',
-    danmaku: '5.6万'
+    danmaku: '5.6万',
+    tags: ['体育', '足球', '世界杯']
   },
   {
     id: 7,
@@ -621,7 +781,8 @@ const videos = [
     duration: '19:15',
     uploader: '美食家',
     playCount: '56万',
-    danmaku: '1.9万'
+    danmaku: '1.9万',
+    tags: ['美食', '旅行', '日本']
   },
   {
     id: 8,
@@ -630,7 +791,8 @@ const videos = [
     duration: '24:50',
     uploader: '旅行达人',
     playCount: '43万',
-    danmaku: '1.4万'
+    danmaku: '1.4万',
+    tags: ['旅行', '自然', '北欧']
   }
 ]
 
@@ -644,38 +806,69 @@ const hasMore = ref(true)
 
 
 
-// 生成更多视频数据
-const generateMoreVideos = (page: number, size: number) => {
-  const startId = (page - 1) * size + 1
-  const newVideos = []
-  
-  for (let i = 0; i < size; i++) {
-    const id = startId + i + 100 // 避免ID冲突
-    newVideos.push({
-      id,
-      title: `${page}页第${i+1}个视频 - 热门视频内容`,
-      cover: `https://picsum.photos/1080/1920?random=${id}`,
-      duration: `${Math.floor(Math.random() * 2) + 1}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-      uploader: ['视频创作者', '热门UP主', '内容创作者'][Math.floor(Math.random() * 3)],
-      playCount: `${Math.floor(Math.random() * 100) + 1}万`,
-      danmaku: `${Math.floor(Math.random() * 1000) + 1}`,
-      videoUrl: null // 实际项目中这里应该是真实视频URL
-    })
-  }
-  
-  return newVideos
-}
+// 首页数据加载
+const isLoadingHome = ref(false)
+const homeDataLoaded = ref(false)
 
-// 初始化视频数据
-const initVideos = () => {
-  // 首先使用已有的videos数据
-  allVideos.value = [...videos]
+// 加载首页数据
+const loadHomeData = async () => {
+  if (isLoadingHome.value) return
   
-  // 然后添加更多视频以确保有足够数据
-  const additionalVideos = generateMoreVideos(1, pageSize)
-  allVideos.value = [...allVideos.value, ...additionalVideos]
+  isLoadingHome.value = true
   
-  
+  try {
+    // 获取用户标签字符串，用于API请求
+    const userTagsStr = userStore.userTags.join(',')
+    
+    // 准备请求参数
+    const params: any = {
+      page: 1,
+      page_size: 10,
+      user_tags: userTagsStr
+    }
+    
+    // 如果用户已登录，添加token
+    if (userStore.isAuthenticated) {
+      params.token = userStore.accessToken
+    }
+    
+    // 调用首页API获取数据
+    const response = await homeAPI.getHomeData(params)
+    
+    if (response.status_code === 0 && response.data) {
+      // 更新轮播图数据
+      if (response.data.carousels && response.data.carousels.length > 0) {
+        carouselSlides.value = response.data.carousels
+      }
+      
+      // 更新分类数据
+      if (response.data.categories && response.data.categories.length > 0) {
+        categories.value = response.data.categories
+      }
+      
+      // 更新推荐视频数据
+      if (response.data.recommendedVideos && response.data.recommendedVideos.length > 0) {
+        recommendedVideos.value = response.data.recommendedVideos
+      }
+      
+      // 更新热门视频数据
+      if (response.data.hotVideos && response.data.hotVideos.length > 0) {
+        videos.value = response.data.hotVideos
+      }
+      
+      // 更新个性化推荐视频（仅登录用户）
+      if (userStore.isAuthenticated && response.data.personalizedVideos && response.data.personalizedVideos.length > 0) {
+        // 可以将个性化推荐添加到推荐视频列表中
+        recommendedVideos.value = [...response.data.personalizedVideos, ...recommendedVideos.value]
+      }
+      
+      homeDataLoaded.value = true
+    }
+  } catch (error) {
+    console.error('加载首页数据失败:', error)
+  } finally {
+    isLoadingHome.value = false
+  }
 }
 
 // 计算当前显示的视频
@@ -751,12 +944,24 @@ const startAutoSlide = () => {
   slideInterval = setInterval(nextSlide, 4000)
 }
 
-onMounted(() => {
+onMounted(async () => {
   startAutoSlide()
   window.addEventListener('resize', updateIsMobile)
   
-  // 初始化视频数据
-  initVideos()
+  // 进入首页时的数据加载逻辑
+  try {
+    // 如果用户已登录，先验证Token有效性
+    if (userStore.isAuthenticated) {
+      await userStore.verifyToken()
+    }
+    
+    // 加载首页数据
+    await loadHomeData()
+  } catch (error) {
+    console.error('初始化首页数据失败:', error)
+    // 如果Token验证失败，仍然加载未登录用户的首页数据
+    await loadHomeData()
+  }
 })
 
 onUnmounted(() => {

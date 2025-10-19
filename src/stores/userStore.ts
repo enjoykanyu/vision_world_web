@@ -30,6 +30,11 @@ export const useUserStore = defineStore('user', () => {
   const refreshToken = ref('')
   const expiresIn = ref(0)
   const loading = ref(false)
+  
+  // 用户标签相关状态
+  const userTags = ref<string[]>([])
+  const tagPreferences = ref<Record<string, number>>({}) // 标签偏好权重
+  const tagHistory = ref<string[]>([]) // 用户浏览过的视频标签历史
 
   // 计算属性
   const isAuthenticated = computed(() => isLoggedIn.value && !!accessToken.value)
@@ -201,14 +206,36 @@ export const useUserStore = defineStore('user', () => {
       const response = await authAPI.getUserInfo()
       const userInfo: { user: UserInfo } = response.data.data
       console.log(userInfo)
-      // const token = response.data
-      // // 更新用户信息（保持token不变）
-      // updateUserInfo(userInfo.user, )
-      //
+      // 更新用户信息（保持token不变）
+      updateUserInfo(userInfo.user, accessToken.value)
       saveUserToLocalStorage()
       return true
     } catch (error) {
       console.error('获取用户信息失败:', error)
+      return false
+    }
+  }
+
+  // 验证Token有效性
+  async function verifyToken(): Promise<boolean> {
+    if (!accessToken.value) return false
+    
+    try {
+      const response = await authAPI.verifyToken(accessToken.value)
+      if (response.data.status_code === 0) {
+        // Token有效，获取用户信息
+        return await fetchUserInfo()
+      } else {
+        // Token无效，清除用户信息
+        clearUserInfo()
+        clearLocalStorage()
+        return false
+      }
+    } catch (error) {
+      console.error('验证Token失败:', error)
+      // Token验证失败，清除用户信息
+      clearUserInfo()
+      clearLocalStorage()
       return false
     }
   }
@@ -373,9 +400,143 @@ export const useUserStore = defineStore('user', () => {
     return newId
   }
 
+  // 用户标签相关方法
+  
+  // 设置用户标签
+  function setUserTags(tags: string[]) {
+    userTags.value = tags
+    saveUserTagsToLocalStorage()
+  }
+  
+  // 添加用户标签
+  function addUserTag(tag: string) {
+    if (!userTags.value.includes(tag)) {
+      userTags.value.push(tag)
+      saveUserTagsToLocalStorage()
+    }
+  }
+  
+  // 移除用户标签
+  function removeUserTag(tag: string) {
+    const index = userTags.value.indexOf(tag)
+    if (index > -1) {
+      userTags.value.splice(index, 1)
+      saveUserTagsToLocalStorage()
+    }
+  }
+  
+  // 更新标签偏好权重
+  function updateTagPreference(tag: string, weight: number) {
+    tagPreferences.value[tag] = weight
+    saveUserTagsToLocalStorage()
+  }
+  
+  // 增加标签偏好权重
+  function increaseTagPreference(tag: string, increment: number = 1) {
+    if (tagPreferences.value[tag]) {
+      tagPreferences.value[tag] += increment
+    } else {
+      tagPreferences.value[tag] = increment
+    }
+    saveUserTagsToLocalStorage()
+  }
+  
+  // 添加标签到历史记录
+  function addToTagHistory(tag: string) {
+    // 如果标签已存在，先移除
+    const index = tagHistory.value.indexOf(tag)
+    if (index > -1) {
+      tagHistory.value.splice(index, 1)
+    }
+    // 添加到开头
+    tagHistory.value.unshift(tag)
+    // 限制历史记录数量
+    if (tagHistory.value.length > 50) {
+      tagHistory.value = tagHistory.value.slice(0, 50)
+    }
+    saveUserTagsToLocalStorage()
+  }
+  
+  // 获取推荐标签（基于偏好权重和历史记录）
+  function getRecommendedTags(limit: number = 10): string[] {
+    // 合并偏好标签和历史标签
+    const allTags = new Set([
+      ...Object.keys(tagPreferences.value),
+      ...tagHistory.value,
+      ...userTags.value
+    ])
+    
+    // 计算每个标签的综合得分
+    const tagScores = Array.from(allTags).map(tag => {
+      const preferenceScore = tagPreferences.value[tag] || 0
+      const historyScore = tagHistory.value.includes(tag) ? (tagHistory.value.length - tagHistory.value.indexOf(tag)) : 0
+      const userTagScore = userTags.value.includes(tag) ? 10 : 0
+      
+      return {
+        tag,
+        score: preferenceScore + historyScore * 0.5 + userTagScore
+      }
+    })
+    
+    // 按得分排序并返回前N个
+    return tagScores
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map(item => item.tag)
+  }
+  
+  // 保存用户标签到localStorage
+  function saveUserTagsToLocalStorage() {
+    const tagsData = {
+      userTags: userTags.value,
+      tagPreferences: tagPreferences.value,
+      tagHistory: tagHistory.value
+    }
+    localStorage.setItem('user_tags', JSON.stringify(tagsData))
+  }
+  
+  // 从localStorage加载用户标签
+  function loadUserTagsFromLocalStorage() {
+    const savedTags = localStorage.getItem('user_tags')
+    if (savedTags) {
+      try {
+        const tagsData = JSON.parse(savedTags)
+        userTags.value = tagsData.userTags || []
+        tagPreferences.value = tagsData.tagPreferences || {}
+        tagHistory.value = tagsData.tagHistory || []
+      } catch (e) {
+        console.error('Failed to parse user tags from localStorage', e)
+        localStorage.removeItem('user_tags')
+      }
+    }
+  }
+  
+  // 清除用户标签
+  function clearUserTags() {
+    userTags.value = []
+    tagPreferences.value = {}
+    tagHistory.value = []
+    localStorage.removeItem('user_tags')
+  }
+
   // 初始化
   function init() {
+    // 从localStorage加载用户信息
     loadUserFromLocalStorage()
+    // 从localStorage加载用户标签
+    loadUserTagsFromLocalStorage()
+    
+    // 如果有token，验证其有效性
+    if (accessToken.value) {
+      // 检查token是否即将过期
+      const now = Date.now()
+      const expiryTime = expiresIn.value * 1000 // 转换为毫秒
+      
+      // 如果token在5分钟内过期，尝试刷新
+      if (expiryTime - now < 5 * 60 * 1000) {
+        refreshAccessToken()
+      }
+    }
   }
 
   // 初始化
@@ -410,6 +571,11 @@ export const useUserStore = defineStore('user', () => {
     expiresIn,
     loading,
     
+    // 用户标签相关状态
+    userTags,
+    tagPreferences,
+    tagHistory,
+    
     // 计算属性
     isAuthenticated,
     tokenExpired,
@@ -421,6 +587,19 @@ export const useUserStore = defineStore('user', () => {
     sendVerificationCode,
     refreshAccessToken,
     fetchUserInfo,
-    init
+    verifyToken,
+    init,
+    
+    // 用户标签相关方法
+    setUserTags,
+    addUserTag,
+    removeUserTag,
+    updateTagPreference,
+    increaseTagPreference,
+    addToTagHistory,
+    getRecommendedTags,
+    saveUserTagsToLocalStorage,
+    loadUserTagsFromLocalStorage,
+    clearUserTags
   }
 })

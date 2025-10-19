@@ -67,11 +67,11 @@ export interface VideoListResponse {
 export const videoAPI = {
   /**
    * 获取推荐视频列表
-   * @param params 请求参数
+   * @param params 请求参数，包含分页信息和用户标签
    * @returns 视频列表
    */
-  getRecommendedVideos(params: { page?: number; page_size?: number; request_id?: string; category?: string }) {
-    const { page = 1, page_size = 20, request_id, category } = params
+  getRecommendedVideos(params: { page?: number; page_size?: number; request_id?: string; category?: string; user_tags?: string }) {
+    const { page = 1, page_size = 20, request_id, category, user_tags } = params
     const urlParams = new URLSearchParams({
       page: page.toString(),
       page_size: page_size.toString()
@@ -81,6 +81,9 @@ export const videoAPI = {
     }
     if (request_id) {
       urlParams.append('request_id', request_id)
+    }
+    if (user_tags) {
+      urlParams.append('user_tags', user_tags)
     }
     
     return http.get<{ data: VideoListResponse }>(`/api/videos/recommended?${urlParams.toString()}`)
