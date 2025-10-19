@@ -151,15 +151,19 @@ export const useUserStore = defineStore('user', () => {
   async function logout() {
     loading.value = true
     try {
-      if (isAuthenticated.value) {
+      if (isAuthenticated.value && accessToken.value) {
+        // 确保退出登录请求携带token
         await authAPI.logout()
       }
     } catch (error) {
       console.error('退出登录API调用失败:', error)
     } finally {
-      // 清除用户信息
+      // 清除用户信息和token
       clearUserInfo()
       clearLocalStorage()
+      // 清除localStorage中的token
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
       // 使用console.log替代ElementPlus的消息提示
       console.log('退出登录成功')
       // 可以在这里添加自定义的成功通知组件
@@ -234,14 +238,16 @@ export const useUserStore = defineStore('user', () => {
     updatedAt.value = user.updated_at || 0
     phone.value = user.phone || ''
     
-    // 添加对tokens的空值检查
+    // 添加对token的空值检查
     if (token) {
       accessToken.value = token
+      // 同时保存到localStorage，确保请求拦截器能够获取到token
+      localStorage.setItem('access_token', token)
     } else {
-      console.error('Tokens is undefined in updateUserInfo')
+      console.error('Token is undefined in updateUserInfo')
       accessToken.value = ''
-      // refreshToken.value = ''
-      // expiresIn.value = 0
+      // 清除localStorage中的token
+      localStorage.removeItem('access_token')
     }
   }
 
@@ -272,6 +278,10 @@ export const useUserStore = defineStore('user', () => {
     accessToken.value = ''
     refreshToken.value = ''
     expiresIn.value = 0
+    
+    // 清除localStorage中的token
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
   }
 
   // 保存用户信息到localStorage
