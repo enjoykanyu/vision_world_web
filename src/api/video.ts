@@ -111,27 +111,6 @@ export const videoAPI = {
   },
 
   /**
-   * 获取热门视频列表（别名）
-   * @param page 页码
-   * @param pageSize 每页数量
-   * @param timeRange 时间范围
-   * @param category 分类
-   * @returns 视频列表
-   */
-  getTrendingVideos(page = 1, pageSize = 20, timeRange = 'week', category?: string) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      page_size: pageSize.toString(),
-      time_range: timeRange
-    })
-    if (category) {
-      params.append('category', category)
-    }
-    
-    return http.get<VideoListResponse>(`/api/videos/trending?${params.toString()}`)
-  },
-
-  /**
    * 获取视频详情
    * @param videoId 视频ID
    * @param requestId 请求ID
@@ -150,21 +129,52 @@ export const videoAPI = {
   },
 
   /**
-   * 点赞视频
+   * 点赞/取消点赞视频
    * @param videoId 视频ID
+   * @param isLike 是否点赞
    * @returns 操作结果
    */
-  likeVideo(videoId: string) {
-    return http.post(`/api/videos/${videoId}/like`)
+  likeVideo(videoId: string, isLike = true) {
+    return http.post(`/api/videos/${videoId}/like`, { action_type: isLike })
   },
 
   /**
-   * 取消点赞视频
-   * @param videoId 视频ID
-   * @returns 操作结果
+   * 获取分类视频列表
+   * @param category 分类名称
+   * @param params 请求参数
+   * @returns 视频列表
    */
-  unlikeVideo(videoId: string) {
-    return http.delete(`/api/videos/${videoId}/like`)
+  getCategoryVideos(category: string, params: { page?: number; page_size?: number; request_id?: string } = {}) {
+    const { page = 1, page_size = 20, request_id } = params
+    const urlParams = new URLSearchParams({
+      page: page.toString(),
+      page_size: page_size.toString()
+    })
+    if (request_id) {
+      urlParams.append('request_id', request_id)
+    }
+    
+    return http.get<{ data: VideoListResponse }>(`/api/videos/category/${category}?${urlParams.toString()}`)
+  },
+
+  /**
+   * 搜索视频
+   * @param keyword 搜索关键词
+   * @param params 请求参数
+   * @returns 视频列表
+   */
+  searchVideos(keyword: string, params: { page?: number; page_size?: number; request_id?: string } = {}) {
+    const { page = 1, page_size = 20, request_id } = params
+    const urlParams = new URLSearchParams({
+      keyword,
+      page: page.toString(),
+      page_size: page_size.toString()
+    })
+    if (request_id) {
+      urlParams.append('request_id', request_id)
+    }
+    
+    return http.get<{ data: VideoListResponse }>(`/api/videos/search?${urlParams.toString()}`)
   },
 
   /**

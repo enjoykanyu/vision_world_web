@@ -204,16 +204,25 @@ export const useVideoStore = defineStore('video', () => {
   // 点赞视频
   async function likeVideo(videoId: string) {
     try {
-      await videoAPI.likeVideo(videoId)
+      const response = await videoAPI.likeVideo(videoId, true)
       
       // 更新本地状态
       if (currentVideo.value && currentVideo.value.id === videoId) {
         currentVideo.value.isLiked = true
-        currentVideo.value.likes = (currentVideo.value.likes || 0) + 1
+        // 使用API返回的点赞数
+        if (response.data && response.data.like_count !== undefined) {
+          currentVideo.value.likes = response.data.like_count
+        } else {
+          currentVideo.value.likes = (currentVideo.value.likes || 0) + 1
+        }
       }
       
       // 更新列表中的视频状态
-      updateVideoInLists(videoId, { isLiked: true, likes: (getVideoById(videoId)?.likes || 0) + 1 })
+      const currentLikes = getVideoById(videoId)?.likes || 0
+      const newLikes = response.data && response.data.like_count !== undefined 
+        ? response.data.like_count 
+        : currentLikes + 1
+      updateVideoInLists(videoId, { isLiked: true, likes: newLikes })
       
       // 使用console.log替代ElementPlus的消息提示
       console.log('点赞成功')
@@ -231,16 +240,25 @@ export const useVideoStore = defineStore('video', () => {
   // 取消点赞
   async function unlikeVideo(videoId: string) {
     try {
-      await videoAPI.unlikeVideo(videoId)
+      const response = await videoAPI.likeVideo(videoId, false)
       
       // 更新本地状态
       if (currentVideo.value && currentVideo.value.id === videoId) {
         currentVideo.value.isLiked = false
-        currentVideo.value.likes = Math.max(0, (currentVideo.value.likes || 1) - 1)
+        // 使用API返回的点赞数
+        if (response.data && response.data.like_count !== undefined) {
+          currentVideo.value.likes = response.data.like_count
+        } else {
+          currentVideo.value.likes = Math.max(0, (currentVideo.value.likes || 1) - 1)
+        }
       }
       
       // 更新列表中的视频状态
-      updateVideoInLists(videoId, { isLiked: false, likes: Math.max(0, (getVideoById(videoId)?.likes || 1) - 1) })
+      const currentLikes = getVideoById(videoId)?.likes || 1
+      const newLikes = response.data && response.data.like_count !== undefined 
+        ? response.data.like_count 
+        : Math.max(0, currentLikes - 1)
+      updateVideoInLists(videoId, { isLiked: false, likes: newLikes })
       
       // 使用console.log替代ElementPlus的消息提示
       console.log('取消点赞成功')
