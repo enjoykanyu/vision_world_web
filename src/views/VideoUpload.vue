@@ -27,8 +27,39 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
             </button>
-            <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
-              <span class="text-white text-sm font-semibold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
+            <!-- 用户头像下拉菜单 -->
+            <div class="relative group">
+              <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all">
+                <span class="text-white text-sm font-semibold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
+              </div>
+              
+              <!-- 下拉菜单 -->
+              <div class="absolute right-0 top-12 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="py-2">
+                  <router-link to="/profile" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    个人账号中心
+                  </router-link>
+                  
+                  <router-link to="/manage/videos" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    投稿管理
+                  </router-link>
+                  
+                  <hr class="my-2 border-gray-200 dark:border-gray-600">
+                  
+                  <button @click="handleLogout" class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    退出登录
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -774,6 +805,17 @@ const closeLoginModal = () => {
   showLoginModal.value = false
   loginError.value = ''
   loginForm.value = { phone: '', verificationCode: '', rememberMe: false }
+}
+
+// 处理退出登录
+const handleLogout = async () => {
+  try {
+    await userStore.logout()
+    // 退出登录后跳转到首页
+    router.push('/')
+  } catch (error) {
+    console.error('退出登录失败:', error)
+  }
 }
 
 // 生命周期
