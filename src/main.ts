@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import router from './router'
 import App from './App.vue'
 import './assets/css/tailwind.css'
+import { useUserStore } from '@/stores/userStore'
 
 // 注释掉mock数据（开发环境）- 使用真实后端
 // if (import.meta.env.DEV) {
@@ -33,4 +34,18 @@ window.addEventListener('auth-logout', () => {
   }
 })
 
-app.mount('#app')
+// 初始化用户状态
+const initializeApp = async () => {
+  try {
+    const userStore = useUserStore()
+    await userStore.init()
+    console.log('用户状态初始化完成')
+  } catch (error) {
+    console.error('用户状态初始化失败:', error)
+  }
+}
+
+// 在应用挂载前初始化用户状态
+initializeApp().then(() => {
+  app.mount('#app')
+})

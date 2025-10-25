@@ -24,8 +24,10 @@ import { onMounted, onUnmounted } from 'vue'
 import VAssistant from './components/VAssistant.vue'
 import LoginSuccessAnimation from './components/LoginSuccessAnimation.vue'
 import { useLoginAnimation } from '@/composables/useLoginAnimation'
+import { useUserStore } from '@/stores/userStore'
 
 const { showLoginAnimation, consecutiveLoginDays, closeLoginAnimation, triggerLoginSuccessAnimation } = useLoginAnimation()
+const userStore = useUserStore()
 
 // 方案B：在全局监听登录成功事件，统一触发动画
 const handleLoginSuccessEvent = (e: Event) => {
@@ -33,8 +35,17 @@ const handleLoginSuccessEvent = (e: Event) => {
   triggerLoginSuccessAnimation()
 }
 
+// 处理需要登录的事件
+const handleLoginRequired = () => {
+  // 可以在这里显示登录提示或重定向到登录页面
+  console.log('需要登录才能访问该页面')
+  // 触发登录成功动画作为提示（可以根据需要修改）
+  triggerLoginSuccessAnimation()
+}
+
 onMounted(() => {
   window.addEventListener('login-success', handleLoginSuccessEvent as EventListener)
+  window.addEventListener('show-login-required', handleLoginRequired)
   
   // 注释掉mock数据初始化 - 使用真实后端
   // if (import.meta.env.DEV) {
@@ -50,6 +61,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('login-success', handleLoginSuccessEvent as EventListener)
+  window.removeEventListener('show-login-required', handleLoginRequired)
 })
 // App组件逻辑
 </script>

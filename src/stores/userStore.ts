@@ -520,7 +520,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 初始化
-  function init() {
+  async function init() {
     // 从localStorage加载用户信息
     loadUserFromLocalStorage()
     // 从localStorage加载用户标签
@@ -528,13 +528,28 @@ export const useUserStore = defineStore('user', () => {
     
     // 如果有token，验证其有效性
     if (accessToken.value) {
-      // 检查token是否即将过期
-      const now = Date.now()
-      const expiryTime = expiresIn.value * 1000 // 转换为毫秒
-      
-      // 如果token在5分钟内过期，尝试刷新
-      if (expiryTime - now < 5 * 60 * 1000) {
-        refreshAccessToken()
+      try {
+        // 首先验证token是否有效
+        const isValid = await verifyToken()
+        if (!isValid) {
+          console.log('Token验证失败，需要重新登录')
+          return
+        }
+        
+        // 检查token是否即将过期
+        const now = Date.now()
+        const expiryTime = expiresIn.value * 1000 // 转换为毫秒
+        
+        // 如果token在5分钟内过期，尝试刷新
+        if (expiryTime - now < 5 * 60 * 1000) {
+          console.log('Token即将过期，尝试刷新')
+          await refreshAccessToken()
+        }
+      } catch (error) {
+        console.error('初始化登录状态失败:', error)
+        // 如果验证失败，清除登录状态
+        clearUserInfo()
+        clearLocalStorage()
       }
     }
   }

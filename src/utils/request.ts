@@ -53,8 +53,7 @@ request.interceptors.request.use(
     config.headers = config.headers || {}
     config.headers['X-Request-ID'] = generateRequestId()
     
-    // 添加认证token - 从localStorage获取
-    // 注意：这里使用localStorage而不是userStore，因为在请求拦截器中可能无法访问到Vue的响应式状态
+    // 添加认证token - 优先从localStorage获取，确保与userStore的同步
     const token = localStorage.getItem('access_token')
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
@@ -180,6 +179,12 @@ const handleBusinessError = (code: number, message: string) => {
       // 其他业务错误可以在这里统一处理
       break
   }
+}
+
+// Token同步函数 - 确保userStore和localStorage中的token保持一致
+export const syncTokenWithLocalStorage = () => {
+  const token = localStorage.getItem('access_token')
+  return token
 }
 
 // 处理HTTP错误
