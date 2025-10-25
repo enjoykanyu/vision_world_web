@@ -8,6 +8,7 @@ import UserProfile from '@/views/UserProfile.vue'
 import Messages from '@/views/Messages.vue'
 import Live from '@/views/Live.vue'
 import StreamSetup from '@/views/StreamSetup.vue'
+import VideoUpload from '@/views/VideoUpload.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -66,6 +67,14 @@ const router = createRouter({
       component: Messages,
       meta: {
         title: '私信 - Vision World'
+      }
+    },
+    {
+      path: '/upload',
+      name: 'videoUpload',
+      component: VideoUpload,
+      meta: {
+        title: '投稿 - Vision World'
       }
     }
   ]

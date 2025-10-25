@@ -10,10 +10,12 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "@types/markdown-it": "^14.1.2",
     "@vueuse/core": "^10.3.0",
     "axios": "^1.12.2",
     "axios-mock-adapter": "^1.22.0",
+    "element-plus": "^2.11.5",
     "github-markdown-css": "^5.8.1",
     "markdown-it": "^14.1.0",
     "pinia": "^2.1.6",

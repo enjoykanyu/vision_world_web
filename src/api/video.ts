@@ -207,6 +207,28 @@ export const videoAPI = {
     })
     
     return http.get<{ videos: ApiVideo[] }>(`/api/videos/${videoId}/related?${params.toString()}`)
+  },
+
+  /**
+   * 上传视频
+   * @param formData 包含视频文件的 FormData
+   * @returns 上传结果
+   */
+  uploadVideo(formData: FormData) {
+    return http.post<{ data: Video }>('/api/video/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+
+  /**
+   * 发布视频
+   * @param formData 包含视频信息的 FormData
+   * @returns 发布结果
+   */
+  publishVideo(formData: FormData) {
+    return http.post<{ data: Video }>('/api/video/publish', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
   }
 }
 
