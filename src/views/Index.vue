@@ -638,6 +638,11 @@ const closeLoginModal = () => {
   loginForm.value = { phone: '', verificationCode: '' }
 }
 
+// 从事件显示登录弹窗
+const showLoginModalFromEvent = () => {
+  showLoginModal.value = true
+}
+
 const carouselSlides = [
   {
     id: 1,
@@ -948,6 +953,9 @@ onMounted(async () => {
   startAutoSlide()
   window.addEventListener('resize', updateIsMobile)
   
+  // 监听显示登录弹窗事件
+  window.addEventListener('show-login-modal', showLoginModalFromEvent)
+  
   // 进入首页时的数据加载逻辑
   try {
     // 如果用户已登录，先验证Token有效性
@@ -969,6 +977,7 @@ onUnmounted(() => {
     clearInterval(slideInterval)
   }
   window.removeEventListener('resize', updateIsMobile)
+  window.removeEventListener('show-login-modal', showLoginModalFromEvent)
 })
 </script>
 

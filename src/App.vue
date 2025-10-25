@@ -37,10 +37,18 @@ const handleLoginSuccessEvent = (e: Event) => {
 
 // 处理需要登录的事件
 const handleLoginRequired = () => {
-  // 可以在这里显示登录提示或重定向到登录页面
+  // 显示登录提示
   console.log('需要登录才能访问该页面')
-  // 触发登录成功动画作为提示（可以根据需要修改）
-  triggerLoginSuccessAnimation()
+  
+  // 如果当前在首页，直接触发登录弹窗事件
+  if (window.location.pathname === '/') {
+    window.dispatchEvent(new CustomEvent('show-login-modal'))
+  } else {
+    // 其他页面重定向到首页后显示登录弹窗
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('show-login-modal'))
+    }, 500)
+  }
 }
 
 onMounted(() => {
