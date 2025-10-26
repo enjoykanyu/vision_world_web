@@ -128,16 +128,48 @@
                       <span>上传中...</span>
                       <span>{{ uploadProgress }}%</span>
                     </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden relative">
                       <div 
-                        class="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                        class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
                         :style="{ width: uploadProgress + '%' }"
+                      >
+                        <div class="absolute inset-0 bg-white opacity-20 animate-pulse-slow"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                          <div class="h-2 w-full bg-white opacity-30 rounded-full transform -skew-x-12 animate-slide"></div>
+                        </div>
+                      </div>
+                      <!-- 进度条光晕效果 -->
+                      <div 
+                        class="absolute top-0 left-0 h-3 rounded-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-slide"
+                        :style="{ width: '50px', left: `calc(${uploadProgress}% - 25px)` }"
                       ></div>
                     </div>
+                    <div class="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <div>
+                        <span>正在上传视频文件...</span>
+                        <span v-if="uploadProgress < 100" class="ml-2">剩余时间: {{ formatRemainingTime(remainingTime) }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <span v-if="uploadProgress < 100" class="mr-2">速度: {{ formatUploadSpeed(uploadSpeed) }}</span>
+                        <span v-if="uploadProgress < 100">请勿关闭页面</span>
+                        <span v-else class="text-green-600 dark:text-green-400">上传完成!</span>
+                      </div>
+                    </div>
                   </div>
-                  <button @click="cancelUpload" class="text-red-600 hover:text-red-700 text-sm">
-                    取消上传
-                  </button>
+                  <div class="flex items-center justify-between">
+                    <button @click="cancelUpload" class="text-red-600 hover:text-red-700 text-sm flex items-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                      取消上传
+                    </button>
+                    <div v-if="uploadProgress === 100" class="flex items-center text-green-600 dark:text-green-400">
+                      <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span>上传成功</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -361,145 +393,148 @@
     </div>
   </div>
 
-  <!-- 登录弹窗 -->
-  <div v-if="showLoginModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <!-- 背景遮罩 -->
-      <div class="fixed inset-0 bg-black bg-opacity-60 transition-opacity" aria-hidden="true" @click="closeLoginModal"></div>
+  <!-- 未登录遮罩层 -->
+  <div v-if="showLoginModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+    <!-- 登录弹窗 -->
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- 背景遮罩 -->
+        <div class="fixed inset-0 bg-black bg-opacity-60 transition-opacity" aria-hidden="true" @click="closeLoginModal"></div>
       
-      <!-- 模态框居中技巧 -->
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-      
-      <!-- 登录卡片 -->
-      <div 
-        class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full p-6 sm:p-8 animate-fade-in-up"
-        @click.stop
-      >
-        <!-- 标题和关闭按钮 -->
-        <div class="flex justify-between items-center mb-8">
-          <h3 class="text-2xl font-bold text-gray-800 dark:text-white">欢迎回来</h3>
-          <button 
-            @click="closeLoginModal" 
-            class="rounded-full p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
+        <!-- 模态框居中技巧 -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         
-        <!-- 登录表单 -->
-        <div class="space-y-6">
-          <!-- 手机号输入框 -->
-          <div class="space-y-2">
-            <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">手机号</label>
-            <div class="relative rounded-md shadow-sm">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6a2 2 0 012-2z" />
-                </svg>
-              </div>
-              <input 
-                type="tel" 
-                id="phone" 
-                v-model="loginForm.phone"
-                class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors" 
-                placeholder="请输入手机号"
-                maxlength="11"
-              >
-            </div>
+        <!-- 登录卡片 -->
+        <div 
+          class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full p-6 sm:p-8 animate-fade-in-up"
+          @click.stop
+        >
+          <!-- 标题和关闭按钮 -->
+          <div class="flex justify-between items-center mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white">欢迎回来</h3>
+            <button 
+              @click="closeLoginModal" 
+              class="rounded-full p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
           </div>
           
-          <!-- 验证码输入框 -->
-          <div class="space-y-2">
-            <label for="verificationCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">验证码</label>
-            <div class="flex space-x-3">
-              <input 
-                type="text" 
-                id="verificationCode" 
-                v-model="loginForm.verificationCode"
-                class="flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors" 
-                placeholder="请输入验证码"
-                maxlength="6"
-              >
-              <button 
-                @click="sendVerificationCode" 
-                :disabled="isSendingCode || countdown > 0"
-                class="px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                :class="countdown > 0 ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-purple-600 hover:bg-purple-700 text-white'"
-              >
-                {{ countdown > 0 ? `${countdown}s` : '发送验证码' }}
+          <!-- 登录表单 -->
+          <div class="space-y-6">
+            <!-- 手机号输入框 -->
+            <div class="space-y-2">
+              <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">手机号</label>
+              <div class="relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6a2 2 0 012-2z" />
+                  </svg>
+                </div>
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  v-model="loginForm.phone"
+                  class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors" 
+                  placeholder="请输入手机号"
+                  maxlength="11"
+                >
+              </div>
+            </div>
+            
+            <!-- 验证码输入框 -->
+            <div class="space-y-2">
+              <label for="verificationCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">验证码</label>
+              <div class="flex space-x-3">
+                <input 
+                  type="text" 
+                  id="verificationCode" 
+                  v-model="loginForm.verificationCode"
+                  class="flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors" 
+                  placeholder="请输入验证码"
+                  maxlength="6"
+                >
+                <button 
+                  @click="sendVerificationCode" 
+                  :disabled="isSendingCode || countdown > 0"
+                  class="px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  :class="countdown > 0 ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-purple-600 hover:bg-purple-700 text-white'"
+                >
+                  {{ countdown > 0 ? `${countdown}s` : '发送验证码' }}
+                </button>
+              </div>
+            </div>
+            
+            <!-- 记住我和忘记密码 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <input 
+                  id="remember-me" 
+                  v-model="loginForm.rememberMe"
+                  type="checkbox" 
+                  class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                >
+                <label for="remember-me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">记住我</label>
+              </div>
+              <div class="text-sm">
+                <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">忘记密码?</a>
+              </div>
+            </div>
+            
+            <!-- 错误提示 -->
+            <div v-if="loginError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm rounded-lg border border-red-200 dark:border-red-800/50">
+              <div class="flex">
+                <svg class="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                {{ loginError }}
+              </div>
+            </div>
+            
+            <!-- 登录按钮 -->
+            <button 
+              @click="handleLogin" 
+              class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform transition-all duration-200 hover:scale-105 active:scale-95"
+            >
+              登录
+            </button>
+            
+            <!-- 注册链接 -->
+            <div class="text-center text-sm text-gray-600 dark:text-gray-400">
+              <span>还没有账号？</span>
+              <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">立即注册</a>
+            </div>
+            
+            <!-- 分隔线 -->
+            <div class="relative my-6">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+              </div>
+              <div class="relative flex justify-center text-sm">
+                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">其他登录方式</span>
+              </div>
+            </div>
+            
+            <!-- 社交登录按钮 -->
+            <div class="flex items-center justify-center space-x-6">
+              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.07 16.57l-4.24-4.24 1.41-1.41 2.83 2.83 6.59-6.59 1.41 1.41-8 8z"/>
+                </svg>
+              </button>
+              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
+                </svg>
+              </button>
+              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.097.118.112.222.083.343-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z"/>
+                </svg>
               </button>
             </div>
-          </div>
-          
-          <!-- 记住我和忘记密码 -->
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <input 
-                id="remember-me" 
-                v-model="loginForm.rememberMe"
-                type="checkbox" 
-                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-              >
-              <label for="remember-me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">记住我</label>
-            </div>
-            <div class="text-sm">
-              <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">忘记密码?</a>
-            </div>
-          </div>
-          
-          <!-- 错误提示 -->
-          <div v-if="loginError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm rounded-lg border border-red-200 dark:border-red-800/50">
-            <div class="flex">
-              <svg class="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-              {{ loginError }}
-            </div>
-          </div>
-          
-          <!-- 登录按钮 -->
-          <button 
-            @click="handleLogin" 
-            class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform transition-all duration-200 hover:scale-105 active:scale-95"
-          >
-            登录
-          </button>
-          
-          <!-- 注册链接 -->
-          <div class="text-center text-sm text-gray-600 dark:text-gray-400">
-            <span>还没有账号？</span>
-            <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">立即注册</a>
-          </div>
-          
-          <!-- 分隔线 -->
-          <div class="relative my-6">
-            <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">其他登录方式</span>
-            </div>
-          </div>
-          
-          <!-- 社交登录按钮 -->
-          <div class="flex items-center justify-center space-x-6">
-            <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8.07 16.57l-4.24-4.24 1.41-1.41 2.83 2.83 6.59-6.59 1.41 1.41-8 8z"/>
-              </svg>
-            </button>
-            <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
-              </svg>
-            </button>
-            <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.097.118.112.222.083.343-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z"/>
-              </svg>
-            </button>
           </div>
         </div>
       </div>
@@ -508,7 +543,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { videoAPI } from '@/api/video'
@@ -526,6 +561,13 @@ const uploadProgress = ref(0)
 const uploadedVideoId = ref('')
 const videoPreviewUrl = ref('')
 const coverPreview = ref('')
+
+// 上传速度和剩余时间
+const uploadSpeed = ref(0) // KB/s
+const remainingTime = ref(0) // 秒
+const uploadStartTime = ref(0) // 开始上传时间
+const lastProgressTime = ref(0) // 上次更新进度时间
+const lastProgressValue = ref(0) // 上次进度值
 
 // 视频表单
 const videoForm = ref({
@@ -636,6 +678,19 @@ const formatFileSize = (bytes: number) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
+const formatUploadSpeed = (speed: number) => {
+  if (speed === 0) return '0 KB/s'
+  if (speed < 1024) return `${speed.toFixed(1)} KB/s`
+  return `${(speed / 1024).toFixed(1)} MB/s`
+}
+
+const formatRemainingTime = (seconds: number) => {
+  if (seconds === 0 || !isFinite(seconds)) return '计算中...'
+  if (seconds < 60) return `${Math.ceil(seconds)}秒`
+  if (seconds < 3600) return `${Math.ceil(seconds / 60)}分钟`
+  return `${Math.ceil(seconds / 3600)}小时`
+}
+
 const startUpload = async () => {
   if (!selectedFile.value) return
   
@@ -651,15 +706,77 @@ const startUpload = async () => {
   
   try {
     uploadProgress.value = 0
+    uploadSpeed.value = 0
+    remainingTime.value = 0
+    uploadStartTime.value = Date.now()
+    lastProgressTime.value = Date.now()
+    lastProgressValue.value = 0
+    
+    // 模拟上传进度更新
+    const progressInterval = setInterval(() => {
+      if (uploadProgress.value < 90) {
+        // 随机增加进度，模拟真实上传
+        const increment = Math.random() * 10 + 2
+        uploadProgress.value = Math.min(uploadProgress.value + increment, 90)
+        
+        // 计算上传速度和剩余时间
+        const currentTime = Date.now()
+        const timeDiff = (currentTime - lastProgressTime.value) / 1000 // 秒
+        const progressDiff = uploadProgress.value - lastProgressValue.value
+        
+        if (timeDiff > 0 && progressDiff > 0) {
+          // 计算上传速度 (KB/s)
+          const uploadedBytes = (selectedFile.value!.size * uploadProgress.value) / 100
+          uploadSpeed.value = (uploadedBytes / 1024) / ((currentTime - uploadStartTime.value) / 1000)
+          
+          // 计算剩余时间
+          const remainingProgress = 100 - uploadProgress.value
+          remainingTime.value = (remainingProgress / progressDiff) * timeDiff
+        }
+        
+        lastProgressTime.value = currentTime
+        lastProgressValue.value = uploadProgress.value
+      }
+    }, 500)
     
     // 使用真实的上传API
     const response = await videoAPI.uploadVideo(formData)
     
+    // 清除进度更新定时器
+    clearInterval(progressInterval)
+    
     if (response.data) {
-      uploadProgress.value = 100
+      // 模拟最后阶段的进度更新
+      const finalProgress = setInterval(() => {
+        if (uploadProgress.value < 100) {
+          uploadProgress.value += 2
+          
+          // 更新速度和剩余时间
+          const currentTime = Date.now()
+          const timeDiff = (currentTime - lastProgressTime.value) / 1000
+          const progressDiff = uploadProgress.value - lastProgressValue.value
+          
+          if (timeDiff > 0 && progressDiff > 0) {
+            uploadSpeed.value = (selectedFile.value!.size / 1024) / ((currentTime - uploadStartTime.value) / 1000)
+            remainingTime.value = ((100 - uploadProgress.value) / progressDiff) * timeDiff
+          }
+          
+          lastProgressTime.value = currentTime
+          lastProgressValue.value = uploadProgress.value
+        } else {
+          clearInterval(finalProgress)
+          uploadSpeed.value = 0
+          remainingTime.value = 0
+        }
+      }, 100)
+      
       uploadedVideoId.value = response.data.id
       videoPreviewUrl.value = URL.createObjectURL(selectedFile.value!)
-      alert('视频上传成功')
+      
+      // 显示上传成功消息
+      setTimeout(() => {
+        alert('视频上传成功')
+      }, 500)
     } else {
       throw new Error('上传失败')
     }
@@ -667,6 +784,8 @@ const startUpload = async () => {
   } catch (error) {
     alert('上传失败，请重试')
     uploadProgress.value = 0
+    uploadSpeed.value = 0
+    remainingTime.value = 0
   }
 }
 
@@ -820,9 +939,22 @@ const handleLogout = async () => {
 
 // 生命周期
 onMounted(() => {
+  // 检查用户是否已登录，如果未登录则显示登录弹窗
   if (!userStore.isLoggedIn) {
     showLoginModal.value = true
   }
+  
+  // 监听需要登录的事件
+  const handleLoginRequired = () => {
+    showLoginModal.value = true
+  }
+  
+  window.addEventListener('show-login-required', handleLoginRequired)
+  
+  // 组件卸载时移除事件监听
+  onUnmounted(() => {
+    window.removeEventListener('show-login-required', handleLoginRequired)
+  })
 })
 </script>
 
@@ -838,5 +970,58 @@ onMounted(() => {
 .upload-area.dragging {
   border-color: #8b5cf6;
   background-color: rgba(139, 92, 246, 0.05);
+}
+
+/* 进度条动画 */
+@keyframes slide {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
+}
+
+.animate-slide {
+  animation: slide 2s infinite;
+}
+
+/* 上传成功动画 */
+@keyframes checkmark {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: checkmark 0.6s ease-in-out forwards;
+}
+
+.checkmark-path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkmark 0.3s ease-in-out 0.3s forwards;
+}
+
+/* 脉冲动画效果 */
+@keyframes pulse {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>

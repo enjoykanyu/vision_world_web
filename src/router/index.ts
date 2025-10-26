@@ -79,15 +79,6 @@ const router = createRouter({
         title: '投稿 - Vision World',
         requiresAuth: true
       }
-    },
-    {
-      path: '/stream-setup',
-      name: 'streamSetup',
-      component: StreamSetup,
-      meta: {
-        title: '开播设置 - Vision World',
-        requiresAuth: true
-      }
     }
   ]
 })
@@ -102,8 +93,9 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta?.requiresAuth)
   
   if (requiresAuth && !userStore.isAuthenticated) {
-    // 需要登录但未登录，重定向到首页并显示登录弹窗
-    next('/')
+    // 需要登录但未登录，不重定向，而是直接显示登录弹窗
+    // 先允许路由加载，但显示登录弹窗覆盖
+    next()
     // 延迟显示登录弹窗，确保路由切换完成
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('show-login-required'))
