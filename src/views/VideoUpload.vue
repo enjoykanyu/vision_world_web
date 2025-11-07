@@ -882,6 +882,9 @@ const handleFileSelect = (e: Event) => {
 const showCropModal = ref(false)
 const cropImage = ref<HTMLImageElement | null>(null)
 
+// 选择封面
+// Note: triggerCoverInput function is already defined above
+
 // 处理封面选择
 const handleCoverSelect = (e: Event) => {
   const target = e.target as HTMLInputElement
