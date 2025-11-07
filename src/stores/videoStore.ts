@@ -20,6 +20,8 @@ export interface Video {
   shares?: number
   isLiked?: boolean
   isFollowed?: boolean
+  type?: string // 视频类型: original/repost
+  source?: string // 转载来源
 }
 
 // 视频列表状态
@@ -398,7 +400,9 @@ export const useVideoStore = defineStore('video', () => {
       comments: apiVideo.comment_count,
       shares: apiVideo.share_count,
       isLiked: apiVideo.is_liked,
-      isFollowed: apiVideo.author.is_followed
+      isFollowed: apiVideo.author.is_followed,
+      type: apiVideo.type,
+      source: apiVideo.source
     }
   }
 

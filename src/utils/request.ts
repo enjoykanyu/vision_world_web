@@ -71,13 +71,19 @@ request.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     const { data } = response
     
-    // 业务状态码为0表示成功
-    if (data.code === 0) {
-      return response
+    // 检查是否是标准API响应格式（包含code字段）
+    if (data && typeof data === 'object' && 'code' in data) {
+      // 业务状态码为0表示成功
+      if (data.code === 0) {
+        return response
+      } else {
+        // 处理业务错误
+        handleBusinessError(data.code, data.message)
+        return Promise.reject(new Error(data.message || '请求失败'))
+      }
     } else {
-      // 处理业务错误
-      handleBusinessError(data.code, data.message)
-      return Promise.reject(new Error(data.message || '请求失败'))
+      // 对于非标准API响应格式（如文件上传等），直接返回响应
+      return response
     }
   },
   async (error: AxiosError) => {

@@ -32,6 +32,8 @@ export interface ApiVideo {
   tags: string[]
   published_at: string
   is_liked: boolean
+  type?: string // 视频类型: original/repost
+  source?: string // 转载来源
 }
 
 // 视频详情接口
@@ -215,7 +217,7 @@ export const videoAPI = {
    * @returns 上传结果
    */
   uploadVideo(formData: FormData) {
-    return http.post<{ data: Video }>('/api/video/upload', formData, {
+    return http.post('/api/video/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
   },
