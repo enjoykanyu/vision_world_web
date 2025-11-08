@@ -265,25 +265,38 @@
     </main>
     
     <!-- 登录弹窗 -->
-    <div v-if="showLoginModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div v-if="showLoginModal" class="fixed inset-0 z-50 overflow-y-auto animate-fade-in" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <!-- 背景遮罩 -->
-        <div class="fixed inset-0 bg-black bg-opacity-60 transition-opacity" aria-hidden="true" @click="closeLoginModal"></div>
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" aria-hidden="true" @click="closeLoginModal"></div>
         
         <!-- 模态框居中技巧 -->
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         
         <!-- 登录卡片 -->
         <div 
-          class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full p-6 sm:p-8 animate-fade-in-up"
+          class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full animate-fade-in-up"
           @click.stop
         >
+          <!-- 顶部装饰条 -->
+          <div class="h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500"></div>
+          
           <!-- 标题和关闭按钮 -->
-          <div class="flex justify-between items-center mb-8">
-            <h3 class="text-2xl font-bold text-gray-800 dark:text-white">欢迎回来</h3>
+          <div class="flex justify-between items-center px-8 pt-6 pb-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">登录账号</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">登录后享受更多精彩内容</p>
+              </div>
+            </div>
             <button 
               @click="closeLoginModal" 
-              class="rounded-full p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+              class="rounded-full p-2 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -291,12 +304,36 @@
             </button>
           </div>
           
+          <!-- 登录方式切换 -->
+          <div class="px-8 pb-4">
+            <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <button 
+                @click="loginType = 'phone'"
+                :class="['flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200', 
+                         loginType === 'phone' 
+                           ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
+                           : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white']"
+              >
+                手机验证码登录
+              </button>
+              <button 
+                @click="loginType = 'qr'"
+                :class="['flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200', 
+                         loginType === 'qr' 
+                           ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
+                           : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white']"
+              >
+                扫码登录
+              </button>
+            </div>
+          </div>
+          
           <!-- 登录表单 -->
-          <div class="space-y-6">
+          <div v-if="loginType === 'phone'" class="px-8 pb-6 space-y-5">
             <!-- 手机号输入框 -->
             <div class="space-y-2">
               <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">手机号</label>
-              <div class="relative rounded-md shadow-sm">
+              <div class="relative rounded-lg shadow-sm">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -306,38 +343,42 @@
                   type="tel" 
                   id="phone" 
                   v-model="loginForm.phone" 
-                  class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
+                  class="form-input block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
+                  :class="loginForm.phone && !isValidPhone(loginForm.phone) ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600'"
                   placeholder="请输入手机号"
                 >
               </div>
+              <p v-if="loginForm.phone && !isValidPhone(loginForm.phone)" class="mt-1 text-sm text-red-500">请输入有效的手机号码</p>
             </div>
             
             <!-- 验证码输入框 -->
             <div class="space-y-2">
               <label for="verificationCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">验证码</label>
               <div class="flex space-x-3">
-                <div class="relative rounded-md shadow-sm flex-1">
+                <div class="relative rounded-lg shadow-sm flex-1">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
                   <input 
-                    type="text" 
-                    id="verificationCode" 
-                    v-model="loginForm.verificationCode" 
-                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
-                    placeholder="请输入验证码"
-                  >
+                  type="text" 
+                  id="verificationCode" 
+                  v-model="loginForm.verificationCode" 
+                  class="form-input block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
+                  :class="loginForm.verificationCode && loginForm.verificationCode.length !== 6 ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600'"
+                  placeholder="请输入验证码"
+                >
                 </div>
                 <button 
                   @click="sendVerificationCode" 
-                  :disabled="isSendingCode || countdown > 0"
-                  class="px-4 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  :disabled="!isValidPhone(loginForm.phone) || isSendingCode || countdown > 0"
+                  class="px-4 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 whitespace-nowrap"
                 >
-                  {{ countdown > 0 ? `${countdown}秒后重试` : '发送验证码' }}
+                  {{ isSendingCode ? '发送中...' : countdown > 0 ? `${countdown}秒后重试` : '发送验证码' }}
                 </button>
               </div>
+              <p v-if="loginForm.verificationCode && loginForm.verificationCode.length !== 6" class="mt-1 text-sm text-red-500">请输入6位验证码</p>
             </div>
             
             <!-- 记住我和忘记密码 -->
@@ -364,9 +405,17 @@
             <!-- 登录按钮 -->
             <button 
               @click="handleLogin" 
-              class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+              :disabled="!isValidPhone(loginForm.phone) || !loginForm.verificationCode || loginForm.verificationCode.length !== 6 || isSendingCode"
+              class="btn-primary w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:transform-none"
             >
-              登录
+              <span v-if="isSendingCode" class="flex items-center justify-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                登录中...
+              </span>
+              <span v-else>登录</span>
             </button>
             
             <!-- 注册链接 -->
@@ -374,32 +423,55 @@
               <span>还没有账号？</span>
               <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">立即注册</a>
             </div>
-            
-            <!-- 分隔线 -->
-            <div class="relative my-6">
-              <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+          </div>
+          
+          <!-- 扫码登录 -->
+          <div v-if="loginType === 'qr'" class="px-8 pb-6">
+            <div class="flex flex-col items-center space-y-4">
+              <div class="w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 opacity-70"></div>
+                <div class="relative z-10 text-center">
+                  <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                  </svg>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">二维码加载中...</p>
+                </div>
               </div>
-              <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">其他登录方式</span>
+              <div class="text-center">
+                <p class="text-sm text-gray-600 dark:text-gray-400">打开手机APP扫描二维码</p>
+                <button class="mt-2 text-sm text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 transition-colors duration-200">
+                  刷新二维码
+                </button>
               </div>
             </div>
-            
-            <!-- 社交登录按钮 -->
+          </div>
+          
+          <!-- 分隔线 -->
+          <div class="relative px-8 py-4">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">其他登录方式</span>
+            </div>
+          </div>
+          
+          <!-- 社交登录按钮 -->
+          <div class="px-8 pb-8">
             <div class="flex items-center justify-center space-x-6">
-              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+              <button class="social-btn flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110 active:scale-95">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8.07 16.57l-4.24-4.24 1.41-1.41 2.83 2.83 6.59-6.59 1.41 1.41-8 8z"/>
+                  <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
                 </svg>
               </button>
-              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+              <button class="social-btn flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110 active:scale-95">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
+                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
                 </svg>
               </button>
-              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110">
+              <button class="social-btn flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110 active:scale-95">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5.01 4.44c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm3.5 9.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5 1.5.67 1.5 1.5z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </button>
             </div>
@@ -553,6 +625,7 @@ const toggleDarkMode = () => {
 
 // 登录相关
 const showLoginModal = ref(false)
+const loginType = ref('phone') // 'phone' 或 'qr'
 const loginForm = ref({
   phone: '',
   verificationCode: ''
@@ -560,6 +633,11 @@ const loginForm = ref({
 const loginError = ref('')
 const isSendingCode = ref(false)
 const countdown = ref(0)
+
+// 手机号验证函数
+const isValidPhone = (phone: string) => {
+  return /^1[3-9]\d{9}$/.test(phone)
+}
 
 // 处理用户头像点击
 const handleUserIconClick = () => {
@@ -578,8 +656,8 @@ const sendVerificationCode = async () => {
     return
   }
   
-  if (!/^1[3-9]\d{9}$/.test(loginForm.value.phone)) {
-    loginError.value = '请输入正确的手机号'
+  if (!isValidPhone(loginForm.value.phone)) {
+    loginError.value = '请输入有效的手机号码'
     return
   }
   
@@ -602,10 +680,10 @@ const sendVerificationCode = async () => {
       
       loginError.value = ''
     } else {
-      loginError.value = result.error || '发送验证码失败服务校验报错'
+      loginError.value = result.error || '发送验证码失败，请稍后重试'
     }
   } catch (error) {
-    loginError.value = '发送验证码失败333'
+    loginError.value = '网络错误，请检查网络连接'
   } finally {
     isSendingCode.value = false
   }
@@ -613,8 +691,23 @@ const sendVerificationCode = async () => {
 
 // 处理登录
 const handleLogin = async () => {
-  if (!loginForm.value.phone || !loginForm.value.verificationCode) {
-    loginError.value = '请输入手机号和验证码'
+  if (!loginForm.value.phone) {
+    loginError.value = '请输入手机号'
+    return
+  }
+  
+  if (!isValidPhone(loginForm.value.phone)) {
+    loginError.value = '请输入有效的手机号码'
+    return
+  }
+  
+  if (!loginForm.value.verificationCode) {
+    loginError.value = '请输入验证码'
+    return
+  }
+  
+  if (loginForm.value.verificationCode.length !== 6) {
+    loginError.value = '请输入6位验证码'
     return
   }
 
@@ -627,7 +720,7 @@ const handleLogin = async () => {
     loginError.value = ''
     loginForm.value = { phone: '', verificationCode: '' }
   } catch (error) {
-    loginError.value = '登录失败，请检查验证码'
+    loginError.value = '登录失败，请检查手机号和验证码是否正确'
   }
 }
 
@@ -980,6 +1073,84 @@ onUnmounted(() => {
   window.removeEventListener('show-login-modal', showLoginModalFromEvent)
 })
 </script>
+
+<style scoped>
+/* 登录弹窗动画 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+/* 输入框聚焦动画 */
+.form-input {
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* 按钮点击动画 */
+.btn-primary {
+  transition: all 0.2s ease;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* 社交登录按钮悬停效果 */
+.social-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.social-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+
+.social-btn:active {
+  transform: translateY(-1px) scale(0.98);
+}
+</style>
 
 <style scoped>
 .line-clamp-2 {
