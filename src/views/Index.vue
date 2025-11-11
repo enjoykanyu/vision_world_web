@@ -335,8 +335,8 @@
                 type="tel" 
                 id="phone" 
                 v-model="loginForm.phone" 
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
-                :class="loginForm.phone && !isValidPhone(loginForm.phone) ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
+                :class="loginForm.phone && !isValidPhone(loginForm.phone) ? 'border-red-500 focus:border-red-500' : ''"
                 placeholder="请输入手机号"
               >
             </div>
@@ -355,8 +355,8 @@
               <input 
                 type="text" 
                 v-model="loginForm.verificationCode" 
-                class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
-                :class="loginForm.verificationCode && loginForm.verificationCode.length !== 6 ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''"
+                class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
+                :class="loginForm.verificationCode && loginForm.verificationCode.length !== 6 ? 'border-red-500 focus:border-red-500' : ''"
                 placeholder="请输入验证码"
                 maxlength="6"
               >
@@ -382,8 +382,8 @@
               <input 
                 :type="showPassword ? 'text' : 'password'" 
                 v-model="loginForm.password" 
-                class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
-                :class="loginForm.password && loginForm.password.length < 6 ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''"
+                class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
+                :class="loginForm.password && loginForm.password.length < 6 ? 'border-red-500 focus:border-red-500' : ''"
                 placeholder="请输入密码"
               >
               <button 
