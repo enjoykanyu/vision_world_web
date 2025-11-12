@@ -43,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
     // 这里简化处理，实际应该解析JWT token的过期时间
     return false
   })
-  const avatar = computed(() => avatarUrl.value || `https://i.pravatar.cc/150?u=${userId.value}`)
+  const avatar = computed(() => avatarUrl.value || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId.value || 'default'}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`)
 
   // 发送验证码
   async function sendVerificationCode(phone: string) {
@@ -265,7 +265,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 更新用户信息
-  function updateUserInfo(user: UserInfo, token:"") {
+  function updateUserInfo(user: UserInfo, token: string) {
     isLoggedIn.value = true
     username.value = user.username || ''
     nickname.value = user.nickname || ''
@@ -585,6 +585,47 @@ export const useUserStore = defineStore('user', () => {
   // 初始化
   init()
 
+  // 模拟登录（开发测试用）
+  function mockLogin() {
+    const mockUser = {
+      id: 12345,
+      username: 'VisionUser',
+      nickname: '视觉世界探索者',
+      email: 'user@visionworld.com',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=VisionUser12345&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf',
+      background_image: 'https://picsum.photos/800/400?random=1',
+      signature: '探索视觉世界的无限可能 🌟',
+      gender: 1,
+      birthday: '1995-08-15',
+      following_count: 128,
+      followers_count: 256,
+      total_favorited: 1024,
+      work_count: 48,
+      favorite_count: 256,
+      is_verified: true,
+      user_type: 'verified',
+      status: 1,
+      last_login_at: Date.now(),
+      created_at: Date.now() - 86400000 * 365,
+      updated_at: Date.now(),
+      phone: '138****8888'
+    }
+
+    const mockToken = {
+      access_token: 'mock_access_token_12345',
+      refresh_token: 'mock_refresh_token_12345',
+      expires_in: 7200
+    }
+
+    updateUserInfo(mockUser, mockToken.access_token)
+    refreshToken.value = mockToken.refresh_token
+    expiresIn.value = mockToken.expires_in
+    saveUserToLocalStorage()
+    
+    console.log('模拟登录成功:', mockUser)
+    return { success: true }
+  }
+
   return {
     // 状态
     isLoggedIn,
@@ -632,17 +673,19 @@ export const useUserStore = defineStore('user', () => {
     fetchUserInfo,
     verifyToken,
     init,
+    mockLogin,
     
     // 用户标签相关方法
-    setUserTags,
-    addUserTag,
-    removeUserTag,
-    updateTagPreference,
-    increaseTagPreference,
-    addToTagHistory,
-    getRecommendedTags,
-    saveUserTagsToLocalStorage,
-    loadUserTagsFromLocalStorage,
-    clearUserTags
+      setUserTags,
+      addUserTag,
+      removeUserTag,
+      updateTagPreference,
+      increaseTagPreference,
+      addToTagHistory,
+      getRecommendedTags,
+      saveUserTagsToLocalStorage,
+      loadUserTagsFromLocalStorage,
+      clearUserTags,
+      mockLogin
   }
 })

@@ -199,28 +199,48 @@
               <!-- B站风格用户信息悬浮弹窗 -->
               <div 
                 v-if="showUserDropdown"
-                class="user-dropdown absolute top-full right-0 mt-2 w-80 z-50 overflow-hidden"
+                class="user-dropdown absolute top-full right-0 mt-3 w-80 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200"
                 @mouseenter="clearDropdownTimer"
                 @mouseleave="startDropdownTimer"
               >
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+                <!-- 顶部箭头指示器 -->
+                <div class="absolute -top-2 right-4 w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 transform rotate-45 rounded-sm"></div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-600 backdrop-blur-lg bg-opacity-95 dark:bg-opacity-95 overflow-hidden">
                   <!-- 用户信息头部 -->
-                  <div class="p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+                  <div class="p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-2xl relative overflow-hidden">
+                    <!-- 背景装饰元素 -->
+                    <div class="absolute inset-0 opacity-20">
+                      <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+                      <div class="absolute bottom-0 left-0 w-16 h-16 bg-purple-300/20 rounded-full blur-lg"></div>
+                    </div>
                     <div class="flex items-center space-x-3">
-                      <div class="relative">
-                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                          <span class="text-lg font-bold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
-                        </div>
+                      <div class="relative w-14 h-14 overflow-hidden rounded-full border-2 border-white/30 shadow-lg">
+                          <img 
+                            v-if="userStore.avatar" 
+                            :src="userStore.avatar" 
+                            alt="用户头像"
+                            class="w-full h-full object-cover"
+                            @error="handleDropdownAvatarError"
+                          >
+                          <div v-else class="w-full h-full bg-white/20 flex items-center justify-center text-lg font-bold">
+                            {{ (userStore.username || 'U').charAt(0).toUpperCase() }}
+                          </div>
                         <!-- 官方认证标识 -->
-                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
                           <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                           </svg>
                         </div>
+                        <!-- 装饰性背景元素 -->
+                        <div class="absolute -top-2 -left-2 w-8 h-8 bg-white/10 rounded-full"></div>
+                        <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-white/10 rounded-full"></div>
                       </div>
                       <div class="flex-1">
-                        <h3 class="font-semibold text-base">{{ userStore.username || '用户' }}</h3>
-                        <p class="text-blue-100 text-sm">{{ userStore.userId || 'ID: 12345678' }}</p>
+                        <div class="font-semibold text-base flex items-center gap-2">
+                          {{ userStore.username || '用户' }}
+                          <span class="px-2 py-0.5 bg-yellow-400/20 text-yellow-300 text-xs rounded-full border border-yellow-400/30">Lv.{{ userStore.user?.level || 1 }}</span>
+                        </div>
+                        <p class="text-blue-100 text-sm font-mono">#{{ (userStore.userId || '12345678').toString().padStart(8,'0') }}</p>
                       </div>
                     </div>
                     
@@ -245,58 +265,58 @@
                   <div class="py-2">
                     <router-link 
                       :to="`/user/${userStore.userId || '12345678'}`"
-                      class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 border-l-3 border-transparent hover:border-purple-500 transition-all duration-300 group"
                       @click="closeDropdown"
                     >
-                      <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-purple-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                       </svg>
-                      <span>个人中心</span>
-                      <svg class="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span class="font-medium">个人中心</span>
+                      <svg class="w-4 h-4 text-gray-400 ml-auto group-hover:text-purple-500 transition-all duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                       </svg>
                     </router-link>
                     
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" @click="closeDropdown">
-                      <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 border-l-3 border-transparent hover:border-blue-500 transition-all duration-300 group" @click="closeDropdown">
+                      <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
                       </svg>
-                      <span>收藏管理</span>
-                      <svg class="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span class="font-medium">收藏管理</span>
+                      <svg class="w-4 h-4 text-gray-400 ml-auto group-hover:text-blue-500 transition-all duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                       </svg>
                     </a>
                     
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" @click="closeDropdown">
-                      <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 border-l-3 border-transparent hover:border-green-500 transition-all duration-300 group" @click="closeDropdown">
+                      <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-green-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                       </svg>
-                      <span>观看历史</span>
-                      <svg class="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span class="font-medium">观看历史</span>
+                      <svg class="w-4 h-4 text-gray-400 ml-auto group-hover:text-green-500 transition-all duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                       </svg>
                     </a>
                     
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" @click="closeDropdown">
-                      <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 border-l-3 border-transparent hover:border-orange-500 transition-all duration-300 group" @click="closeDropdown">
+                      <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-orange-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
                       </svg>
-                      <span>推荐服务</span>
-                      <svg class="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span class="font-medium">推荐服务</span>
+                      <svg class="w-4 h-4 text-gray-400 ml-auto group-hover:text-orange-500 transition-all duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                       </svg>
                     </a>
                     
                     <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
                     
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" @click="closeDropdown">
-                      <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 border-l-3 border-transparent hover:border-indigo-500 transition-all duration-300 group" @click="closeDropdown">
+                      <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-indigo-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                       </svg>
-                      <span>账号设置</span>
-                      <svg class="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span class="font-medium">账号设置</span>
+                      <svg class="w-4 h-4 text-gray-400 ml-auto group-hover:text-indigo-500 transition-all duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                       </svg>
                     </a>
@@ -458,7 +478,24 @@ const handleLogout = async () => {
 
 // 处理用户头像点击（保留兼容性）
 const handleUserIconClick = () => {
-  toggleUserDropdown()
+  // 如果未登录，使用模拟登录
+  if (!userStore.isLoggedIn) {
+    userStore.mockLogin()
+  } else {
+    toggleUserDropdown()
+  }
+}
+
+// 处理主头像加载错误
+const handleAvatarError = (event: Event) => {
+  const target = event.target as HTMLImageElement
+  target.style.display = 'none'
+}
+
+// 处理下拉菜单头像加载错误
+const handleDropdownAvatarError = (event: Event) => {
+  const target = event.target as HTMLImageElement
+  target.style.display = 'none'
 }
 
 
