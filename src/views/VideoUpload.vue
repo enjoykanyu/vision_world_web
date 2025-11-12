@@ -572,149 +572,175 @@
   </div>
 
   <!-- 未登录遮罩层 -->
-  <div v-if="showLoginModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-    <!-- 登录弹窗 -->
-    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- 背景遮罩 -->
-        <div class="fixed inset-0 bg-black bg-opacity-60 transition-opacity" aria-hidden="true" @click="closeLoginModal"></div>
-      
-        <!-- 模态框居中技巧 -->
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+  <!-- 登录弹窗 - 简洁现代风格 -->
+  <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- 背景遮罩 -->
+    <div 
+      class="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+      @click="closeLoginModal"
+    ></div>
+    
+    <!-- 登录卡片 -->
+    <div 
+      class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+      @click.stop
+    >
+      <!-- 简洁标题区域 -->
+      <div class="flex justify-between items-center p-6 pb-0">
+        <div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            登录账号
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            使用手机号登录您的账户
+          </p>
+        </div>
         
-        <!-- 登录卡片 -->
-        <div 
-          class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full p-6 sm:p-8"
-          @click.stop
+        <!-- 关闭按钮 -->
+        <button 
+          @click="closeLoginModal" 
+          class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <!-- 标题和关闭按钮 -->
-          <div class="flex justify-between items-center mb-8">
-            <h3 class="text-2xl font-bold text-gray-800 dark:text-white">欢迎回来</h3>
-            <button 
-              @click="closeLoginModal" 
-              class="rounded-full p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+        
+      <!-- 登录方式切换 -->
+      <div class="px-6 pb-6">
+        <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <button 
+            @click="loginType = 'phone'"
+            :class="['relative flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200', 
+                     loginType === 'phone' 
+                       ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
+                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200']"
+          >
+            验证码登录
+          </button>
+          <button 
+            @click="loginType = 'password'"
+            :class="['relative flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200', 
+                     loginType === 'password' 
+                       ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
+                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200']"
+          >
+            密码登录
+          </button>
+        </div>
+      </div>
+      
+      <!-- 登录表单 -->
+      <div class="px-6 pb-6 space-y-4">
+        <!-- 手机号输入框 -->
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            手机号
+          </label>
+          <div class="relative">
+            <input 
+              type="tel" 
+              id="phone" 
+              v-model="loginForm.phone" 
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
+              :class="loginForm.phone && !isValidPhone(loginForm.phone) ? 'border-red-500 focus:border-red-500' : ''"
+              placeholder="请输入手机号"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </div>
+          <p v-if="loginForm.phone && !isValidPhone(loginForm.phone)" class="mt-1 text-sm text-red-600">
+            请输入正确的手机号
+          </p>
+        </div>
+        
+        
+        <!-- 验证码输入 -->
+        <div v-if="loginType === 'phone'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            验证码
+          </label>
+          <div class="flex space-x-3">
+            <input 
+              type="text" 
+              v-model="loginForm.verificationCode" 
+              class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
+              :class="loginForm.verificationCode && loginForm.verificationCode.length !== 6 ? 'border-red-500 focus:border-red-500' : ''"
+              placeholder="请输入验证码"
+              maxlength="6"
+            >
+            <button 
+              @click="sendVerificationCode" 
+              :disabled="!isValidPhone(loginForm.phone) || isSendingCode || countdown > 0"
+              class="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {{ isSendingCode ? '发送中' : countdown > 0 ? `${countdown}s` : '获取验证码' }}
+            </button>
+          </div>
+          <p v-if="loginForm.verificationCode && loginForm.verificationCode.length !== 6" class="mt-1 text-sm text-red-600">
+            请输入6位验证码
+          </p>
+        </div>
+        
+        <!-- 密码输入 -->
+        <div v-if="loginType === 'password'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            密码
+          </label>
+          <div class="relative">
+            <input 
+              :type="showPassword ? 'text' : 'password'" 
+              v-model="loginForm.password" 
+              class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
+              :class="loginForm.password && loginForm.password.length < 6 ? 'border-red-500 focus:border-red-500' : ''"
+              placeholder="请输入密码"
+            >
+            <button 
+              @click="showPassword = !showPassword"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
+              <svg v-if="!showPassword" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
               </svg>
             </button>
           </div>
-          
-          <!-- 登录表单 -->
-          <div class="space-y-6">
-            <!-- 手机号输入框 -->
-            <div class="space-y-2">
-              <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">手机号</label>
-              <div class="relative rounded-md shadow-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6a2 2 0 012-2z" />
-                  </svg>
-                </div>
-                <input 
-                  type="tel" 
-                  id="phone" 
-                  v-model="loginForm.phone"
-                  class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors" 
-                  placeholder="请输入手机号"
-                  maxlength="11"
-                >
-              </div>
-            </div>
-            
-            <!-- 验证码输入框 -->
-            <div class="space-y-2">
-              <label for="verificationCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">验证码</label>
-              <div class="flex space-x-3">
-                <input 
-                  type="text" 
-                  id="verificationCode" 
-                  v-model="loginForm.verificationCode"
-                  class="flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors" 
-                  placeholder="请输入验证码"
-                  maxlength="6"
-                >
-                <button 
-                  @click="sendVerificationCode" 
-                  :disabled="isSendingCode || countdown > 0"
-                  class="px-4 py-3 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  :class="countdown > 0 ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-pink-600 hover:bg-pink-700 text-white'"
-                >
-                  {{ countdown > 0 ? `${countdown}s` : '发送验证码' }}
-                </button>
-              </div>
-            </div>
-            
-            <!-- 记住我和忘记密码 -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <input 
-                  id="remember-me" 
-                  v-model="loginForm.rememberMe"
-                  type="checkbox" 
-                  class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                >
-                <label for="remember-me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">记住我</label>
-              </div>
-              <div class="text-sm">
-                <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">忘记密码?</a>
-              </div>
-            </div>
-            
-            <!-- 错误提示 -->
-            <div v-if="loginError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm rounded-lg border border-red-200 dark:border-red-800/50">
-              <div class="flex">
-                <svg class="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                {{ loginError }}
-              </div>
-            </div>
-            
-            <!-- 登录按钮 -->
-            <button 
-              @click="handleLogin" 
-              class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors"
-            >
-              登录
-            </button>
-            
-            <!-- 注册链接 -->
-            <div class="text-center text-sm text-gray-600 dark:text-gray-400">
-              <span>还没有账号？</span>
-              <a href="#" class="font-medium text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300">立即注册</a>
-            </div>
-            
-            <!-- 分隔线 -->
-            <div class="relative my-6">
-              <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
-              </div>
-              <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">其他登录方式</span>
-              </div>
-            </div>
-            
-            <!-- 社交登录按钮 -->
-            <div class="flex items-center justify-center space-x-6">
-              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white shadow-md hover:shadow-lg transition-shadow">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8.07 16.57l-4.24-4.24 1.41-1.41 2.83 2.83 6.59-6.59 1.41 1.41-8 8z"/>
-                </svg>
-              </button>
-              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-pink-500 text-white shadow-md hover:shadow-lg transition-shadow">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
-                </svg>
-              </button>
-              <button class="flex items-center justify-center w-12 h-12 rounded-full bg-red-500 text-white shadow-md hover:shadow-lg transition-shadow">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.097.118.112.222.083.343-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
+          <p v-if="loginForm.password && loginForm.password.length < 6" class="mt-1 text-sm text-red-600">
+            密码长度至少6位
+          </p>
         </div>
+        
+        <!-- 记住我和忘记密码 -->
+        <div class="flex items-center justify-between">
+          <label class="flex items-center">
+            <input type="checkbox" class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500">
+            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">记住我</span>
+          </label>
+          <button class="text-sm text-blue-500 hover:text-blue-600 transition-colors">忘记密码？</button>
+        </div>
+        
+        <!-- 错误提示 -->
+        <div v-if="loginError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p class="text-sm text-red-600 dark:text-red-400">{{ loginError }}</p>
+        </div>
+        
+        <!-- 登录按钮 -->
+        <button 
+          @click="handleLogin" 
+          :disabled="!isValidPhone(loginForm.phone) || (loginType === 'phone' && (!loginForm.verificationCode || loginForm.verificationCode.length !== 6)) || (loginType === 'password' && (!loginForm.password || loginForm.password.length < 6))"
+          class="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+        >
+          <span v-if="isSendingCode" class="flex items-center">
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            登录中...
+          </span>
+          <span v-else>登录</span>
+        </button>
       </div>
     </div>
   </div>
@@ -799,12 +825,15 @@ const showLoginModal = ref(false)
 const loginForm = ref({
   phone: '',
   verificationCode: '',
+  password: '',
   rememberMe: false
 })
 
 const loginError = ref('')
 const isSendingCode = ref(false)
 const countdown = ref(0)
+const loginType = ref<'phone' | 'password'>('phone')
+const showPassword = ref(false)
 
 // 计算属性
 const canSubmit = computed(() => {
@@ -1182,29 +1211,70 @@ const sendVerificationCode = async () => {
   }
 }
 
+// 手机号验证函数
+const isValidPhone = (phone: string) => {
+  return /^1[3-9]\d{9}$/.test(phone)
+}
+
 const handleLogin = async () => {
-  if (!loginForm.value.phone || !loginForm.value.verificationCode) {
-    loginError.value = '请输入手机号和验证码'
+  if (!loginForm.value.phone) {
+    loginError.value = '请输入手机号'
+    return
+  }
+  
+  if (!isValidPhone(loginForm.value.phone)) {
+    loginError.value = '请输入正确的手机号'
     return
   }
 
+  if (loginType.value === 'phone') {
+    if (!loginForm.value.verificationCode) {
+      loginError.value = '请输入验证码'
+      return
+    }
+    
+    if (loginForm.value.verificationCode.length !== 6) {
+      loginError.value = '请输入6位验证码'
+      return
+    }
+  } else {
+    if (!loginForm.value.password) {
+      loginError.value = '请输入密码'
+      return
+    }
+    
+    if (loginForm.value.password.length < 6) {
+      loginError.value = '密码长度至少6位'
+      return
+    }
+  }
+
   try {
-    await userStore.login({
-      phone: loginForm.value.phone,
-      verificationCode: loginForm.value.verificationCode
-    })
+    if (loginType.value === 'phone') {
+      await userStore.login({
+        phone: loginForm.value.phone,
+        verificationCode: loginForm.value.verificationCode
+      })
+    } else {
+      await userStore.login({
+        phone: loginForm.value.phone,
+        password: loginForm.value.password
+      })
+    }
     showLoginModal.value = false
     loginError.value = ''
-    loginForm.value = { phone: '', verificationCode: '', rememberMe: false }
+    loginForm.value = { phone: '', verificationCode: '', password: '', rememberMe: false }
   } catch (error) {
-    loginError.value = '登录失败，请检查验证码'
+    loginError.value = '登录失败，请检查信息是否正确'
   }
 }
 
 const closeLoginModal = () => {
   showLoginModal.value = false
   loginError.value = ''
-  loginForm.value = { phone: '', verificationCode: '', rememberMe: false }
+  loginForm.value = { phone: '', verificationCode: '', password: '', rememberMe: false }
+  loginType.value = 'phone'
+  showPassword.value = false
 }
 
 // 处理退出登录
