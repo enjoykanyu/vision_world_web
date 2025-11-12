@@ -117,15 +117,15 @@ request.interceptors.response.use(
         }
         
         // 调用token刷新API
-        const response = await authAPI.directRefreshToken(refreshToken)
-        const newToken = response.data.data.token
+        const response = await authAPI.refreshToken(refreshToken)
+        const tokenData = response.data.data
         
         // 更新本地存储的token
-        localStorage.setItem('access_token', newToken)
+        localStorage.setItem('access_token', tokenData.access_token || tokenData.token)
         
         // 如果返回了新的refresh token，也更新它
-        if (response.data.data.refresh_token) {
-          localStorage.setItem('refresh_token', response.data.data.refresh_token)
+        if (tokenData.refresh_token) {
+          localStorage.setItem('refresh_token', tokenData.refresh_token)
         }
         
         // 处理等待队列

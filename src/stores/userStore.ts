@@ -124,6 +124,11 @@ export const useUserStore = defineStore('user', () => {
       // 保存用户信息
       updateUserInfo(loginDataRes.user, loginDataRes.token)
       
+      // 如果响应中有refresh token，也保存它
+      if (loginDataRes.refresh_token) {
+        refreshToken.value = loginDataRes.refresh_token
+      }
+      
       // 保存到localStorage
       saveUserToLocalStorage()
       
@@ -226,16 +231,35 @@ export const useUserStore = defineStore('user', () => {
         // Token有效，获取用户信息
         return await fetchUserInfo()
       } else {
-        // Token无效，清除用户信息
-        clearUserInfo()
-        clearLocalStorage()
+        // Token无效，但不清除登录状态，让用户下次操作时再处理
+        console.log('Token验证失败，但保持登录状态')
+        // 可以尝试刷新token
+        if (refreshToken.value) {
+          console.log('尝试使用刷新token获取新token')
+          const refreshed = await refreshAccessToken()
+          if (refreshed) {
+            console.log('Token刷新成功')
+            return true
+          }
+        }
         return false
       }
     } catch (error) {
       console.error('验证Token失败:', error)
-      // Token验证失败，清除用户信息
-      clearUserInfo()
-      clearLocalStorage()
+      // 网络错误或服务器错误，不清除登录状态
+      console.log('Token验证遇到网络问题，但保持登录状态')
+      // 如果有刷新token，可以尝试刷新
+      if (refreshToken.value) {
+        try {
+          const refreshed = await refreshAccessToken()
+          if (refreshed) {
+            console.log('网络问题后Token刷新成功')
+            return true
+          }
+        } catch (refreshError) {
+          console.log('Token刷新也失败:', refreshError)
+        }
+      }
       return false
     }
   }
@@ -526,30 +550,34 @@ export const useUserStore = defineStore('user', () => {
     // 从localStorage加载用户标签
     loadUserTagsFromLocalStorage()
     
-    // 如果有token，验证其有效性
+    // 如果有token，尝试验证其有效性
     if (accessToken.value) {
       try {
-        // 首先验证token是否有效
-        const isValid = await verifyToken()
-        if (!isValid) {
-          console.log('Token验证失败，需要重新登录')
-          return
-        }
-        
-        // 检查token是否即将过期
-        const now = Date.now()
-        const expiryTime = expiresIn.value * 1000 // 转换为毫秒
-        
-        // 如果token在5分钟内过期，尝试刷新
-        if (expiryTime - now < 5 * 60 * 1000) {
-          console.log('Token即将过期，尝试刷新')
-          await refreshAccessToken()
-        }
+        // 延迟验证，避免页面初始化时立即验证
+        setTimeout(async () => {
+          try {
+            const isValid = await verifyToken()
+            if (!isValid) {
+              console.log('Token验证失败，但保持登录状态，直到用户主动操作')
+              // 不清除登录状态，等待用户触发API请求时再验证
+            }
+            
+            // 检查token是否即将过期
+            const now = Date.now()
+            const expiryTime = expiresIn.value * 1000 // 转换为毫秒
+            
+            // 如果token在10分钟内过期，尝试刷新
+            if (expiryTime && expiryTime - now < 10 * 60 * 1000) {
+              console.log('Token即将过期，尝试刷新')
+              await refreshAccessToken()
+            }
+          } catch (error) {
+            console.log('初始化时token验证遇到网络问题，但保持登录状态:', error)
+            // 网络问题不清除登录状态，让用户后续再试
+          }
+        }, 100)
       } catch (error) {
-        console.error('初始化登录状态失败:', error)
-        // 如果验证失败，清除登录状态
-        clearUserInfo()
-        clearLocalStorage()
+        console.error('初始化登录状态时发生错误:', error)
       }
     }
   }
