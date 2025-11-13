@@ -119,10 +119,10 @@
                   <p class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ selectedFile.name }}</p>
                   <p class="text-gray-500 dark:text-gray-400 mb-8">{{ formatFileSize(selectedFile.size) }}</p>
                   <div class="flex justify-center space-x-4">
-                    <button @click="startUpload" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition-colors font-medium">
+                    <button @click.stop="startUpload" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition-colors font-medium">
                       开始上传
                     </button>
-                    <button @click="resetFile" class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-lg transition-colors font-medium">
+                    <button @click.stop="resetFile" class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-lg transition-colors font-medium">
                       重新选择
                     </button>
                   </div>
