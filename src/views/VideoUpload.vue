@@ -1089,6 +1089,18 @@ const startUpload = async () => {
     
   } catch (error) {
     alert('上传失败，请重试')
+    
+    // 清除进度定时器
+    if (progressInterval) {
+      clearInterval(progressInterval)
+      progressInterval = null
+    }
+    if (finalProgress) {
+      clearInterval(finalProgress)
+      finalProgress = null
+    }
+    
+    // 重置上传状态
     uploadProgress.value = 0
     uploadSpeed.value = 0
     remainingTime.value = 0
