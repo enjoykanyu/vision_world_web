@@ -153,7 +153,7 @@
                     </div>
                   </div>
                   <div class="flex items-center justify-between">
-                    <button @click="cancelUpload" class="text-red-600 hover:text-red-700 text-sm flex items-center">
+                    <button @click.stop="cancelUpload" class="text-red-600 hover:text-red-700 text-sm flex items-center">
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                       </svg>
@@ -773,6 +773,11 @@ const uploadStartTime = ref(0) // 开始上传时间
 const lastProgressTime = ref(0) // 上次更新进度时间
 const lastProgressValue = ref(0) // 上次进度值
 
+// 上传控制变量
+let progressInterval: number | null = null // 进度更新定时器
+let finalProgress: number | null = null // 最终进度定时器
+let abortController: AbortController | null = null // 用于取消上传请求
+
 // 视频表单
 const videoForm = ref({
   title: '',
@@ -988,8 +993,11 @@ const startUpload = async () => {
     lastProgressTime.value = Date.now()
     lastProgressValue.value = 0
     
+    // 创建AbortController用于取消上传请求
+    abortController = new AbortController()
+    
     // 模拟上传进度更新
-    const progressInterval = setInterval(() => {
+    progressInterval = setInterval(() => {
       if (uploadProgress.value < 90) {
         // 随机增加进度，模拟真实上传
         const increment = Math.random() * 10 + 2
@@ -1015,14 +1023,17 @@ const startUpload = async () => {
       }
     }, 500)
     
-    const response = await videoAPI.uploadVideo(formData)
+    const response = await videoAPI.uploadVideo(formData, { signal: abortController?.signal })
     
     // 清除进度更新定时器
-    clearInterval(progressInterval)
+    if (progressInterval) {
+      clearInterval(progressInterval)
+      progressInterval = null
+    }
     
     if (response.data) {
       // 模拟最后阶段的进度更新
-      const finalProgress = setInterval(() => {
+      finalProgress = setInterval(() => {
         if (uploadProgress.value < 100) {
           uploadProgress.value += 2
           
@@ -1039,7 +1050,10 @@ const startUpload = async () => {
           lastProgressTime.value = currentTime
           lastProgressValue.value = uploadProgress.value
         } else {
-          clearInterval(finalProgress)
+          if (finalProgress) {
+            clearInterval(finalProgress)
+            finalProgress = null
+          }
           uploadSpeed.value = 0
           remainingTime.value = 0
         }
@@ -1082,8 +1096,28 @@ const startUpload = async () => {
 }
 
 const cancelUpload = () => {
+  // 取消上传请求
+  if (abortController) {
+    abortController.abort()
+    abortController = null
+  }
+  
+  // 清除进度更新定时器
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
+  }
+  
+  // 清除最终进度定时器
+  if (finalProgress) {
+    clearInterval(finalProgress)
+    finalProgress = null
+  }
+  
+  // 重置上传状态
   uploadProgress.value = 0
-  // 这里应该取消真实的上传请求
+  uploadSpeed.value = 0
+  remainingTime.value = 0
 }
 
 const addTag = () => {
