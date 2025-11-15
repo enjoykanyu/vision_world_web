@@ -476,11 +476,11 @@ const handleLogout = async () => {
   }
 }
 
-// 处理用户头像点击（保留兼容性）
+// 处理用户头像点击（触发真实登录流程）
 const handleUserIconClick = () => {
-  // 如果未登录，使用模拟登录
+  // 如果未登录，触发登录弹窗
   if (!userStore.isLoggedIn) {
-    userStore.mockLogin()
+    emit('login')
   } else {
     toggleUserDropdown()
   }
