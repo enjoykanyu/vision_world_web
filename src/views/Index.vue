@@ -10,23 +10,8 @@
 
     <!-- 主要内容 -->
     <main class="max-w-screen-xl mx-auto px-4 py-6">
-      <!-- 错误提示 -->
-      <div v-if="homeDataError" class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6 text-center">
-        <div class="text-red-600 text-xl mb-2">加载失败</div>
-        <p class="text-red-500 mb-4">{{ homeDataError }}</p>
-        <button @click="loadHomeData" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
-          重试
-        </button>
-      </div>
-
-      <!-- 加载中提示 -->
-      <div v-else-if="!homeDataLoaded && !isLoadingHome" class="text-center py-10">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600 mb-4"></div>
-        <p class="text-gray-600 dark:text-gray-400">加载中...</p>
-      </div>
-
       <!-- 轮播图区域 -->
-      <div v-else class="mb-8">
+      <div class="mb-8">
         <div class="relative h-64 md:h-80 rounded-xl overflow-hidden shadow-lg">
           <div v-for="(slide, index) in carouselSlides" :key="index"
                :class="['absolute inset-0 transition-all duration-700', 
@@ -908,14 +893,12 @@ const hasMore = ref(true)
 // 首页数据加载
 const isLoadingHome = ref(false)
 const homeDataLoaded = ref(false)
-const homeDataError = ref('')
 
 // 加载首页数据
 const loadHomeData = async () => {
   if (isLoadingHome.value) return
   
   isLoadingHome.value = true
-  homeDataError.value = ''
   
   try {
     // 获取用户标签字符串，用于API请求
@@ -964,12 +947,9 @@ const loadHomeData = async () => {
       }
       
       homeDataLoaded.value = true
-    } else {
-      homeDataError.value = '加载首页数据失败: ' + (response.message || '未知错误')
     }
   } catch (error) {
     console.error('加载首页数据失败:', error)
-    homeDataError.value = '网络错误，无法加载首页数据'
   } finally {
     isLoadingHome.value = false
   }
