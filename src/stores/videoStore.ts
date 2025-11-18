@@ -1,27 +1,33 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useUserStore } from './userStore'
 import { videoAPI, Video as ApiVideo } from '@/api/video'
 
 // 本地视频接口（保持与原有接口兼容）
+export interface Author {
+  username: string
+  avatar: string
+  is_followed?: boolean
+}
+
 export interface Video {
   id: string
   title: string
   src: string
   poster: string
-  duration: number
+  duration: string
   views: number
-  author: string
-  authorAvatar: string
+  author: Author
   description: string
   tags: string[]
   publishedAt: string
-  likes?: number
-  comments?: number
-  shares?: number
-  isLiked?: boolean
-  isFollowed?: boolean
-  type?: string // 视频类型: original/repost
-  source?: string // 转载来源
+  likes: number
+  comments: number
+  shares: number
+  isLiked: boolean
+  isFollowed: boolean
+  type: string // 视频类型: original/repost
+  source: string // 转载来源
 }
 
 // 视频列表状态
@@ -32,6 +38,7 @@ export interface VideoListState {
   page: number
   pageSize: number
   total: number
+  error?: string
 }
 
 export const useVideoStore = defineStore('video', () => {
@@ -101,8 +108,14 @@ export const useVideoStore = defineStore('video', () => {
       
       const response = await videoAPI.getRecommendedVideos(requestParams)
       
-      const { videos, pagination } = response.data.data
-      
+      if (!response.data) {
+        throw new Error('Invalid response structure')
+      }
+
+      const data = response.data
+      const videos = Array.isArray(data.videos) ? data.videos : []
+      const pagination = data.pagination || { current_page: 1, per_page: 10, total: 0, total_pages: 1 }
+
       // 转换API数据格式
       const convertedVideos = videos.map(transformApiVideoToLocal)
       
@@ -117,14 +130,13 @@ export const useVideoStore = defineStore('video', () => {
       recommendedVideos.value.pageSize = pagination.per_page
       recommendedVideos.value.total = pagination.total
       recommendedVideos.value.hasMore = pagination.current_page < pagination.total_pages
+      recommendedVideos.value.error = undefined
       
       return { success: true, data: recommendedVideos.value.videos }
     } catch (error: any) {
       console.error('获取推荐视频失败:', error)
-      // 使用console.error替代ElementPlus的消息提示
-      console.error('获取推荐视频失败:', error.message || '获取推荐视频失败')
-      // 可以在这里添加自定义的错误通知组件
-      return { success: false, error: error.message }
+      recommendedVideos.value.error = error.message || '获取推荐视频失败'
+      return { success: false, error: recommendedVideos.value.error }
     } finally {
       recommendedVideos.value.loading = false
     }
@@ -188,6 +200,11 @@ export const useVideoStore = defineStore('video', () => {
   async function fetchVideoDetail(videoId: string) {
     try {
       const response = await videoAPI.getVideoDetail(videoId, generateRequestId())
+      
+      if (!response.data || !response.data.data) {
+        throw new Error('Invalid response structure')
+      }
+      
       const { video } = response.data.data
       
       // 转换API数据格式
@@ -208,15 +225,15 @@ export const useVideoStore = defineStore('video', () => {
     try {
       const response = await videoAPI.likeVideo(videoId, true)
       
+      if (!response.data) {
+        throw new Error('Invalid response structure')
+      }
+      
       // 更新本地状态
       if (currentVideo.value && currentVideo.value.id === videoId) {
         currentVideo.value.isLiked = true
         // 使用API返回的点赞数
-        if (response.data && response.data.like_count !== undefined) {
-          currentVideo.value.likes = response.data.like_count
-        } else {
-          currentVideo.value.likes = (currentVideo.value.likes || 0) + 1
-        }
+        currentVideo.value.likes = response.data.like_count !== undefined ? Number(response.data.like_count) : (currentVideo.value.likes || 0) + 1
       }
       
       // 更新列表中的视频状态
@@ -244,15 +261,15 @@ export const useVideoStore = defineStore('video', () => {
     try {
       const response = await videoAPI.likeVideo(videoId, false)
       
+      if (!response.data) {
+        throw new Error('Invalid response structure')
+      }
+      
       // 更新本地状态
       if (currentVideo.value && currentVideo.value.id === videoId) {
         currentVideo.value.isLiked = false
         // 使用API返回的点赞数
-        if (response.data && response.data.like_count !== undefined) {
-          currentVideo.value.likes = response.data.like_count
-        } else {
-          currentVideo.value.likes = Math.max(0, (currentVideo.value.likes || 1) - 1)
-        }
+        currentVideo.value.likes = response.data.like_count !== undefined ? Number(response.data.like_count) : Math.max(0, (currentVideo.value.likes || 1) - 1)
       }
       
       // 更新列表中的视频状态
@@ -281,7 +298,7 @@ export const useVideoStore = defineStore('video', () => {
       await videoAPI.followUser(authorId)
       
       // 更新本地状态
-      if (currentVideo.value && currentVideo.value.author === authorId) {
+      if (currentVideo.value && currentVideo.value.author.username === authorId) {
         currentVideo.value.isFollowed = true
       }
       
@@ -307,7 +324,7 @@ export const useVideoStore = defineStore('video', () => {
       await videoAPI.unfollowUser(authorId)
       
       // 更新本地状态
-      if (currentVideo.value && currentVideo.value.author === authorId) {
+      if (currentVideo.value && currentVideo.value.author.username === authorId) {
         currentVideo.value.isFollowed = false
       }
       
@@ -367,53 +384,72 @@ export const useVideoStore = defineStore('video', () => {
   function updateVideosByAuthor(authorId: string, updates: Partial<Video>) {
     // 更新推荐视频列表
     recommendedVideos.value.videos = recommendedVideos.value.videos.map(video => 
-      video.author === authorId ? { ...video, ...updates } : video
+      video.author.username === authorId ? { ...video, ...updates } : video
     )
     
     // 更新热门视频列表
     hotVideos.value.videos = hotVideos.value.videos.map(video => 
-      video.author === authorId ? { ...video, ...updates } : video
+      video.author.username === authorId ? { ...video, ...updates } : video
     )
   }
 
   // 根据ID获取视频
   function getVideoById(videoId: string): Video | undefined {
+    if (!recommendedVideos.value?.videos || !hotVideos.value?.videos) return undefined;
     return recommendedVideos.value.videos.find(v => v.id === videoId) ||
            hotVideos.value.videos.find(v => v.id === videoId)
   }
 
   // 转换API视频数据格式
   function transformApiVideoToLocal(apiVideo: ApiVideo): Video {
-    return {
-      id: apiVideo.video_id,
-      title: apiVideo.title,
-      src: apiVideo.video_url,
-      poster: apiVideo.thumbnail_url,
-      duration: formatDuration(apiVideo.duration),
-      views: apiVideo.view_count,
-      author: apiVideo.author.username,
-      authorAvatar: apiVideo.author.avatar,
-      description: apiVideo.description,
-      tags: apiVideo.tags,
-      publishedAt: formatDate(apiVideo.published_at),
-      likes: apiVideo.like_count,
-      comments: apiVideo.comment_count,
-      shares: apiVideo.share_count,
-      isLiked: apiVideo.is_liked,
-      isFollowed: apiVideo.author.is_followed,
-      type: apiVideo.type,
-      source: apiVideo.source
+    // 处理可能的duration类型问题
+    let durationSeconds = 0;
+    if (typeof apiVideo.duration === 'string') {
+      durationSeconds = parseInt(apiVideo.duration, 10) || 0;
+    } else if (typeof apiVideo.duration === 'number') {
+      durationSeconds = apiVideo.duration;
     }
-  }
 
-  // 格式化时长（秒转分钟）
-  function formatDuration(seconds: number): number {
-    return Math.floor(seconds / 60)
+    // 处理作者信息
+    const author = apiVideo.author || {};
+
+    return {
+      id: apiVideo.video_id || 'unknown_id',
+      title: apiVideo.title || 'Untitled',
+      src: apiVideo.video_url || '',
+      poster: apiVideo.thumbnail_url || '',
+      duration: formatDuration(durationSeconds),
+      views: typeof apiVideo.view_count === 'number' ? apiVideo.view_count : parseInt(apiVideo.view_count as string, 10) || 0,
+      author: {
+        username: author.username || 'Unknown Author',
+        avatar: author.avatar || '',
+        is_followed: author.is_followed || false
+      },
+      description: apiVideo.description || '',
+      tags: Array.isArray(apiVideo.tags) ? apiVideo.tags : [],
+      publishedAt: formatDate(apiVideo.published_at || new Date()),
+      likes: typeof apiVideo.like_count === 'number' ? apiVideo.like_count : parseInt(apiVideo.like_count as string, 10) || 0,
+      comments: typeof apiVideo.comment_count === 'number' ? apiVideo.comment_count : parseInt(apiVideo.comment_count as string, 10) || 0,
+      shares: typeof apiVideo.share_count === 'number' ? apiVideo.share_count : parseInt(apiVideo.share_count as string, 10) || 0,
+      isLiked: Boolean(apiVideo.is_liked),
+      isFollowed: Boolean(author.is_followed),
+      type: apiVideo.type || 'original',
+      source: apiVideo.source || ''
+    }
+}
+
+  // 格式化时长（秒转 MM:SS 格式）
+  function formatDuration(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
 
   // 格式化日期
   function formatDate(dateString: string): string {
-    const date = new Date(dateString)
+    if (!dateString) return 'Unknown Date';
+    const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
     const now = new Date()
     const diffTime = Math.abs(now.getTime() - date.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))

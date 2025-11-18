@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     <!-- 使用公用导航头组件 -->
     <NavHeader 
       :isLoggedIn="userStore.isLoggedIn" 
@@ -19,74 +19,233 @@
         <!-- Left side: Video Player and Info -->
         <div class="lg:col-span-2">
           <div class="aspect-w-16 aspect-h-9 mb-4">
-            <video 
-              ref="videoPlayer"
-              :src="video.src" 
-              :poster="video.poster" 
-              controls 
-              autoplay
-              class="w-full rounded-lg shadow-lg"
-              @loadstart="handleVideoLoad"
-            ></video>
-          </div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ video.title }}</h1>
-          <div class="flex items-center text-sm text-gray-500 mb-4">
-            <span>{{ video.views }} 观看</span>
-            <span class="mx-2">·</span>
-            <span>{{ video.publishedAt }}</span>
-          </div>
-          <div class="flex items-center mb-6">
-            <img :src="video.authorAvatar" alt="author" class="w-12 h-12 rounded-full mr-4">
-            <div>
-              <p class="font-semibold text-gray-800">{{ video.author }}</p>
-              <button 
-                @click="handleFollow"
-                :class="[
-                  'text-sm px-4 py-1 rounded-full transition-colors',
-                  video.isFollowed 
-                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' 
-                    : 'bg-bilibili-primary text-white hover:bg-purple-700'
-                ]"
-              >
-                {{ video.isFollowed ? '已关注' : '+ 关注' }}
+            <div class="relative w-full rounded-lg overflow-hidden shadow-lg bg-black">
+        <video 
+          ref="videoPlayer"
+          :src="video.src" 
+          :poster="video.poster" 
+          controls 
+          class="w-full aspect-video"
+          @loadstart="handleVideoLoad"
+        ></video>
+        <!-- 弹幕容器 -->
+        <div ref="danmakuContainer" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+        <!-- 弹幕控制 -->
+        <div class="absolute bottom-16 left-0 right-0 flex items-center justify-between px-4 text-white">
+          <div class="flex items-center space-x-4">
+            <button @click="toggleDanmaku" class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
+              <span>弹幕</span>
+            </button>
+            <div class="relative group">
+              <button class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063c.286 1.328 2.288 2.75 4.929 2.75h10.734c2.64-0 4.643-1.422 4.929-2.75l.548-3.063c.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948l-.548-3.063c-.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948zM10 15a2 2 0 100-4 2 2 0 000 4zm-6-5a2 2 0 114 0 2 2 0 01-4 0zm12 0a2 2 0 114 0 2 2 0 01-4 0z" clip-rule="evenodd"></path></svg>
+                <span>设置</span>
               </button>
             </div>
           </div>
-          
-          <!-- 互动按钮 -->
-          <div class="flex items-center space-x-4 mb-6">
+          <div class="flex items-center space-x-4">
+            <div class="relative group">
+              <button class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"></path></svg>
+                <span>1080P</span>
+              </button>
+            </div>
+            <div class="relative group">
+              <button class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                <span>倍速</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ video.title }}</h1>
+          <div class="flex flex-wrap items-center text-sm text-gray-500 mb-4 gap-x-4 gap-y-2">
+            <span>{{ video.views }} 观看</span>
+            <span>{{ video.publishedAt }}</span>
+            <span v-if="video.duration">时长: {{ video.duration }}</span>
+          </div>
+          <div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+            <div class="flex items-center">
+              <img :src="video.authorAvatar" alt="author" class="w-14 h-14 rounded-full mr-4 border-2 border-white dark:border-gray-700 shadow-sm">
+              <div>
+                <p class="font-semibold text-gray-900 dark:text-white text-lg">{{ video.author }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ video.authorFans || '0' }} 粉丝</p>
+              </div>
+            </div>
             <button 
-              @click="handleLike"
-              :class="[
-                'flex items-center space-x-2 px-4 py-2 rounded-full transition-colors',
-                video.isLiked 
-                  ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              ]"
+              @click="handleFollow"
+              :class="[ 'px-5 py-2 rounded-full transition-colors text-sm font-medium', video.isFollowed ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-bilibili-primary text-white hover:bg-purple-700' ]"
             >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-              </svg>
-              <span>{{ video.likes || 0 }}</span>
-            </button>
-            
-            <button class="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-              </svg>
-              <span>{{ video.comments || 0 }}</span>
-            </button>
-            
-            <button class="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
-              </svg>
-              <span>{{ video.shares || 0 }}</span>
+              {{ video.isFollowed ? '已关注' : '+ 关注' }}
             </button>
           </div>
-          <p class="text-gray-700 leading-relaxed">{{ video.description }}</p>
-          <div class="mt-4">
-            <span v-for="tag in video.tags" :key="tag" class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#{{ tag }}</span>
+          
+          <!-- 互动按钮 -->
+          <!-- 互动按钮区 -->
+          <div class="grid grid-cols-4 gap-2 mb-8">
+            <button 
+              @click="handleLike"
+              :class="[ 'flex flex-col items-center justify-center py-3 rounded-lg transition-colors', video.isLiked ? 'bg-red-50 text-red-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700' ]"
+            >
+              <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-sm">{{ formatNumber(video.likes || 0) }}</span>
+              <span class="text-xs mt-1">点赞</span>
+            </button>
+            
+            <button class="flex flex-col items-center justify-center py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+              <span class="text-sm">{{ formatNumber(video.comments || 0) }}</span>
+              <span class="text-xs mt-1">评论</span>
+            </button>
+            
+            <button class="flex flex-col items-center justify-center py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+              </svg>
+              <span class="text-sm">{{ formatNumber(video.shares || 0) }}</span>
+              <span class="text-xs mt-1">分享</span>
+            </button>
+            
+            <button class="flex flex-col items-center justify-center py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+              </svg>
+              <span class="text-sm">{{ formatNumber(video.collections || 0) }}</span>
+              <span class="text-xs mt-1">收藏</span>
+            </button>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6">
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{{ video.description }}</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span v-for="tag in video.tags" :key="tag" class="inline-block bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300">#{{ tag }}</span>
+            </div>
+          </div>
+
+          <!-- 弹幕输入 -->
+          <div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm mb-6">
+            <div class="flex items-center">
+              <img :src="userStore.avatar || 'https://picsum.photos/100/100'" alt="Your avatar" class="w-8 h-8 rounded-full mr-3">
+              <div class="flex-1 relative">
+                <input 
+                  type="text" 
+                  v-model="danmakuText"
+                  placeholder="发送弹幕..."
+                  class="w-full pl-4 pr-20 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-bilibili-primary"
+                  @keyup.enter="addDanmaku"
+                >
+                <button @click="addDanmaku" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-bilibili-primary text-white text-sm px-4 py-1 rounded-full hover:bg-purple-700 transition-colors">
+  发送
+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 评论区 -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ formatNumber(video.comments || 0) }} 条评论</h2>
+            </div>
+            <div class="p-4">
+              <div class="flex mb-6">
+                <img :src="userStore.avatar || 'https://picsum.photos/100/100'" alt="Your avatar" class="w-10 h-10 rounded-full mr-3">
+                <div class="flex-1">
+                  <textarea 
+                    placeholder="写下你的评论..."
+                    class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-bilibili-primary resize-none"
+                    rows="3"
+                  ></textarea>
+                  <div class="flex justify-end mt-2">
+                    <button class="bg-bilibili-primary text-white px-5 py-2 rounded-full hover:bg-purple-700 transition-colors text-sm font-medium">
+                      发布评论
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 热门评论 -->
+              <div class="space-y-6">
+                <div class="flex">
+                  <img src="https://picsum.photos/id/1005/100/100" alt="Comment author" class="w-10 h-10 rounded-full mr-3">
+                  <div class="flex-1">
+                    <div class="flex items-center mb-1">
+                      <span class="font-semibold text-gray-900 dark:text-white">用户昵称</span>
+                      <span class="ml-2 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded">官方</span>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 mb-2">这是一条热门评论，内容非常精彩，值得大家点赞和回复。</p>
+                    <div class="flex items-center text-sm text-gray-500 mb-3">
+                      <span>2023-10-01</span>
+                      <span class="mx-2">·</span>
+                      <button class="hover:text-bilibili-primary transition-colors">回复</button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                      <button class="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+                        <span>1.2K</span>
+                      </button>
+                      <button class="flex items-center space-x-1 text-gray-500 hover:text-bilibili-primary transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01"></path></svg>
+                        <span>回复</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex">
+                  <img src="https://picsum.photos/id/1012/100/100" alt="Comment author" class="w-10 h-10 rounded-full mr-3">
+                  <div class="flex-1">
+                    <div class="flex items-center mb-1">
+                      <span class="font-semibold text-gray-900 dark:text-white">另一位用户</span>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 mb-2">这个视频真不错，支持一下UP主！希望能看到更多类似内容。</p>
+                    <div class="flex items-center text-sm text-gray-500 mb-3">
+                      <span>2023-10-02</span>
+                      <span class="mx-2">·</span>
+                      <button class="hover:text-bilibili-primary transition-colors">回复</button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                      <button class="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+                        <span>865</span>
+                      </button>
+                      <button class="flex items-center space-x-1 text-gray-500 hover:text-bilibili-primary transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01"></path></svg>
+                        <span>回复</span>
+                      </button>
+                    </div>
+
+                    <!-- 回复 -->
+                    <div class="mt-4 ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                      <div class="flex mb-4">
+                        <img src="https://picsum.photos/id/1025/100/100" alt="Reply author" class="w-8 h-8 rounded-full mr-2">
+                        <div class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
+                          <div class="flex items-center mb-1">
+                            <span class="font-semibold text-gray-900 dark:text-white text-sm">UP主</span>
+                            <span class="ml-2 text-xs bg-bilibili-primary/20 text-bilibili-primary px-2 py-0.5 rounded">作者</span>
+                          </div>
+                          <p class="text-gray-700 dark:text-gray-300 text-sm">感谢支持！会继续努力创作的~</p>
+                          <div class="flex items-center text-xs text-gray-500 mt-2">
+                            <span>2023-10-02</span>
+                            <span class="mx-2">·</span>
+                            <button class="hover:text-bilibili-primary transition-colors">回复</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button class="w-full py-3 text-bilibili-primary hover:text-purple-700 transition-colors text-sm font-medium">
+                查看更多评论
+              </button>
+            </div>
           </div>
         </div>
 
@@ -94,14 +253,15 @@
         <div class="lg:col-span-1">
           <h2 class="text-xl font-bold text-gray-900 mb-4">推荐视频</h2>
           <div class="space-y-4">
-            <div v-for="recVideo in recommendedVideos" :key="recVideo.id" class="flex items-start space-x-4 cursor-pointer" @click="goToVideo(recVideo.id)">
-              <div class="w-32 flex-shrink-0">
-                <img :src="recVideo.poster" :alt="recVideo.title" class="rounded-lg aspect-video object-cover">
+            <div v-for="recVideo in recommendedVideos" :key="recVideo.id" class="flex items-start space-x-3 cursor-pointer group" @click="goToVideo(recVideo.id)">
+              <div class="w-36 flex-shrink-0 relative">
+                <img :src="recVideo.poster" :alt="recVideo.title" class="rounded-lg aspect-video object-cover group-hover:opacity-90 transition-opacity">
+                <span v-if="recVideo.duration" class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 rounded">{{ recVideo.duration }}</span>
               </div>
-              <div>
-                <h3 class="text-sm font-semibold text-gray-800 leading-tight mb-1">{{ recVideo.title }}</h3>
-                <p class="text-xs text-gray-500">{{ recVideo.author }}</p>
-                <p class="text-xs text-gray-500">{{ recVideo.views }} 观看</p>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1 group-hover:text-bilibili-primary transition-colors">{{ recVideo.title }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{{ recVideo.author }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ recVideo.views }} 观看</p>
               </div>
             </div>
           </div>
@@ -132,6 +292,8 @@ const loading = ref(false)
 // 视频数据
 const video = ref(null)
 const recommendedVideos = ref([])
+const danmakus = ref([])
+const danmakuText = ref('')
 
 // 获取推荐视频 - 使用真实后端API
 const getRecommendedVideos = async () => {
@@ -158,6 +320,60 @@ const getRecommendedVideos = async () => {
 const handleLogin = () => {
   router.push('/login')
 }
+
+// 添加弹幕
+const addDanmaku = () => {
+  if (!danmakuText.value.trim()) return;
+  
+  // 创建新弹幕
+  const newDanmaku = {
+    id: Date.now(),
+    text: danmakuText.value,
+    color: getRandomColor(),
+    position: Math.random() * 80 + 10,
+    time: videoPlayer.value?.currentTime || 0
+  };
+  
+  danmakus.value.push(newDanmaku);
+  danmakuText.value = '';
+  
+  // 渲染弹幕
+  renderDanmaku(newDanmaku);
+};
+
+// 随机颜色生成
+const getRandomColor = () => {
+  const colors = ['#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+
+// 渲染弹幕
+const renderDanmaku = (danmaku) => {
+  const container = danmakuContainer.value;
+  if (!container || !videoPlayer.value) return;
+  
+  const danmakuElement = document.createElement('div');
+  danmakuElement.className = 'danmaku';
+  danmakuElement.style.position = 'absolute';
+  danmakuElement.style.color = danmaku.color;
+  danmakuElement.style.left = '100%';
+  danmakuElement.style.top = `${danmaku.position}%`;
+  danmakuElement.style.transform = 'translateY(-50%)';
+  danmakuElement.style.whiteSpace = 'nowrap';
+  danmakuElement.style.fontSize = '16px';
+  danmakuElement.style.fontWeight = 'bold';
+  danmakuElement.style.textShadow = '0 0 2px black';
+  // 动画由CSS类定义，移除内联样式以避免冲突
+
+  danmakuElement.textContent = danmaku.text;
+  
+  container.appendChild(danmakuElement);
+  
+  // 移除过期弹幕
+  setTimeout(() => {
+    danmakuElement.remove();
+  }, 8000);
+};
 
 // 获取视频详情和推荐视频
 const fetchVideoData = async () => {
@@ -261,6 +477,25 @@ const handleFollow = async () => {
   }
 }
 
+// 格式化数字为K/M表示法
+const formatNumber = (num) => {
+  if (!num) return '0';
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
+}
+
+// 弹幕显示控制
+const toggleDanmaku = () => {
+  const container = danmakuContainer.value;
+  if (container) {
+    container.style.display = container.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
 // 点赞/取消点赞
 const handleLike = async () => {
   if (!video.value) return
@@ -317,6 +552,15 @@ video {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+@keyframes danmaku {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
+}
+
+.danmaku {
+  animation: danmaku 8s linear forwards;
 }
 
 /* 添加缺失的样式类 */
