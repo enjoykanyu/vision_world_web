@@ -1,33 +1,33 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useUserStore } from './userStore'
-import { videoAPI, Video as ApiVideo } from '@/api/video'
+import { videoAPI, VideoListResponse, VideoDetailResponse, Video as ApiVideo } from '@/api/video';
 
 // 本地视频接口（保持与原有接口兼容）
 export interface Author {
   username: string
   avatar: string
-  is_followed?: boolean
+  isFollowed?: boolean
 }
 
 export interface Video {
-  id: string
-  title: string
-  src: string
-  poster: string
-  duration: string
-  views: number
-  author: Author
-  description: string
-  tags: string[]
-  publishedAt: string
-  likes: number
-  comments: number
-  shares: number
-  isLiked: boolean
-  isFollowed: boolean
-  type: string // 视频类型: original/repost
-  source: string // 转载来源
+  id: string;
+  title: string;
+  url: string;
+  thumbnail: string;
+  duration: string;
+  views: number;
+  author: Author;
+  description: string;
+  tags: string[];
+  publishedAt: string;
+  like_count: number;
+  comment_count: number;
+  share_count: number;
+  isLiked: boolean;
+  isFollowed: boolean;
+  videoType: string;
+  videoSource: string;
 }
 
 // 视频列表状态
@@ -89,7 +89,8 @@ export const useVideoStore = defineStore('video', () => {
     
     try {
       // 导入userStore
-      const { isAuthenticated, getRecommendedTags } = useUserStore()
+      const userStore = useUserStore()
+      const { isAuthenticated, getRecommendedTags } = userStore
       
       // 构建请求参数
       const requestParams: any = {
@@ -106,14 +107,14 @@ export const useVideoStore = defineStore('video', () => {
         }
       }
       
-      const response = await videoAPI.getRecommendedVideos(requestParams)
+      const response: VideoListResponse = await videoAPI.getRecommendedVideos(requestParams)
       
-      if (!response.data) {
+      if (!response || !response.videos) {
         throw new Error('Invalid response structure')
       }
 
-      const data = response.data
-      const videos = Array.isArray(data.videos) ? data.videos : []
+      const data = response
+      const videos = Array.isArray(data.videos) ? data.videos : [] as ApiVideo[]
       const pagination = data.pagination || { current_page: 1, per_page: 10, total: 0, total_pages: 1 }
 
       // 转换API数据格式
@@ -161,13 +162,13 @@ export const useVideoStore = defineStore('video', () => {
     hotVideos.value.loading = true
     
     try {
-      const response = await videoAPI.getHotVideos({
+      const response: VideoListResponse = await videoAPI.getHotVideos({
         page,
         page_size: pageSize,
         request_id: generateRequestId()
       })
       
-      const { videos, pagination } = response.data.data
+      const { videos = [], pagination = { current_page: 1, page_size: 10, total: 0, total_pages: 1 } } = response || {}
       
       // 转换API数据格式
       const convertedVideos = videos.map(transformApiVideoToLocal)
@@ -199,13 +200,13 @@ export const useVideoStore = defineStore('video', () => {
   // 获取视频详情
   async function fetchVideoDetail(videoId: string) {
     try {
-      const response = await videoAPI.getVideoDetail(videoId, generateRequestId())
+      const response: VideoDetailResponse = await videoAPI.getVideoDetail(videoId, generateRequestId())
       
       if (!response.data || !response.data.data) {
         throw new Error('Invalid response structure')
       }
       
-      const { video } = response.data.data
+      const video = response.data;
       
       // 转换API数据格式
       currentVideo.value = transformApiVideoToLocal(video)
@@ -233,15 +234,13 @@ export const useVideoStore = defineStore('video', () => {
       if (currentVideo.value && currentVideo.value.id === videoId) {
         currentVideo.value.isLiked = true
         // 使用API返回的点赞数
-        currentVideo.value.likes = response.data.like_count !== undefined ? Number(response.data.like_count) : (currentVideo.value.likes || 0) + 1
+        currentVideo.value.like_count = response.like_count !== undefined ? Number(response.like_count) : (currentVideo.value.like_count || 0) + 1
       }
       
       // 更新列表中的视频状态
-      const currentLikes = getVideoById(videoId)?.likes || 0
-      const newLikes = response.data && response.data.like_count !== undefined 
-        ? response.data.like_count 
-        : currentLikes + 1
-      updateVideoInLists(videoId, { isLiked: true, likes: newLikes })
+      const currentLikes = getVideoById(videoId)?.like_count || 0
+      const newLikes = response.like_count !== undefined ? response.like_count : currentLikes + 1
+      updateVideoInLists(videoId, { isLiked: true, like_count: newLikes as number })
       
       // 使用console.log替代ElementPlus的消息提示
       console.log('点赞成功')
@@ -269,15 +268,13 @@ export const useVideoStore = defineStore('video', () => {
       if (currentVideo.value && currentVideo.value.id === videoId) {
         currentVideo.value.isLiked = false
         // 使用API返回的点赞数
-        currentVideo.value.likes = response.data.like_count !== undefined ? Number(response.data.like_count) : Math.max(0, (currentVideo.value.likes || 1) - 1)
+        currentVideo.value.like_count = response.like_count !== undefined ? Number(response.like_count) : Math.max(0, (currentVideo.value.like_count || 1) - 1)
       }
       
       // 更新列表中的视频状态
-      const currentLikes = getVideoById(videoId)?.likes || 1
-      const newLikes = response.data && response.data.like_count !== undefined 
-        ? response.data.like_count 
-        : Math.max(0, currentLikes - 1)
-      updateVideoInLists(videoId, { isLiked: false, likes: newLikes })
+      const currentLikes = getVideoById(videoId)?.like_count || 1
+      const newLikes = response.like_count !== undefined ? response.like_count : Math.max(0, currentLikes - 1)
+      updateVideoInLists(videoId, { isLiked: false, like_count: newLikes as number })
       
       // 使用console.log替代ElementPlus的消息提示
       console.log('取消点赞成功')
@@ -414,29 +411,25 @@ export const useVideoStore = defineStore('video', () => {
     const author = apiVideo.author || {};
 
     return {
-      id: apiVideo.video_id || 'unknown_id',
+      id: apiVideo.id || 'unknown_id',
       title: apiVideo.title || 'Untitled',
-      src: apiVideo.video_url || '',
-      poster: apiVideo.thumbnail_url || '',
+      url: apiVideo.url || '',
+      thumbnail: apiVideo.thumbnail || '',
       duration: formatDuration(durationSeconds),
-      views: typeof apiVideo.view_count === 'number' ? apiVideo.view_count : parseInt(apiVideo.view_count as string, 10) || 0,
-      author: {
-        username: author.username || 'Unknown Author',
-        avatar: author.avatar || '',
-        is_followed: author.is_followed || false
-      },
+      views: typeof apiVideo.views === 'number' ? apiVideo.views : parseInt(apiVideo.views as string, 10) || 0,
+      author: { username: apiVideo.author?.username || 'Unknown', avatar: apiVideo.author?.avatar || '', isFollowed: apiVideo.author?.isFollowed || false },
       description: apiVideo.description || '',
       tags: Array.isArray(apiVideo.tags) ? apiVideo.tags : [],
-      publishedAt: formatDate(apiVideo.published_at || new Date()),
-      likes: typeof apiVideo.like_count === 'number' ? apiVideo.like_count : parseInt(apiVideo.like_count as string, 10) || 0,
-      comments: typeof apiVideo.comment_count === 'number' ? apiVideo.comment_count : parseInt(apiVideo.comment_count as string, 10) || 0,
-      shares: typeof apiVideo.share_count === 'number' ? apiVideo.share_count : parseInt(apiVideo.share_count as string, 10) || 0,
-      isLiked: Boolean(apiVideo.is_liked),
-      isFollowed: Boolean(author.is_followed),
-      type: apiVideo.type || 'original',
-      source: apiVideo.source || ''
+      publishedAt: formatDate(apiVideo.publishedAt ? new Date(apiVideo.publishedAt).toISOString() : new Date().toISOString()),
+      like_count: typeof apiVideo.like_count === 'number' ? apiVideo.like_count : parseInt(apiVideo.like_count as string, 10) || 0,
+      comment_count: typeof apiVideo.comment_count === 'number' ? apiVideo.comment_count : parseInt(apiVideo.comment_count as string, 10) || 0,
+      share_count: typeof apiVideo.share_count === 'number' ? apiVideo.share_count : parseInt(apiVideo.share_count as string, 10) || 0,
+      isLiked: Boolean(apiVideo.isLiked),
+      isFollowed: Boolean(apiVideo.author?.isFollowed),
+      videoType: apiVideo.videoType || 'original',
+      videoSource: apiVideo.videoSource || ''
     }
-}
+  }
 
   // 格式化时长（秒转 MM:SS 格式）
   function formatDuration(seconds: number): string {
@@ -449,17 +442,17 @@ export const useVideoStore = defineStore('video', () => {
   function formatDate(dateString: string): string {
     if (!dateString) return 'Unknown Date';
     const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - date.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays === 0) return '今天'
-    if (diffDays === 1) return '昨天'
-    if (diffDays < 7) return `${diffDays}天前`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月前`
-    return `${Math.floor(diffDays / 365)}年前`
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return '今天';
+    if (diffDays === 1) return '昨天';
+    if (diffDays < 7) return `${diffDays}天前`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月前`;
+    return `${Math.floor(diffDays / 365)}年前`;
   }
 
   // 生成请求ID

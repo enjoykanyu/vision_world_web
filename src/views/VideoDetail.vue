@@ -18,48 +18,64 @@
       <div v-else-if="video" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Left side: Video Player and Info -->
         <div class="lg:col-span-2">
-          <div class="aspect-w-16 aspect-h-9 mb-4">
-            <div class="relative w-full rounded-lg overflow-hidden shadow-lg bg-black">
-        <video 
-          ref="videoPlayer"
-          :src="video.src" 
-          :poster="video.poster" 
-          controls 
-          class="w-full aspect-video"
-          @loadstart="handleVideoLoad"
-        ></video>
-        <!-- 弹幕容器 -->
-        <div ref="danmakuContainer" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
-        <!-- 弹幕控制 -->
-        <div class="absolute bottom-16 left-0 right-0 flex items-center justify-between px-4 text-white">
-          <div class="flex items-center space-x-4">
-            <button @click="toggleDanmaku" class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
-              <span>弹幕</span>
-            </button>
-            <div class="relative group">
-              <button class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063c.286 1.328 2.288 2.75 4.929 2.75h10.734c2.64-0 4.643-1.422 4.929-2.75l.548-3.063c.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948l-.548-3.063c-.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948zM10 15a2 2 0 100-4 2 2 0 000 4zm-6-5a2 2 0 114 0 2 2 0 01-4 0zm12 0a2 2 0 114 0 2 2 0 01-4 0z" clip-rule="evenodd"></path></svg>
-                <span>设置</span>
-              </button>
+          <!-- 视频播放器 -->
+          <div class="w-full bg-black mb-4 shadow-lg">
+            <div class="relative pt-[56.25%]"> <!-- 16:9 宽高比 -->
+              <video 
+                ref="videoPlayer"
+                :src="video.src" 
+                :poster="video.poster" 
+                class="absolute top-0 left-0 w-full h-full object-contain"
+                controls
+                @loadstart="handleVideoLoad"
+                @error="handleVideoError"
+              ></video>
+              
+              <!-- 弹幕容器 -->
+              <div ref="danmakuContainer" class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+                <!-- 弹幕会动态添加到这里 -->
+              </div>
+              
+              <!-- 视频控制栏上方的控制按钮 -->
+              <div class="absolute bottom-16 left-0 right-0 flex items-center justify-between px-4 text-white bg-gradient-to-t from-black/70 to-transparent py-2">
+                <div class="flex items-center space-x-6">
+                  <button @click="toggleDanmaku" class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
+                    <span>弹幕</span>
+                  </button>
+                  
+                  <div class="relative group">
+                    <button class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063c.286 1.328 2.288 2.75 4.929 2.75h10.734c2.64-0 4.643-1.422 4.929-2.75l.548-3.063c.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948l-.548-3.063c-.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948zM10 15a2 2 0 100-4 2 2 0 000 4zm-6-5a2 2 0 114 0 2 2 0 01-4 0zm12 0a2 2 0 114 0 2 2 0 01-4 0z" clip-rule="evenodd"></path></svg>
+                      <span>设置</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                  <div class="relative group">
+                    <button class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
+                      <span class="font-medium">1080P</span>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                  </div>
+                  
+                  <div class="relative group">
+                    <button class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
+                      <span>倍速</span>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                  </div>
+                  
+                  <div class="relative group">
+                    <button class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.338 8.588a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L10 9.586 4.338 8.588z"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="flex items-center space-x-4">
-            <div class="relative group">
-              <button class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"></path></svg>
-                <span>1080P</span>
-              </button>
-            </div>
-            <div class="relative group">
-              <button class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                <span>倍速</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
           </div>
           <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ video.title }}</h1>
           <div class="flex flex-wrap items-center text-sm text-gray-500 mb-4 gap-x-4 gap-y-2">
@@ -129,22 +145,22 @@
           </div>
 
           <!-- 弹幕输入 -->
-          <div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm mb-6">
-            <div class="flex items-center">
-              <img :src="userStore.avatar || 'https://picsum.photos/100/100'" alt="Your avatar" class="w-8 h-8 rounded-full mr-3">
-              <div class="flex-1 relative">
-                <input 
-                  type="text" 
-                  v-model="danmakuText"
-                  placeholder="发送弹幕..."
-                  class="w-full pl-4 pr-20 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-bilibili-primary"
-                  @keyup.enter="addDanmaku"
-                >
-                <button @click="addDanmaku" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-bilibili-primary text-white text-sm px-4 py-1 rounded-full hover:bg-purple-700 transition-colors">
-  发送
-</button>
-              </div>
-            </div>
+          <div class="flex items-center space-x-2 p-2 bg-white rounded-md mb-6 shadow-sm border border-gray-100">
+            <img :src="userStore.avatar || 'https://picsum.photos/100/100'" alt="Your avatar" class="w-8 h-8 rounded-full">
+            <input 
+              type="text" 
+              v-model="danmakuText"
+              placeholder="发送弹幕..."
+              class="flex-1 px-4 py-2.5 rounded-full bg-gray-100 focus:outline-none focus:bg-white border border-transparent focus:border-blue-300 transition-all"
+              @keyup.enter="addDanmaku"
+            >
+            <button 
+              @click="addDanmaku" 
+              class="px-5 py-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors font-medium text-sm"
+              :disabled="!danmakuText.trim()"
+            >
+              发送
+            </button>
           </div>
 
           <!-- 评论区 -->
@@ -399,7 +415,7 @@ const fetchVideoData = async () => {
       video.value = {
         id: videoId.value,
         title: '示例视频标题',
-        src: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4',
+        src: '/test-video.mp4',
         poster: 'https://picsum.photos/1280/720',
         views: '0.1K',
         publishedAt: '今天',
@@ -424,7 +440,7 @@ const fetchVideoData = async () => {
     video.value = {
       id: videoId.value,
       title: '示例视频标题',
-      src: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
+      src: '/test-video.mp4',
       poster: 'https://picsum.photos/1280/720',
       views: '0.1K',
       publishedAt: '今天',
@@ -451,6 +467,15 @@ const goToVideo = (id: string) => {
 // 处理视频加载
 const handleVideoLoad = () => {
   console.log('视频开始加载')
+}
+
+// 处理视频加载错误，切换到备用视频
+const handleVideoError = (event) => {
+  console.error('视频加载失败，尝试加载备用视频:', event);
+  if (video.value && video.value.altSrc) {
+    video.value.src = video.value.altSrc;
+    videoPlayer.value.load();
+  }
 }
 
 // 播放视频
@@ -559,8 +584,17 @@ video {
   to { transform: translateX(-100%); }
 }
 
+/* 弹幕样式优化 */
 .danmaku {
+  position: absolute;
+  white-space: nowrap;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(0, 0, 0, 0.8);
+  font-size: 16px;
+  font-weight: 500;
   animation: danmaku 8s linear forwards;
+  pointer-events: none;
+  z-index: 10;
 }
 
 /* 添加缺失的样式类 */
