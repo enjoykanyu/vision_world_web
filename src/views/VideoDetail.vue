@@ -19,7 +19,7 @@
         <!-- Left side: Video Player and Info -->
         <div class="lg:col-span-2">
           <!-- 视频播放器 -->
-          <div class="w-full bg-black mb-4 shadow-lg">
+          <div class="w-full bg-black mb-4 shadow-lg rounded-lg overflow-hidden">
             <div class="relative pt-[56.25%]"> <!-- 16:9 宽高比 -->
               <video 
                 ref="videoPlayer"
@@ -40,13 +40,18 @@
               <div class="absolute bottom-16 left-0 right-0 flex items-center justify-between px-4 text-white bg-gradient-to-t from-black/70 to-transparent py-2">
                 <div class="flex items-center space-x-6">
                   <button @click="toggleDanmaku" class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                      <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                    </svg>
                     <span>弹幕</span>
                   </button>
                   
                   <div class="relative group">
                     <button class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
-                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063c.286 1.328 2.288 2.75 4.929 2.75h10.734c2.64-0 4.643-1.422 4.929-2.75l.548-3.063c.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948l-.548-3.063c-.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948zM10 15a2 2 0 100-4 2 2 0 000 4zm-6-5a2 2 0 114 0 2 2 0 01-4 0zm12 0a2 2 0 114 0 2 2 0 01-4 0z" clip-rule="evenodd"></path></svg>
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063a1.532 1.532 0 01-2.286.948c-1.372-.696-2.942.724-2.656 2.05l.548 3.063c.286 1.328 2.288 2.75 4.929 2.75h10.734c2.64-0 4.643-1.422 4.929-2.75l.548-3.063c.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948l-.548-3.063c-.286-1.326-1.284-2.747-2.656-2.05a1.532 1.532 0 01-2.286-.948zM10 15a2 2 0 100-4 2 2 0 000 4zm-6-5a2 2 0 114 0 2 2 0 01-4 0zm12 0a2 2 0 114 0 2 2 0 01-4 0z" clip-rule="evenodd"></path>
+                      </svg>
                       <span>设置</span>
                     </button>
                   </div>
@@ -56,87 +61,79 @@
                   <div class="relative group">
                     <button class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
                       <span class="font-medium">1080P</span>
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
                     </button>
                   </div>
                   
                   <div class="relative group">
                     <button class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
                       <span>倍速</span>
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
                     </button>
                   </div>
                   
                   <div class="relative group">
                     <button class="flex items-center space-x-1 hover:text-blue-400 transition-colors text-sm">
-                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.338 8.588a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L10 9.586 4.338 8.588z"></path></svg>
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.338 8.588a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L10 9.586 4.338 8.588z"></path>
+                      </svg>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          </div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ video.title }}</h1>
-          <div class="flex flex-wrap items-center text-sm text-gray-500 mb-4 gap-x-4 gap-y-2">
-            <span>{{ video.views }} 观看</span>
-            <span>{{ video.publishedAt }}</span>
-            <span v-if="video.duration">时长: {{ video.duration }}</span>
-          </div>
-          <div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-            <div class="flex items-center">
-              <img :src="video.authorAvatar" alt="author" class="w-14 h-14 rounded-full mr-4 border-2 border-white dark:border-gray-700 shadow-sm">
-              <div>
-                <p class="font-semibold text-gray-900 dark:text-white text-lg">{{ video.author }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ video.authorFans || '0' }} 粉丝</p>
+          
+          <!-- 视频标题和作者信息 -->
+          <div class="flex flex-col md:flex-row md:items-start justify-between mb-6">
+            <div>
+              <h1 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-900 mb-2 line-clamp-2">{{ video.title }}</h1>
+              <div class="flex items-center text-sm text-gray-500 mb-3 flex-wrap gap-x-4 gap-y-1">
+                <span class="flex items-center"><i class="far fa-eye mr-1.5"></i>{{ video.views }} 次观看</span>
+                <span class="flex items-center"><i class="far fa-calendar mr-1.5"></i>{{ video.publishedAt }}</span>
               </div>
             </div>
-            <button 
-              @click="handleFollow"
-              :class="[ 'px-5 py-2 rounded-full transition-colors text-sm font-medium', video.isFollowed ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-bilibili-primary text-white hover:bg-purple-700' ]"
-            >
-              {{ video.isFollowed ? '已关注' : '+ 关注' }}
+            <div class="flex items-center space-x-3 mt-2 md:mt-0">
+              <div class="flex items-center">
+                <img :src="video.authorAvatar" alt="Author avatar" class="w-10 h-10 rounded-full mr-3 border-2 border-white shadow-sm">
+                <div class="hidden sm:block">
+                  <p class="font-medium text-gray-900">{{ video.author }}</p>
+                </div>
+              </div>
+              <button 
+                @click="handleFollow"
+                class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors flex items-center"
+              >
+                <i :class="video.isFollowed ? 'fas fa-check' : 'far fa-plus'" class="mr-1.5"></i>{{ video.isFollowed ? '已关注' : '关注' }}
+              </button>
+            </div>
+          </div>
+          
+          <!-- 互动按钮区 -->
+          <div class="flex flex-wrap gap-3 mb-6">
+            <button @click="handleLike" class="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 transition-all group">
+              <i :class="video.isLiked ? 'fas fa-heart text-red-500' : 'far fa-heart'" class="text-xl group-hover:scale-110 transition-transform"></i>
+              <span>{{ formatNumber(video.likes) }}</span>
+            </button>
+            <button class="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 transition-all">
+              <i class="far fa-comment text-xl"></i>
+              <span>{{ formatNumber(video.comments) }}</span>
+            </button>
+            <button class="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 transition-all">
+              <i class="far fa-share-square text-xl"></i>
+              <span>{{ formatNumber(video.shares) }}</span>
+            </button>
+            <button class="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 transition-all ml-auto">
+              <i class="far fa-bookmark text-xl"></i>
+              <span>收藏</span>
             </button>
           </div>
           
-          <!-- 互动按钮 -->
-          <!-- 互动按钮区 -->
-          <div class="grid grid-cols-4 gap-2 mb-8">
-            <button 
-              @click="handleLike"
-              :class="[ 'flex flex-col items-center justify-center py-3 rounded-lg transition-colors', video.isLiked ? 'bg-red-50 text-red-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700' ]"
-            >
-              <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-              </svg>
-              <span class="text-sm">{{ formatNumber(video.likes || 0) }}</span>
-              <span class="text-xs mt-1">点赞</span>
-            </button>
-            
-            <button class="flex flex-col items-center justify-center py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-              <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-              </svg>
-              <span class="text-sm">{{ formatNumber(video.comments || 0) }}</span>
-              <span class="text-xs mt-1">评论</span>
-            </button>
-            
-            <button class="flex flex-col items-center justify-center py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-              <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
-              </svg>
-              <span class="text-sm">{{ formatNumber(video.shares || 0) }}</span>
-              <span class="text-xs mt-1">分享</span>
-            </button>
-            
-            <button class="flex flex-col items-center justify-center py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-              <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-              </svg>
-              <span class="text-sm">{{ formatNumber(video.collections || 0) }}</span>
-              <span class="text-xs mt-1">收藏</span>
-            </button>
-          </div>
+          <!-- 视频描述 -->
           <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6">
             <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{{ video.description }}</p>
             <div class="mt-4 flex flex-wrap gap-2">
@@ -202,11 +199,15 @@
                     </div>
                     <div class="flex items-center space-x-4">
                       <button class="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                        </svg>
                         <span>1.2K</span>
                       </button>
                       <button class="flex items-center space-x-1 text-gray-500 hover:text-bilibili-primary transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01"></path>
+                        </svg>
                         <span>回复</span>
                       </button>
                     </div>
@@ -227,11 +228,15 @@
                     </div>
                     <div class="flex items-center space-x-4">
                       <button class="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                        </svg>
                         <span>865</span>
                       </button>
                       <button class="flex items-center space-x-1 text-gray-500 hover:text-bilibili-primary transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01"></path>
+                        </svg>
                         <span>回复</span>
                       </button>
                     </div>
@@ -266,23 +271,28 @@
         </div>
 
         <!-- Right side: Recommended Videos -->
-        <div class="lg:col-span-1">
-          <h2 class="text-xl font-bold text-gray-900 mb-4">推荐视频</h2>
-          <div class="space-y-4">
-            <div v-for="recVideo in recommendedVideos" :key="recVideo.id" class="flex items-start space-x-3 cursor-pointer group" @click="goToVideo(recVideo.id)">
-              <div class="w-36 flex-shrink-0 relative">
-                <img :src="recVideo.poster" :alt="recVideo.title" class="rounded-lg aspect-video object-cover group-hover:opacity-90 transition-opacity">
-                <span v-if="recVideo.duration" class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 rounded">{{ recVideo.duration }}</span>
+        <div class="lg:col-span-1 related-videos lg:pl-6 bg-white rounded-xl shadow-sm p-4 mt-6">
+          <h3 class="text-lg font-bold mb-4 flex items-center text-gray-900">
+            <i class="fas fa-compass mr-2 text-blue-500"></i>推荐视频
+          </h3>
+          <div class="space-y-5">
+            <div v-for="recVideo in recommendedVideos" :key="recVideo.id" @click="goToVideo(recVideo.id)" class="flex cursor-pointer group transition-transform hover:translate-x-1">
+              <div class="relative w-48 h-27 flex-shrink-0 rounded-lg overflow-hidden">
+                <img :src="recVideo.poster" alt="Video thumbnail" class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300">
+                <span v-if="recVideo.duration" class="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded font-medium backdrop-blur-sm">{{ recVideo.duration }}</span>
               </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1 group-hover:text-bilibili-primary transition-colors">{{ recVideo.title }}</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{{ recVideo.author }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ recVideo.views }} 观看</p>
+              <div class="ml-3 overflow-hidden flex flex-col justify-between">
+                <h4 class="font-medium text-sm line-clamp-2 group-hover:text-blue-500 transition-colors text-gray-900">{{ recVideo.title }}</h4>
+                <div class="flex flex-col justify-end">
+                  <p class="text-xs text-gray-500 mt-1 line-clamp-1">{{ recVideo.author }}</p>
+                  <p class="text-xs text-gray-500 flex items-center"><i class="far fa-eye mr-1 text-gray-400"></i>{{ recVideo.views }} 观看</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
       <div v-else class="text-center py-20">
         <h1 class="text-2xl text-gray-600">视频加载中或未找到...</h1>
       </div>
@@ -303,6 +313,7 @@ const userStore = useUserStore()
 
 const videoId = ref(route.params.id as string)
 const videoPlayer = ref<HTMLVideoElement | null>(null)
+const danmakuContainer = ref<HTMLElement | null>(null)
 const loading = ref(false)
 
 // 视频数据
@@ -379,7 +390,6 @@ const renderDanmaku = (danmaku) => {
   danmakuElement.style.fontSize = '16px';
   danmakuElement.style.fontWeight = 'bold';
   danmakuElement.style.textShadow = '0 0 2px black';
-  // 动画由CSS类定义，移除内联样式以避免冲突
 
   danmakuElement.textContent = danmaku.text;
   
@@ -390,6 +400,18 @@ const renderDanmaku = (danmaku) => {
     danmakuElement.remove();
   }, 8000);
 };
+
+// 切换弹幕显示
+const toggleDanmaku = () => {
+  console.log('切换弹幕显示状态');
+}
+
+// 处理点赞
+const handleLike = () => {
+  if (!video.value) return;
+  video.value.isLiked = !video.value.isLiked;
+  video.value.likes += video.value.isLiked ? 1 : -1;
+}
 
 // 获取视频详情和推荐视频
 const fetchVideoData = async () => {
@@ -411,7 +433,7 @@ const fetchVideoData = async () => {
       }
     } else {
       console.error('获取视频详情失败:', result?.error || '未知错误')
-      // 如果API调用失败，可以添加mock数据以确保页面能正常显示
+      // 如果API调用失败，使用mock数据
       video.value = {
         id: videoId.value,
         title: '示例视频标题',
@@ -513,110 +535,46 @@ const formatNumber = (num) => {
   return num.toString();
 }
 
-// 弹幕显示控制
-const toggleDanmaku = () => {
-  const container = danmakuContainer.value;
-  if (container) {
-    container.style.display = container.style.display === 'none' ? 'block' : 'none';
-  }
-}
-
-// 点赞/取消点赞
-const handleLike = async () => {
-  if (!video.value) return
-  
-  try {
-    video.value.isLiked = !video.value.isLiked
-    video.value.likes += video.value.isLiked ? 1 : -1
-    console.log(video.value.isLiked ? '点赞成功' : '取消点赞成功')
-  } catch (error: any) {
-    console.error('操作失败:', error.message || '操作失败')
-  }
-}
-
 // 监听路由变化
-watch(() => route.params.id, async (newId) => {
-  if (newId && newId !== videoId.value) {
+watch(() => route.params.id, (newId) => {
+  if (newId) {
     videoId.value = newId as string
-    window.scrollTo(0, 0)
-    await fetchVideoData()
-    
-    // 等待DOM更新后尝试播放视频
-    await nextTick()
-    setTimeout(() => {
-      playVideo()
-    }, 500)
+    fetchVideoData()
   }
 })
 
-// 组件挂载时加载数据
-onMounted(async () => {
-  await fetchVideoData()
-  
-  // 尝试播放视频
-  setTimeout(() => {
-    playVideo()
-  }, 500)
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchVideoData()
 })
 </script>
 
 <style scoped>
-.aspect-w-16 {
-  position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-}
-.aspect-h-9 {
-  /* This class is a companion for aspect-w-16 */
-}
-.aspect-video {
-    aspect-ratio: 16 / 9;
-}
-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-@keyframes danmaku {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-100%); }
-}
-
-/* 弹幕样式优化 */
 .danmaku {
-  position: absolute;
-  white-space: nowrap;
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(0, 0, 0, 0.8);
-  font-size: 16px;
-  font-weight: 500;
-  animation: danmaku 8s linear forwards;
-  pointer-events: none;
-  z-index: 10;
+  animation: danmaku-move 8s linear;
 }
 
-/* 添加缺失的样式类 */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+@keyframes danmaku-move {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
 }
 
-.bg-bilibili-primary {
-  background-color: #00a1d6;
+.related-videos {
+  position: sticky;
+  top: 2rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
 }
 
-.bg-bilibili-primary:hover {
-  background-color: #0085b3;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .grid-cols-1.lg\\:grid-cols-3 {
-    grid-template-columns: 1fr;
+@media (max-width: 1024px) {
+  .related-videos {
+    position: relative;
+    top: 0;
+    max-height: none;
   }
 }
 </style>
