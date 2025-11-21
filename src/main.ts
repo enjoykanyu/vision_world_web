@@ -18,18 +18,27 @@ app.use(router)
 
 // 添加全局事件监听器，处理token失效导致的登出
 window.addEventListener('auth-logout', () => {
-  // 获取userStore实例
-  const userStore = pinia._s.get('user')
-  if (userStore) {
-    // 清除用户信息和token
-    userStore.clearUserInfo()
-    userStore.clearLocalStorage()
-    
-    // 清除localStorage中的token
+  try {
+    // 获取userStore实例
+    const userStore = useUserStore()
+    if (userStore) {
+      // 清除用户信息和token
+      userStore.clearUserInfo()
+      userStore.clearLocalStorage()
+      
+      // 清除localStorage中的token
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      
+      // 重定向到登录页
+      router.push('/login')
+    }
+  } catch (error) {
+    console.error('处理auth-logout事件失败:', error)
+    // 即使出错也要清除localStorage并跳转
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
-    
-    // 重定向到登录页
+    localStorage.removeItem('user')
     router.push('/login')
   }
 })

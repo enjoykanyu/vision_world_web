@@ -674,6 +674,10 @@ export const useUserStore = defineStore('user', () => {
     verifyToken,
     init,
     mockLogin,
+    clearUserInfo,
+    clearLocalStorage,
+    saveUserToLocalStorage,
+    loadUserFromLocalStorage,
     
     // 用户标签相关方法
       setUserTags,
@@ -685,7 +689,6 @@ export const useUserStore = defineStore('user', () => {
       getRecommendedTags,
       saveUserTagsToLocalStorage,
       loadUserTagsFromLocalStorage,
-      clearUserTags,
-      mockLogin
+      clearUserTags
   }
 })

@@ -89,8 +89,31 @@ request.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean }
     
+    // 定义不需要强制认证的公开接口
+    const publicEndpoints = [
+      '/api/videos/recommended',
+      '/api/videos/hot',
+      '/api/videos/category/',
+      '/api/videos/search',
+      '/api/videos/',
+      '/api/auth/verify-code',
+      '/api/auth/login',
+      '/api/auth/register'
+    ]
+    
+    // 检查是否是公开接口
+    const isPublicEndpoint = publicEndpoints.some(endpoint => 
+      originalRequest.url?.includes(endpoint)
+    )
+    
     // 处理HTTP错误，特别是401未授权错误
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // 对于公开接口，401错误不强制刷新token，直接返回错误让前端处理
+      if (isPublicEndpoint) {
+        console.log('公开接口401错误，不强制刷新token:', originalRequest.url)
+        return Promise.reject(error)
+      }
+      
       // 如果正在刷新token，将请求加入队列
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
