@@ -62,31 +62,6 @@
                 playsinline
               ></video>
               
-              <!-- 模拟视频播放器 -->
-              <div class="w-full aspect-video bg-black flex items-center justify-center relative overflow-hidden group">
-                <img :src="video.poster" alt="视频封面" class="w-full h-full object-cover transition-all duration-300" :class="isPlaying ? 'scale-105' : 'scale-100'">
-                <!-- 播放时的视觉效果 -->
-                <div v-if="isPlaying" class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse"></div>
-                <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                  <button @click="togglePlay" class="w-20 h-20 rounded-full bg-black bg-opacity-50 flex items-center justify-center hover:bg-opacity-70 transition-all transform hover:scale-110 opacity-0 group-hover:opacity-100">
-                    <i class="fas text-white text-4xl" :class="isPlaying ? 'fa-pause' : 'fa-play'"></i>
-                  </button>
-                </div>
-                <!-- 播放状态指示器 -->
-                <div v-if="isPlaying" class="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm flex items-center space-x-2">
-                  <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <span>正在播放</span>
-                </div>
-                <!-- 播放时间显示 -->
-                <div class="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                  {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-                </div>
-                <!-- 进度条覆盖层 -->
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-black bg-opacity-30">
-                  <div class="h-full bg-bilibili-primary transition-all duration-100" :style="{ width: `${progress}%` }"></div>
-                </div>
-              </div>
-              
               <!-- 视频加载失败提示 -->
               <div v-if="videoLoadError" class="absolute inset-0 flex items-center justify-center bg-gray-900">
                 <div class="text-center text-white">
@@ -155,8 +130,8 @@
                 </div>
               </div>
 
-              <!-- 播放按钮覆盖层 -->
-              <div v-if="!isPlaying && !isHovered" class="absolute inset-0 flex items-center justify-center">
+              <!-- 播放按钮覆盖层 - 只在未播放且鼠标未悬停时显示 -->
+              <div v-if="!isPlaying" class="absolute inset-0 flex items-center justify-center pointer-events-auto">
                 <button @click="togglePlay" class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors">
                   <i class="fas fa-play text-4xl text-white"></i>
                 </button>
