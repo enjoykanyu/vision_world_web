@@ -32,10 +32,11 @@
             <!-- 视频播放器容器 -->
             <div class="relative bg-black rounded-lg overflow-hidden shadow-2xl group">
               <!-- 弹幕容器 -->
-              <div class="absolute inset-0 pointer-events-none" ref="danmakuContainer">
+              <div class="absolute inset-0 pointer-events-none overflow-hidden" ref="danmakuContainer" v-show="danmakuEnabled">
                 <div v-for="(danmaku, index) in danmakus" :key="index" 
-                  :style="{ left: `${danmaku.left}%`, top: `${danmaku.top}%`, color: danmaku.color }"
-                  class="absolute whitespace-nowrap text-white danmaku-item">
+                  :style="{ left: `${danmaku.left}%`, top: `${danmaku.top}%`, color: danmaku.color, animationDuration: `${danmaku.duration}s` }"
+                  class="absolute whitespace-nowrap text-white danmaku-item"
+                  :class="{ 'danmaku-animating': isPlaying }">
                   {{ danmaku.text }}
                 </div>
               </div>
@@ -215,7 +216,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 
@@ -239,7 +240,7 @@ const route = useRoute()
 const videoId = route.params.id as string
 
 // 弹幕相关状态
-const danmakus = ref<Array<{text: string, color: string, left: number, top: number}>>([])
+const danmakus = ref<Array<{text: string, color: string, left: number, top: number, duration?: number}>>([])
 const newDanmakuText = ref('')
 const danmakuEnabled = ref(true)
 const danmakuContainer = ref<HTMLDivElement | null>(null)
@@ -417,9 +418,24 @@ const toggleFullscreen = () => {
 // 切换弹幕显示
 const toggleDanmaku = () => {
   danmakuEnabled.value = !danmakuEnabled.value
-  if (danmakuContainer.value) {
-    danmakuContainer.value.style.pointerEvents = danmakuEnabled.value ? 'none' : 'auto'
-  }
+  console.log('弹幕开关状态:', danmakuEnabled.value ? '开启' : '关闭')
+}
+
+// 重置所有弹幕动画
+const resetAllDanmakuAnimations = () => {
+  // 清空现有弹幕并重新生成，确保动画重新开始
+  const currentDanmakus = [...danmakus.value]
+  danmakus.value = []
+  
+  // 使用nextTick确保DOM更新后重新添加弹幕
+  nextTick(() => {
+    danmakus.value = currentDanmakus.map(danmaku => ({
+      ...danmaku,
+      // 重新生成随机位置，确保弹幕从右侧重新开始
+      left: 100,
+      top: danmaku.top
+    }))
+  })
 }
 
 // 发送弹幕
@@ -430,9 +446,12 @@ const sendDanmaku = () => {
     text: newDanmakuText.value,
     color: '#FFFFFF',
     left: 100,
-    top: Math.random() * 80 + 10
+    top: Math.random() * 80 + 10,
+    duration: Math.random() * 3 + 5 // 随机5-8秒滚动时间
   })
 
+  console.log('发送弹幕:', newDanmakuText.value, '当前弹幕数量:', danmakus.value.length)
+  
   newDanmakuText.value = ''
 }
 
@@ -451,10 +470,13 @@ const simulateDanmakus = () => {
     danmakus.value.push({
       text: sampleTexts[Math.floor(Math.random() * sampleTexts.length)],
       color: '#FFFFFF',
-      left: Math.random() * 80 + 10,
-      top: Math.random() * 80 + 10
+      left: 100, // 从右侧开始
+      top: Math.random() * 80 + 10,
+      duration: Math.random() * 3 + 5 // 随机5-8秒滚动时间
     })
   }
+  
+  console.log('模拟弹幕生成完成，弹幕数量:', danmakus.value.length)
 }
 
 
@@ -585,6 +607,8 @@ const onVideoCanPlay = () => {
 const onVideoPlay = () => {
   console.log('视频开始播放')
   isPlaying.value = true
+  // 重新播放时，重置所有弹幕动画
+  resetAllDanmakuAnimations()
 }
 
 // 视频暂停事件
@@ -599,6 +623,8 @@ const onVideoEnded = () => {
   isPlaying.value = false
   currentTime.value = 0
   progress.value = 0
+  // 视频结束时清空弹幕
+  danmakus.value = []
 }
 
 // 监听视频时间更新事件
@@ -635,16 +661,20 @@ onUnmounted(() => {
 }
 
 .danmaku-item {
-  animation: danmaku-scroll 8s linear forwards;
   font-size: 18px;
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   z-index: 10;
+  transition: none;
+}
+
+.danmaku-animating {
+  animation: danmaku-scroll linear forwards;
 }
 
 @keyframes danmaku-scroll {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-100%); }
+  from { transform: translateX(0); }
+  to { transform: translateX(-100vw); }
 }
 
 .text-shadow {
