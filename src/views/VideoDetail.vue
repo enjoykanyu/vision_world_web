@@ -30,13 +30,19 @@
           <!-- Left side: Video Player and Info -->
           <div class="lg:col-span-8">
             <!-- 视频播放器容器 -->
-            <div class="relative bg-black rounded-lg overflow-hidden shadow-2xl group">
-              <!-- 弹幕容器 -->
-              <div class="absolute inset-0 pointer-events-none overflow-hidden" ref="danmakuContainer" v-show="danmakuEnabled">
-                <div v-for="(danmaku, index) in danmakus" :key="index" 
-                  :style="{ left: `${danmaku.left}%`, top: `${danmaku.top}%`, color: danmaku.color, animationDuration: `${danmaku.duration}s` }"
-                  class="absolute whitespace-nowrap text-white danmaku-item"
-                  :class="{ 'danmaku-animating': isPlaying }">
+            <div class="relative bg-black rounded-lg overflow-hidden shadow-2xl group" @mouseenter="showPauseButton = true" @mouseleave="showPauseButton = false">
+              <!-- 弹幕层 - B站风格 -->
+              <div class="absolute inset-0 pointer-events-none overflow-hidden" ref="danmakuContainer">
+                <div v-for="danmaku in danmakus" :key="danmaku.id" 
+                     class="danmaku-item absolute font-bold select-none"
+                     :style="{
+                       color: danmaku.color,
+                       top: danmaku.top + '%',
+                       animationDelay: Math.random() * 2 + 's',
+                       animationDuration: (8 + Math.random() * 4) + 's',
+                       textShadow: '1px 1px 1px rgba(0,0,0,0.8), -1px -1px 1px rgba(0,0,0,0.8), 1px -1px 1px rgba(0,0,0,0.8), -1px 1px 1px rgba(0,0,0,0.8)',
+                       fontFamily: 'Microsoft YaHei, SimHei, sans-serif'
+                     }">
                   {{ danmaku.text }}
                 </div>
               </div>
@@ -78,64 +84,110 @@
                 </div>
               </div>
 
-              <!-- 自定义视频控制栏 -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <!-- 进度条 -->
-                <div class="relative h-1 bg-gray-500 rounded-full mb-4 cursor-pointer" 
-                     @click="seek" 
-                     @mousedown="startSeeking"
-                     @touchstart="startSeeking">
-                  <div class="absolute h-full bg-bilibili-primary rounded-full" :style="{ width: `${progress}%` }"></div>
-                  <div class="absolute h-3 w-3 bg-white rounded-full -mt-1 cursor-grab active:cursor-grabbing" 
-                       :style="{ left: `${progress}%` }"
+              <!-- 自定义视频控制栏 - B站风格 -->
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <!-- 弹幕预览区域（在进度条上方） -->
+                <div v-if="showDanmakuPreview && danmakuPreviewText" class="absolute bottom-20 left-0 right-0 px-4">
+                  <div class="bg-black/70 rounded px-3 py-2 text-white text-sm inline-block border border-white/20">
+                    {{ danmakuPreviewText }}
+                  </div>
+                </div>
+                
+                <!-- 进度条容器 -->
+                <div class="relative mb-3">
+                  <!-- 弹幕发送提示 -->
+                  <div v-if="showDanmakuSendTip" class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-bilibili-primary text-white text-xs px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
+                    点击发送弹幕
+                  </div>
+                  
+                  <!-- 进度条 - B站风格 -->
+                  <div class="relative h-2 bg-black/40 rounded-full cursor-pointer group/progress hover:h-3 transition-all duration-200" 
+                       @click="seek" 
                        @mousedown="startSeeking"
-                       @touchstart="startSeeking"></div>
+                       @touchstart="startSeeking"
+                       @mouseenter="showDanmakuSendTip = true"
+                       @mouseleave="showDanmakuSendTip = false">
+                    <!-- 弹幕发送区域（透明层） -->
+                    <div class="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-200" 
+                         @click="sendDanmakuAtProgress($event)">
+                      <div class="h-full flex items-center justify-center">
+                        <div class="text-white text-xs bg-black/60 px-2 py-1 rounded-full border border-white/30">
+                          点击发送弹幕
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- 已播放进度 -->
+                    <div class="absolute h-full bg-bilibili-primary rounded-full transition-all duration-100 shadow-sm" 
+                         :style="{ width: `${progress}%` }"></div>
+                    
+                    <!-- 缓冲进度 -->
+                    <div class="absolute h-full bg-white/30 rounded-full" 
+                         :style="{ width: `${bufferedProgress}%` }"></div>
+                    
+                    <!-- 进度点 -->
+                    <div class="absolute h-3 w-3 bg-white rounded-full -mt-0.5 shadow-lg cursor-grab active:cursor-grabbing transition-all hover:h-4 hover:w-4" 
+                         :style="{ left: `${progress}%` }"
+                         @mousedown="startSeeking"
+                         @touchstart="startSeeking"></div>
+                  </div>
                 </div>
 
-                <!-- 控制按钮和时间 -->
-                <div class="flex items-center justify-between text-white">
-                  <div class="flex items-center space-x-4">
-                    <button @click="togglePlay" class="hover:text-bilibili-primary transition-colors">
-                      <i class="fas" :class="isPlaying ? 'fa-pause' : 'fa-play'"></i>
+                <!-- 控制按钮和时间 - B站布局 -->
+                <div class="flex items-center justify-between text-white text-sm">
+                  <!-- 左侧控制区 -->
+                  <div class="flex items-center space-x-3">
+                    <button @click="togglePlay" class="hover:text-bilibili-primary transition-colors p-1">
+                      <i class="fas text-lg" :class="isPlaying ? 'fa-pause' : 'fa-play'"></i>
                     </button>
                     <div class="flex items-center space-x-2">
-                      <button @click="toggleMute" class="hover:text-bilibili-primary transition-colors">
+                      <button @click="toggleMute" class="hover:text-bilibili-primary transition-colors p-1">
                         <i class="fas" :class="isMuted ? 'fa-volume-mute' : 'fa-volume-up'"></i>
                       </button>
-                      <input type="range" min="0" max="100" v-model="volume" class="w-20 accent-bilibili-primary" @input="setVolume">
+                      <div class="relative">
+                        <input type="range" min="0" max="100" v-model="volume" class="w-16 h-1 accent-bilibili-primary bg-gray-600 rounded-full appearance-none cursor-pointer" @input="setVolume">
+                      </div>
                     </div>
-                    <div class="text-sm">
+                    <div class="text-xs font-mono">
                       {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
                     </div>
                   </div>
-                  <div class="flex items-center space-x-4">
-                    <button @click="toggleDanmaku" class="hover:text-bilibili-primary transition-colors">
-                      <i class="fas" :class="danmakuEnabled ? 'fa-comment-dots' : 'fa-comment-slash'"></i>
+                  
+                  <!-- 右侧控制区 -->
+                  <div class="flex items-center space-x-3">
+                    <!-- 弹幕开关 -->
+                    <button @click="toggleDanmaku" class="hover:text-bilibili-primary transition-colors p-1 relative" :class="danmakuEnabled ? 'text-bilibili-primary' : 'text-white/70'">
+                      <i class="fas fa-comment-dots text-lg"></i>
+                      <span class="absolute -top-1 -right-1 text-xs bg-bilibili-primary text-white rounded-full w-4 h-4 flex items-center justify-center text-xs" v-if="danmakuEnabled">{{ danmakus.length }}</span>
                     </button>
-                    <button @click="toggleFullscreen" class="hover:text-bilibili-primary transition-colors">
-                    <i class="fas fa-expand"></i>
-                  </button>
-                  <!-- 播放速度 -->
-                  <div class="playback-speed flex items-center space-x-2">
-                    <span class="speed-label text-sm">速度</span>
-                    <select v-model="playbackRate" @change="setPlaybackRate(playbackRate)" class="speed-select bg-transparent text-white border border-gray-600 rounded px-1 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-bilibili-primary">
-                      <option value="0.5">0.5x</option>
-                      <option value="0.75">0.75x</option>
-                      <option value="1">1x</option>
-                      <option value="1.25">1.25x</option>
-                      <option value="1.5">1.5x</option>
-                      <option value="2">2x</option>
-                    </select>
-                  </div>
+                    
+                    <!-- 播放速度 -->
+                    <div class="relative">
+                      <select v-model="playbackRate" @change="setPlaybackRate(playbackRate)" class="bg-black/60 text-white text-xs border border-white/20 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-bilibili-primary hover:bg-black/80 transition-colors">
+                        <option value="0.5">0.5x</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1">1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                      </select>
+                    </div>
+                    
+                    <!-- 全屏 -->
+                    <button @click="toggleFullscreen" class="hover:text-bilibili-primary transition-colors p-1">
+                      <i class="fas fa-expand text-lg"></i>
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <!-- 播放按钮覆盖层 - 只在未播放且鼠标未悬停时显示 -->
-              <div v-if="!isPlaying" class="absolute inset-0 flex items-center justify-center pointer-events-auto">
-                <button @click="togglePlay" class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors">
-                  <i class="fas fa-play text-4xl text-white"></i>
-                </button>
+              <!-- 播放/暂停按钮覆盖层 - B站风格 -->
+              <div v-if="showPauseButton || !isPlaying" 
+                   class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                   @click="togglePlay">
+                <div class="play-button-overlay w-16 h-16 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95">
+                  <i class="fas text-2xl text-white" :class="isPlaying ? 'fa-pause' : 'fa-play ml-1'"></i>
+                </div>
               </div>
             </div>
 
@@ -166,17 +218,28 @@
                   <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">M: 静音切换</span>
                 </div>
               </div>
-              <!-- 弹幕输入框 -->
-              <div class="mt-4 flex">
+              <!-- 弹幕输入区域 - B站风格 -->
+              <div class="danmaku-input-container mt-4 flex items-center space-x-3 bg-black/20 rounded-lg p-3">
                 <input
                   v-model="newDanmakuText"
                   @keyup.enter="sendDanmaku"
-                  placeholder="发送弹幕..."
-                  class="flex-1 px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-bilibili-primary"
+                  placeholder="发个弹幕见证当下"
+                  class="danmaku-input flex-1 px-3 py-2 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-bilibili-primary bg-black/30 border border-white/20 text-sm"
                 >
+                <div class="flex items-center space-x-2">
+                  <button
+                    v-for="color in danmakuColors"
+                    :key="color.value"
+                    @click="selectedDanmakuColor = color.value"
+                    class="color-picker-btn w-5 h-5 rounded-full border transition-all"
+                    :class="selectedDanmakuColor === color.value ? 'border-white scale-110 shadow-lg' : 'border-white/30 hover:scale-110'"
+                    :style="{ backgroundColor: color.value }"
+                  ></button>
+                </div>
                 <button
                   @click="sendDanmaku"
-                  class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-r-lg"
+                  :disabled="!newDanmakuText.trim()"
+                  class="px-4 py-2 bg-bilibili-primary text-white rounded hover:bg-bilibili-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium"
                 >
                   发送
                 </button>
@@ -216,7 +279,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 
@@ -240,10 +303,16 @@ const route = useRoute()
 const videoId = route.params.id as string
 
 // 弹幕相关状态
-const danmakus = ref<Array<{text: string, color: string, left: number, top: number, duration?: number}>>([])
+const danmakus = ref<Array<{text: string, color: string, left: number, top: number, id: number, time?: number}>>([])
 const newDanmakuText = ref('')
 const danmakuEnabled = ref(true)
 const danmakuContainer = ref<HTMLDivElement | null>(null)
+const selectedDanmakuColor = ref('#FFFFFF')
+const showDanmakuPreview = ref(false)
+const danmakuPreviewText = ref('')
+const showDanmakuSendTip = ref(false)
+const showPauseButton = ref(false)
+const bufferedProgress = ref(0)
 
 // 视频控制状态
 const isPlaying = ref(false)
@@ -263,10 +332,22 @@ const isSeeking = ref(false)
 // 相关视频数据
 const relatedVideos = ref([
   { id: 1, title: '测试相关视频 1', author: '测试作者', viewCount: '1.2万', duration: '10:23', poster: 'https://picsum.photos/320/180?random=1' },
-  { id: 2, title: '测试相关视频 2', author: '测试作者', viewCount: '8.5千', duration: '08:45', poster: 'https://picsum.photos/320/180?random=2' },
+  { id:2, title: '测试相关视频 2', author: '测试作者', viewCount: '8.5千', duration: '08:45', poster: 'https://picsum.photos/320/180?random=2' },
   { id: 3, title: '测试相关视频 3 这是一个比较长的标题用来测试多行显示效果', author: '测试作者', viewCount: '3.7万', duration: '15:12', poster: 'https://picsum.photos/320/180?random=3' },
   { id: 4, title: '测试相关视频 4', author: '测试作者', viewCount: '2.1万', duration: '05:30', poster: 'https://picsum.photos/320/180?random=4' },
   { id: 5, title: '测试相关视频 5', author: '测试作者', viewCount: '9.8千', duration: '12:48', poster: 'https://picsum.photos/320/180?random=5' },
+])
+
+// 弹幕颜色选项
+const danmakuColors = ref([
+  { value: '#FFFFFF', class: 'border-gray-400' },
+  { value: '#FF6B6B', class: 'border-red-400' },
+  { value: '#4ECDC4', class: 'border-teal-400' },
+  { value: '#45B7D1', class: 'border-blue-400' },
+  { value: '#FFA07A', class: 'border-orange-400' },
+  { value: '#98D8C8', class: 'border-green-400' },
+  { value: '#F7DC6F', class: 'border-yellow-400' },
+  { value: '#BB8FCE', class: 'border-purple-400' }
 ])
 
 // 方法
@@ -418,65 +499,109 @@ const toggleFullscreen = () => {
 // 切换弹幕显示
 const toggleDanmaku = () => {
   danmakuEnabled.value = !danmakuEnabled.value
-  console.log('弹幕开关状态:', danmakuEnabled.value ? '开启' : '关闭')
-}
-
-// 重置所有弹幕动画
-const resetAllDanmakuAnimations = () => {
-  // 清空现有弹幕并重新生成，确保动画重新开始
-  const currentDanmakus = [...danmakus.value]
-  danmakus.value = []
-  
-  // 使用nextTick确保DOM更新后重新添加弹幕
-  nextTick(() => {
-    danmakus.value = currentDanmakus.map(danmaku => ({
-      ...danmaku,
-      // 重新生成随机位置，确保弹幕从右侧重新开始
-      left: 100,
-      top: danmaku.top
-    }))
-  })
+  if (danmakuContainer.value) {
+    danmakuContainer.value.style.pointerEvents = danmakuEnabled.value ? 'none' : 'auto'
+  }
 }
 
 // 发送弹幕
 const sendDanmaku = () => {
   if (!newDanmakuText.value.trim() || !danmakuEnabled.value) return
 
-  danmakus.value.push({
+  const danmaku = {
     text: newDanmakuText.value,
-    color: '#FFFFFF',
+    color: selectedDanmakuColor.value,
     left: 100,
     top: Math.random() * 80 + 10,
-    duration: Math.random() * 3 + 5 // 随机5-8秒滚动时间
-  })
+    id: Date.now() + Math.random(),
+    time: currentTime.value
+  }
 
-  console.log('发送弹幕:', newDanmakuText.value, '当前弹幕数量:', danmakus.value.length)
-  
+  danmakus.value.push(danmaku)
   newDanmakuText.value = ''
+  
+  // 3秒后自动移除弹幕
+  setTimeout(() => {
+    const index = danmakus.value.findIndex(d => d.id === danmaku.id)
+    if (index > -1) {
+      danmakus.value.splice(index, 1)
+    }
+  }, 8000)
+}
+
+// 在进度条位置发送弹幕
+const sendDanmakuAtProgress = (e: MouseEvent) => {
+  if (!newDanmakuText.value.trim() || !danmakuEnabled.value) return
+  
+  e.stopPropagation()
+  
+  // 计算点击位置对应的时间
+  const rect = (e.currentTarget as HTMLElement).parentElement!.getBoundingClientRect()
+  const pos = (e.clientX - rect.left) / rect.width
+  const targetTime = pos * duration.value
+  
+  const danmaku = {
+    text: newDanmakuText.value,
+    color: selectedDanmakuColor.value,
+    left: 100,
+    top: Math.random() * 80 + 10,
+    id: Date.now() + Math.random(),
+    time: targetTime
+  }
+  
+  danmakus.value.push(danmaku)
+  newDanmakuText.value = ''
+  
+  // 显示发送成功提示
+  danmakuPreviewText.value = danmaku.text
+  showDanmakuPreview.value = true
+  
+  setTimeout(() => {
+    showDanmakuPreview.value = false
+  }, 2000)
+  
+  // 3秒后自动移除弹幕
+  setTimeout(() => {
+    const index = danmakus.value.findIndex(d => d.id === danmaku.id)
+    if (index > -1) {
+      danmakus.value.splice(index, 1)
+    }
+  }, 8000)
 }
 
 // 模拟弹幕
 const simulateDanmakus = () => {
   const sampleTexts = [
     '这个视频太棒了！', '前方高能！', '666', '主播加油！', '哈哈哈哈',
-    '这个操作太秀了', '学习了', '打卡', '支持一下', '路过留名'
+    '这个操作太秀了', '学习了', '打卡', '支持一下', '路过留名',
+    '太精彩了', '收藏了', '分享一波', '感谢分享', '太厉害了',
+    '弹幕护体', '保护保护', '来了来了', '前排围观', '太真实了'
   ]
 
   // 清空现有弹幕
   danmakus.value = []
 
-  // 添加初始弹幕
-  for (let i = 0; i < 15; i++) {
-    danmakus.value.push({
+  // 添加初始弹幕，使用更真实的B站风格
+  for (let i = 0; i < 20; i++) {
+    const danmaku = {
       text: sampleTexts[Math.floor(Math.random() * sampleTexts.length)],
-      color: '#FFFFFF',
-      left: 100, // 从右侧开始
-      top: Math.random() * 80 + 10,
-      duration: Math.random() * 3 + 5 // 随机5-8秒滚动时间
-    })
+      color: danmakuColors.value[Math.floor(Math.random() * danmakuColors.value.length)].value,
+      left: 100,
+      top: Math.random() * 70 + 10, // 避免顶部和底部
+      id: Date.now() + Math.random() + i,
+      time: Math.random() * 30
+    }
+    
+    danmakus.value.push(danmaku)
+    
+    // 8秒后自动移除弹幕
+    setTimeout(() => {
+      const index = danmakus.value.findIndex(d => d.id === danmaku.id)
+      if (index > -1) {
+        danmakus.value.splice(index, 1)
+      }
+    }, 8000 + Math.random() * 4000) // 8-12秒随机时间
   }
-  
-  console.log('模拟弹幕生成完成，弹幕数量:', danmakus.value.length)
 }
 
 
@@ -607,8 +732,6 @@ const onVideoCanPlay = () => {
 const onVideoPlay = () => {
   console.log('视频开始播放')
   isPlaying.value = true
-  // 重新播放时，重置所有弹幕动画
-  resetAllDanmakuAnimations()
 }
 
 // 视频暂停事件
@@ -623,8 +746,6 @@ const onVideoEnded = () => {
   isPlaying.value = false
   currentTime.value = 0
   progress.value = 0
-  // 视频结束时清空弹幕
-  danmakus.value = []
 }
 
 // 监听视频时间更新事件
@@ -651,55 +772,137 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 基本样式 */
-.bg-bilibili-primary {
-  background-color: #FB7299;
-}
-
-.text-bilibili-primary {
-  color: #FB7299;
-}
-
+/* B站风格弹幕样式 */
 .danmaku-item {
-  font-size: 18px;
+  white-space: nowrap;
   font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  z-index: 10;
-  transition: none;
+  font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: 0.5px;
 }
 
-.danmaku-animating {
-  animation: danmaku-scroll linear forwards;
+/* B站风格播放按钮 */
+.play-button-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
 }
 
-@keyframes danmaku-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-100vw); }
+.play-button-overlay:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 1);
 }
 
-.text-shadow {
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+/* B站风格进度条 */
+.progress-bar {
+  transition: all 0.2s ease;
 }
 
-/* 响应式调整 */
-@media (max-width: 1024px) {
-  .grid-cols-12 {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* 自定义滚动条 */
-::-webkit-scrollbar {
-  width: 6px;
+.progress-bar:hover .progress-track {
   height: 6px;
 }
 
-::-webkit-scrollbar-thumb {
-  background-color: #FB7299;
-  border-radius: 3px;
+.progress-bar:hover .progress-thumb {
+  transform: scale(1.2);
+}
+
+/* B站风格控制栏 */
+.control-button {
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.control-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.control-button:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* B站风格输入框 */
+.danmaku-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-family: 'Microsoft YaHei', sans-serif;
+}
+
+.danmaku-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #00a1d6;
+  box-shadow: 0 0 0 2px rgba(0, 161, 214, 0.3);
+}
+
+/* B站风格颜色选择器 */
+.color-picker-btn {
+  transition: all 0.2s ease;
+  border-radius: 50%;
+}
+
+.color-picker-btn:hover {
+  transform: scale(1.15);
+}
+
+.color-picker-btn.active {
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #00a1d6;
+}
+
+/* B站风格动画 */
+@keyframes danmaku-scroll {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .danmaku-input-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .danmaku-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .play-button-overlay {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+/* B站风格滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* B站主色调 */
+:root {
+  --bilibili-primary: #00a1d6;
+  --bilibili-primary-hover: #00b5e5;
+  --bilibili-bg: #f6f7f8;
+  --bilibili-text: #212121;
 }
 </style>
