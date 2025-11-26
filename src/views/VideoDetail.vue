@@ -30,18 +30,25 @@
           <!-- Left side: Video Player and Info -->
           <div class="lg:col-span-8">
             <!-- 视频播放器容器 -->
-            <div class="relative bg-black rounded-lg overflow-hidden shadow-2xl group" @mouseenter="showPauseButton = true" @mouseleave="showPauseButton = false">
+            <div class="relative bg-black rounded-lg overflow-hidden shadow-2xl group video-player-container" 
+                 @mouseenter="showPauseButton = true" 
+                 @mouseleave="showPauseButton = false"
+                 @mousemove="handleFullscreenMouseMove">
               <!-- 弹幕层 - B站风格 -->
-              <div class="absolute inset-0 pointer-events-none overflow-hidden" ref="danmakuContainer">
+              <div class="absolute inset-0 pointer-events-none overflow-hidden z-10" ref="danmakuContainer">
                 <div v-for="danmaku in danmakus" :key="danmaku.id" 
-                     class="danmaku-item absolute font-bold select-none"
+                     class="danmaku-item font-bold select-none"
                      :style="{
                        color: danmaku.color,
                        top: danmaku.top + '%',
+                       animationName: 'danmaku-scroll',
                        animationDelay: Math.random() * 2 + 's',
                        animationDuration: (8 + Math.random() * 4) + 's',
+                       animationTimingFunction: 'linear',
+                       animationIterationCount: 'infinite',
                        textShadow: '1px 1px 1px rgba(0,0,0,0.8), -1px -1px 1px rgba(0,0,0,0.8), 1px -1px 1px rgba(0,0,0,0.8), -1px 1px 1px rgba(0,0,0,0.8)',
-                       fontFamily: 'Microsoft YaHei, SimHei, sans-serif'
+                       fontFamily: 'Microsoft YaHei, SimHei, sans-serif',
+                       whiteSpace: 'nowrap'
                      }">
                   {{ danmaku.text }}
                 </div>
@@ -85,7 +92,7 @@
               </div>
 
               <!-- 自定义视频控制栏 - B站风格 -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="custom-video-controls absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <!-- 弹幕预览区域（在进度条上方） -->
                 <div v-if="showDanmakuPreview && danmakuPreviewText" class="absolute bottom-20 left-0 right-0 px-4">
                   <div class="bg-black/70 rounded px-3 py-2 text-white text-sm inline-block border border-white/20">
@@ -174,7 +181,7 @@
                     </div>
                     
                     <!-- 全屏 -->
-                    <button @click="toggleFullscreen" class="hover:text-bilibili-primary transition-colors p-1">
+                    <button @click="toggleFullscreen" class="fullscreen-btn hover:text-bilibili-primary transition-colors p-1">
                       <i class="fas fa-expand text-lg"></i>
                     </button>
                   </div>
@@ -183,7 +190,7 @@
 
               <!-- 播放/暂停按钮覆盖层 - B站风格 -->
               <div v-if="showPauseButton || !isPlaying" 
-                   class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                   class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                    @click="togglePlay">
                 <div class="play-button-overlay w-16 h-16 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95">
                   <i class="fas text-2xl text-white" :class="isPlaying ? 'fa-pause' : 'fa-play ml-1'"></i>
@@ -216,6 +223,17 @@
                   <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">↑: 增加音量</span>
                   <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">↓: 减少音量</span>
                   <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">M: 静音切换</span>
+                </div>
+                <div class="mt-3">
+                  <button @click="addTestDanmaku" class="bg-bilibili-primary hover:bg-bilibili-primary/90 text-white px-3 py-1 rounded text-xs">
+                    🎯 添加测试弹幕
+                  </button>
+                  <button @click="danmakuEnabled = !danmakuEnabled" 
+                          :class="['px-3 py-1 rounded transition-colors text-xs', 
+                                   danmakuEnabled ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white']">
+                    {{ danmakuEnabled ? '关闭弹幕' : '开启弹幕' }}
+                  </button>
+                  <span class="text-xs text-gray-500 ml-2">当前弹幕: {{ danmakus.length }} 条</span>
                 </div>
               </div>
               <!-- 弹幕输入区域 - B站风格 -->
@@ -297,6 +315,7 @@ const errorMessage = ref('')
 const videoPlayer = ref<HTMLVideoElement | null>(null)
 const currentVideoSourceIndex = ref(0)
 const playbackRate = ref(1)
+const videoSourcesRef = ref<string[]>([])
 
 // 路由
 const route = useRoute()
@@ -488,12 +507,155 @@ const toggleFullscreen = () => {
   if (!container) return
 
   if (!document.fullscreenElement) {
-    container.requestFullscreen().catch(err => {
-      console.error(`全屏错误: ${err.message}`)
-    })
+    // 尝试不同的全屏API方法
+    const requestFullscreen = container.requestFullscreen || 
+                             container.webkitRequestFullscreen || 
+                             container.mozRequestFullScreen || 
+                             container.msRequestFullscreen
+    
+    if (requestFullscreen) {
+      requestFullscreen.call(container).catch(err => {
+        console.error(`全屏错误: ${err.message}`)
+        alert('全屏功能需要用户交互才能启用')
+      })
+    } else {
+      console.error('当前浏览器不支持全屏API')
+      alert('您的浏览器不支持全屏功能')
+    }
   } else {
-    document.exitFullscreen()
+    // 退出全屏
+    const exitFullscreen = document.exitFullscreen || 
+                          document.webkitExitFullscreen || 
+                          document.mozCancelFullScreen || 
+                          document.msExitFullscreen
+    
+    if (exitFullscreen) {
+      exitFullscreen.call(document)
+    }
   }
+}
+
+// 全屏模式下的鼠标和控件管理
+let fullscreenMouseTimer: number | null = null
+
+// 弹幕生成定时器
+let danmakuGenerationTimer: number | null = null
+
+// 模拟播放定时器
+let simulatedPlaybackTimer: number | null = null
+
+// 开始生成弹幕
+const startDanmakuGeneration = () => {
+  if (danmakuGenerationTimer) {
+    clearInterval(danmakuGenerationTimer)
+  }
+  
+  // 每2秒生成一批新弹幕
+  danmakuGenerationTimer = window.setInterval(() => {
+    if (isPlaying.value && danmakuEnabled.value) {
+      generateRandomDanmakus(3) // 每次生成3条弹幕
+    }
+  }, 2000)
+}
+
+// 停止生成弹幕
+const stopDanmakuGeneration = () => {
+  if (danmakuGenerationTimer) {
+    clearInterval(danmakuGenerationTimer)
+    danmakuGenerationTimer = null
+  }
+}
+
+// 开始模拟播放
+const startSimulatedPlayback = () => {
+  console.log('开始模拟播放，进度条将自动前进')
+  
+  simulatedPlaybackTimer = window.setInterval(() => {
+    if (currentTime.value < duration.value) {
+      currentTime.value += 0.1
+      progress.value = (currentTime.value / duration.value) * 100
+      
+      // 模拟时间更新，生成弹幕
+      if (Math.random() < 0.3) { // 30%概率生成弹幕
+        generateRandomDanmakus(1)
+      }
+    } else {
+      // 播放结束
+      isPlaying.value = false
+      currentTime.value = 0
+      progress.value = 0
+      stopSimulatedPlayback()
+      console.log('模拟播放结束')
+    }
+  }, 100) // 每100毫秒更新一次
+}
+
+// 停止模拟播放
+const stopSimulatedPlayback = () => {
+  if (simulatedPlaybackTimer) {
+    clearInterval(simulatedPlaybackTimer)
+    simulatedPlaybackTimer = null
+  }
+}
+
+// 生成随机弹幕
+const generateRandomDanmakus = (count: number) => {
+  const randomTexts = [
+    '来了来了', '666', '哈哈哈', '太棒了', '支持',
+    '👍', '❤️', '🌟', '🔥', '💯',
+    '弹幕+1', '真实', '雀食', '针不戳', '绝了',
+    '泪目', '破防', '蚌埠住', 'yyds', 'xswl'
+  ]
+  
+  for (let i = 0; i < count; i++) {
+    const danmaku = {
+      text: randomTexts[Math.floor(Math.random() * randomTexts.length)],
+      color: danmakuColors.value[Math.floor(Math.random() * danmakuColors.value.length)].value,
+      left: 100,
+      top: Math.random() * 70 + 10,
+      id: Date.now() + Math.random() + i,
+      time: currentTime.value
+    }
+    
+    danmakus.value.push(danmaku)
+    
+    // 8秒后移除
+    setTimeout(() => {
+      const index = danmakus.value.findIndex(d => d.id === danmaku.id)
+      if (index > -1) {
+        danmakus.value.splice(index, 1)
+      }
+    }, 8000)
+  }
+  
+  console.log(`生成了 ${count} 条随机弹幕，当前总数:`, danmakus.value.length)
+}
+
+const handleFullscreenMouseMove = () => {
+  if (!document.fullscreenElement) return
+  
+  // 显示控件
+  const controls = document.querySelector('.custom-video-controls')
+  if (controls) {
+    controls.classList.remove('opacity-0')
+    controls.classList.add('opacity-100')
+  }
+  
+  // 清除之前的定时器
+  if (fullscreenMouseTimer) {
+    clearTimeout(fullscreenMouseTimer)
+  }
+  
+  // 3秒后隐藏控件
+  fullscreenMouseTimer = window.setTimeout(() => {
+    if (document.fullscreenElement) {
+      const controls = document.querySelector('.custom-video-controls')
+      if (controls) {
+        controls.classList.remove('opacity-100')
+        controls.classList.add('opacity-0')
+      }
+    }
+  }, 3000)
 }
 
 // 切换弹幕显示
@@ -502,6 +664,34 @@ const toggleDanmaku = () => {
   if (danmakuContainer.value) {
     danmakuContainer.value.style.pointerEvents = danmakuEnabled.value ? 'none' : 'auto'
   }
+}
+
+// 手动添加测试弹幕
+const addTestDanmaku = () => {
+  if (!danmakuEnabled.value) {
+    alert('请先开启弹幕功能！')
+    return
+  }
+  
+  const testDanmaku = {
+    text: `🎯 测试弹幕 - ${new Date().toLocaleTimeString()}`,
+    color: '#ff0000',
+    left: 100,
+    top: Math.random() * 60 + 20,
+    id: Date.now() + Math.random(),
+    time: currentTime.value
+  }
+  
+  danmakus.value.push(testDanmaku)
+  console.log('手动添加测试弹幕:', testDanmaku.text, '当前总数:', danmakus.value.length)
+  
+  // 5秒后移除
+  setTimeout(() => {
+    const index = danmakus.value.findIndex(d => d.id === testDanmaku.id)
+    if (index > -1) {
+      danmakus.value.splice(index, 1)
+    }
+  }, 5000)
 }
 
 // 发送弹幕
@@ -571,18 +761,31 @@ const sendDanmakuAtProgress = (e: MouseEvent) => {
 
 // 模拟弹幕
 const simulateDanmakus = () => {
+  console.log('开始生成模拟弹幕...')
   const sampleTexts = [
     '这个视频太棒了！', '前方高能！', '666', '主播加油！', '哈哈哈哈',
     '这个操作太秀了', '学习了', '打卡', '支持一下', '路过留名',
     '太精彩了', '收藏了', '分享一波', '感谢分享', '太厉害了',
-    '弹幕护体', '保护保护', '来了来了', '前排围观', '太真实了'
+    '弹幕护体', '保护保护', '来了来了', '前排围观', '太真实了',
+    '🎯 精准打击！', '🔥 燃起来了！', '💯 满分操作！', '⚡ 闪电侠！', '🌟 闪闪发光！',
+    '👍 点赞支持！', '❤️ 爱心发射！', '🚀 起飞！', '💪 加油加油！', '🎉 庆祝一下！',
+    'B站第一！', '承包这个视频！', '此生无悔入B站', '此生无悔入华夏', '来世还在种花家',
+    '妈妈问我为什么跪着看视频', '我裂开了', '就这？', '有内味了', 'awsl',
+    '泪目', '破防了', '蚌埠住了', 'yyds', 'xswl',
+    '这波啊，这波是', '大气层', '下饭操作', '离谱', '离离原上谱',
+    '雀食', '针不戳', '夺笋啊', '社死现场', '伤害性不大，侮辱性极强',
+    '🎬 视频开始啦！', '📺 画质不错！', '🎵 声音清晰！', '⏰ 时间刚刚好！', '👏 掌声雷动！',
+    '💫 特效拉满！', '🌈 彩虹弹幕！', '⭐ 五星好评！', '🏆 冠军品质！', '💎 钻石弹幕！',
+    '这个兔子好可爱！', '小兔子跳啊跳', 'bunny太萌了', '动画制作精良', '色彩很鲜艳',
+    '背景音乐很好听', '节奏感不错', '画面很流畅', '细节处理到位', '值得收藏的视频'
   ]
 
   // 清空现有弹幕
   danmakus.value = []
+  console.log('已清空现有弹幕')
 
   // 添加初始弹幕，使用更真实的B站风格
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 35; i++) {
     const danmaku = {
       text: sampleTexts[Math.floor(Math.random() * sampleTexts.length)],
       color: danmakuColors.value[Math.floor(Math.random() * danmakuColors.value.length)].value,
@@ -593,21 +796,38 @@ const simulateDanmakus = () => {
     }
     
     danmakus.value.push(danmaku)
+    console.log(`生成弹幕 ${i + 1}:`, danmaku.text, '颜色:', danmaku.color)
     
-    // 8秒后自动移除弹幕
+    // 8-15秒后自动移除弹幕
     setTimeout(() => {
       const index = danmakus.value.findIndex(d => d.id === danmaku.id)
       if (index > -1) {
         danmakus.value.splice(index, 1)
       }
-    }, 8000 + Math.random() * 4000) // 8-12秒随机时间
+    }, 8000 + Math.random() * 7000) // 8-15秒随机时间
   }
+  
+  console.log('模拟弹幕生成完成，总数:', danmakus.value.length)
 }
 
 
 
 // 切换播放状态
 const togglePlay = () => {
+  if (videoError.value) {
+    // 如果视频加载失败，进入纯模拟播放模式
+    isPlaying.value = !isPlaying.value
+    
+    if (isPlaying.value) {
+      console.log('进入纯模拟播放模式')
+      startSimulatedPlayback()
+    } else {
+      console.log('停止模拟播放')
+      stopSimulatedPlayback()
+    }
+    return
+  }
+  
   if (!videoPlayer.value) return
   
   if (videoPlayer.value.paused) {
@@ -629,16 +849,25 @@ const fetchVideoData = async () => {
     // 实际应用中应该调用真实的API获取视频数据
     console.log(`获取视频ID: ${videoId}的数据`)
     
-    // 使用真实的视频文件
+    // 使用多个备选视频源
+    const videoSources = [
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', // Google测试视频
+      'https://www.w3schools.com/html/mov_bbb.mp4', // W3Schools测试视频
+      '/videos/sample.mp4', // 本地视频
+      'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4' // 备用测试视频
+    ]
+    
+    // 默认使用第一个视频源，如果加载失败会自动尝试其他源
+    videoSourcesRef.value = videoSources
     video.value = {
       id: videoId,
       title: 'VisionWorld 示例视频',
-      src: '/videos/sample.mp4', // 使用真实的视频文件
+      src: videoSources[currentVideoSourceIndex.value],
       poster: 'https://picsum.photos/seed/video123/800/450.jpg',
       viewCount: '1.2万',
       likeCount: '856',
-      duration: '00:30',
-      note: '这是一个真实的视频演示，展示了VisionWorld的视频播放功能。'
+      duration: '00:10',
+      note: '这是一个真实的视频演示，展示了VisionWorld的视频播放功能。支持全屏播放和弹幕功能。'
     }
   } catch (error) {
     videoError.value = true
@@ -687,15 +916,147 @@ const handleKeydown = (e: KeyboardEvent) => {
 
 // 生命周期
 onMounted(() => {
+  console.log('VideoDetail组件已挂载')
   fetchVideoData()
   simulateDanmakus()
+  
+  // 添加测试弹幕以确保弹幕系统正常工作
+  setTimeout(() => {
+    console.log('当前弹幕数量:', danmakus.value.length)
+    console.log('弹幕开关状态:', danmakuEnabled.value)
+    
+    // 添加多个测试弹幕在不同位置
+    const testDanmakus = [
+      {
+        text: '🎯 测试弹幕1 - 如果看到这个弹幕在移动，说明系统正常！',
+        color: '#ff0000',
+        left: 100,
+        top: 20,
+        id: Date.now() + Math.random(),
+        time: 0
+      },
+      {
+        text: '🎯 测试弹幕2 - 红色大字弹幕测试',
+        color: '#ff6b6b',
+        left: 100,
+        top: 40,
+        id: Date.now() + Math.random() + 1,
+        time: 0
+      },
+      {
+        text: '🎯 测试弹幕3 - 绿色弹幕测试',
+        color: '#00ff00',
+        left: 100,
+        top: 60,
+        id: Date.now() + Math.random() + 2,
+        time: 0
+      }
+    ]
+    
+    testDanmakus.forEach(danmaku => {
+      danmakus.value.push(danmaku)
+    })
+    
+    console.log('添加测试弹幕后数量:', danmakus.value.length)
+    
+    // 8秒后移除测试弹幕
+    setTimeout(() => {
+      testDanmakus.forEach(testDanmaku => {
+        const index = danmakus.value.findIndex(d => d.id === testDanmaku.id)
+        if (index > -1) {
+          danmakus.value.splice(index, 1)
+        }
+      })
+    }, 8000)
+  }, 2000)
+  
+  // 监听全屏状态变化
+  const handleFullscreenChange = () => {
+    console.log('全屏状态变化:', document.fullscreenElement ? '进入全屏' : '退出全屏')
+    if (document.fullscreenElement) {
+      // 进入全屏时的处理
+      document.body.classList.add('fullscreen-active')
+      
+      // 全屏模式下生成更多弹幕
+      setTimeout(() => {
+        generateMoreDanmakusForFullscreen()
+      }, 1000)
+    } else {
+      // 退出全屏时的处理
+      document.body.classList.remove('fullscreen-active')
+    }
+  }
+  
+  // 全屏模式下生成更多弹幕
+  const generateMoreDanmakusForFullscreen = () => {
+    if (!document.fullscreenElement || !danmakuEnabled.value) return
+    
+    const fullscreenTexts = [
+      '全屏模式启动！', '沉浸式体验！', '大屏看就是爽！', '弹幕护体！', '全屏弹幕来袭！',
+      '🔥 全屏模式 🔥', '👀 专注观看 👀', '💯 最佳体验 💯', '🌟 星光闪闪 🌟', '⚡ 电力十足 ⚡',
+      '全屏模式太棒了！', '这就是B站的感觉！', '弹幕铺满屏幕！', '视觉盛宴！', '全屏看更清楚！',
+      '妈妈问我为什么跪着看全屏', '全屏模式是真香', '这画质爱了爱了', '全屏弹幕更带感', '沉浸式弹幕体验',
+      '🌟 全屏模式太爽了', '💎 全屏钻石画质', '🎊 全屏狂欢开始', '🏅 全屏金牌体验', '🌺 全屏花开富贵'
+    ]
+    
+    for (let i = 0; i < 15; i++) {
+      const danmaku = {
+        text: fullscreenTexts[Math.floor(Math.random() * fullscreenTexts.length)],
+        color: danmakuColors.value[Math.floor(Math.random() * danmakuColors.value.length)].value,
+        left: 100,
+        top: Math.random() * 70 + 10,
+        id: Date.now() + Math.random() + i + 1000,
+        time: currentTime.value
+      }
+      
+      danmakus.value.push(danmaku)
+      
+      // 10秒后移除
+      setTimeout(() => {
+        const index = danmakus.value.findIndex(d => d.id === danmaku.id)
+        if (index > -1) {
+          danmakus.value.splice(index, 1)
+        }
+      }, 10000)
+    }
+    
+    console.log('全屏模式添加了 15 条弹幕，当前总数:', danmakus.value.length)
+  }
+  
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+  document.addEventListener('mozfullscreenchange', handleFullscreenChange)
+  document.addEventListener('MSFullscreenChange', handleFullscreenChange)
+  
   window.addEventListener('keydown', handleKeydown)
 })
 
 // 处理视频加载错误（现在为模拟播放，错误处理简化）
 const handleVideoError = (event: Event) => {
   console.log('视频元素错误（模拟播放模式）:', event)
-  // 在模拟播放模式下，不需要处理视频加载错误
+  
+  // 尝试切换到下一个视频源
+  if (videoSourcesRef.value && currentVideoSourceIndex.value < videoSourcesRef.value.length - 1) {
+    currentVideoSourceIndex.value++
+    console.log(`尝试切换到视频源 ${currentVideoSourceIndex.value + 1}/${videoSourcesRef.value.length}`)
+    
+    if (video.value && videoSourcesRef.value) {
+      video.value.src = videoSourcesRef.value[currentVideoSourceIndex.value]
+      console.log('切换到新视频源:', video.value.src)
+      
+      // 重试加载
+      setTimeout(() => {
+        if (videoPlayer.value) {
+          videoPlayer.value.load()
+        }
+      }, 1000)
+    }
+  } else {
+    // 所有视频源都失败了，显示错误信息
+    videoError.value = true
+    errorMessage.value = '视频加载失败，请稍后重试'
+    console.error('所有视频源都加载失败')
+  }
 }
 
 // 重试加载视频（模拟播放模式下简化处理）
@@ -732,12 +1093,18 @@ const onVideoCanPlay = () => {
 const onVideoPlay = () => {
   console.log('视频开始播放')
   isPlaying.value = true
+  
+  // 视频播放时持续生成弹幕
+  startDanmakuGeneration()
 }
 
 // 视频暂停事件
 const onVideoPause = () => {
   console.log('视频暂停')
   isPlaying.value = false
+  
+  // 视频暂停时停止生成弹幕
+  stopDanmakuGeneration()
 }
 
 // 视频结束事件
@@ -761,6 +1128,14 @@ onMounted(() => {
   fetchVideoData()
   simulateDanmakus()
   window.addEventListener('keydown', handleKeydown)
+  
+  // 页面加载后延迟生成更多弹幕
+  setTimeout(() => {
+    if (danmakuEnabled.value) {
+      generateRandomDanmakus(5)
+      console.log('页面加载后生成初始弹幕')
+    }
+  }, 3000)
 })
 
 onUnmounted(() => {
@@ -768,12 +1143,25 @@ onUnmounted(() => {
   if (videoPlayer.value) {
     videoPlayer.value.pause()
   }
+  
+  // 清理弹幕生成定时器
+  stopDanmakuGeneration()
+  
+  // 清理模拟播放定时器
+  stopSimulatedPlayback()
+  
+  // 清理全屏鼠标定时器
+  if (fullscreenMouseTimer) {
+    clearTimeout(fullscreenMouseTimer)
+    fullscreenMouseTimer = null
+  }
 })
 </script>
 
 <style scoped>
 /* B站风格弹幕样式 */
 .danmaku-item {
+  position: absolute;
   white-space: nowrap;
   font-weight: bold;
   font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
@@ -781,6 +1169,10 @@ onUnmounted(() => {
   pointer-events: none;
   user-select: none;
   letter-spacing: 0.5px;
+  right: -100%;
+  display: inline-block;
+  font-size: 18px;
+  line-height: 1.2;
 }
 
 /* B站风格播放按钮 */
@@ -798,6 +1190,42 @@ onUnmounted(() => {
 /* B站风格进度条 */
 .progress-bar {
   transition: all 0.2s ease;
+}
+
+/* 全屏模式样式 */
+:global(.fullscreen-active) {
+  overflow: hidden;
+}
+
+:global(.fullscreen-active) .video-player-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  background: #000 !important;
+}
+
+:global(.fullscreen-active) video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+/* 全屏模式下的弹幕优化 */
+:global(.fullscreen-active) .danmaku-item {
+  font-size: 24px !important;
+  line-height: 1.4 !important;
+}
+
+/* 全屏按钮样式 */
+.fullscreen-btn {
+  transition: all 0.2s ease;
+}
+
+.fullscreen-btn:hover {
+  transform: scale(1.1);
 }
 
 .progress-bar:hover .progress-track {
@@ -854,10 +1282,10 @@ onUnmounted(() => {
 /* B站风格动画 */
 @keyframes danmaku-scroll {
   from {
-    transform: translateX(100%);
+    transform: translateX(100vw);
   }
   to {
-    transform: translateX(-100%);
+    transform: translateX(-100vw);
   }
 }
 
