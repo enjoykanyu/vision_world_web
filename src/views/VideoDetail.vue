@@ -165,45 +165,253 @@
                   <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">M: 静音切换</span>
                 </div>
               </div>
-              <!-- 弹幕输入框 -->
-              <div class="mt-4 flex">
-                <input
-                  v-model="newDanmakuText"
-                  @keyup.enter="sendDanmaku"
-                  placeholder="发送弹幕..."
-                  class="flex-1 px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-bilibili-primary"
-                >
-                <button
-                  @click="sendDanmaku"
-                  class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-r-lg"
-                >
-                  发送
-                </button>
+              <!-- 弹幕控制面板 -->
+              <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">弹幕设置</h3>
+                  <div class="flex items-center space-x-2">
+                    <button
+                      @click="toggleDanmaku"
+                      class="px-3 py-1 text-xs rounded-full transition-colors"
+                      :class="danmakuEnabled ? 'bg-bilibili-primary text-white' : 'bg-gray-200 text-gray-600'"
+                    >
+                      {{ danmakuEnabled ? '弹幕开启' : '弹幕关闭' }}
+                    </button>
+                    <select
+                      v-model="danmakuDensity"
+                      class="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700"
+                    >
+                      <option value="low">低密度</option>
+                      <option value="normal">正常</option>
+                      <option value="high">高密度</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <!-- 弹幕输入区域 -->
+                <div class="danmaku-input-container">
+                  <input
+                    v-model="newDanmakuText"
+                    @keyup.enter="sendDanmaku"
+                    placeholder="发送弹幕..."
+                    class="danmaku-input"
+                    :disabled="!danmakuEnabled"
+                  >
+                  <div class="flex items-center border-l border-gray-200 dark:border-gray-600">
+                    <!-- 颜色选择器 -->
+                    <input
+                      v-model="danmakuColor"
+                      type="color"
+                      class="w-8 h-8 border-none cursor-pointer"
+                      title="弹幕颜色"
+                    >
+                    <!-- 速度选择 -->
+                    <select
+                      v-model="danmakuSpeed"
+                      class="text-xs border-none bg-transparent px-2 py-1"
+                      title="弹幕速度"
+                    >
+                      <option value="6">超快</option>
+                      <option value="8">快</option>
+                      <option value="10">正常</option>
+                      <option value="12">慢</option>
+                      <option value="15">超慢</option>
+                    </select>
+                  </div>
+                  <button
+                    @click="sendDanmaku"
+                    :disabled="!danmakuEnabled || !newDanmakuText.trim()"
+                    class="danmaku-send-button"
+                  >
+                    发送
+                  </button>
+                </div>
+                
+                <!-- 弹幕统计 -->
+                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex justify-between">
+                  <span>当前弹幕: {{ danmakus.length }}</span>
+                  <span>速度: {{ danmakuSpeed }}秒</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 右侧: 关联视频列表 -->
+          <!-- 右侧: 视频信息展示区域 -->
           <div class="lg:col-span-4">
-            <h2 class="text-xl font-bold mb-4">相关视频</h2>
-            <div class="space-y-4">
-              <div v-for="relatedVideo in relatedVideos" :key="relatedVideo.id" class="flex space-x-3 group cursor-pointer">
-                <div class="relative flex-shrink-0 w-48 h-27 rounded overflow-hidden">
-                  <img :src="relatedVideo.poster" alt="{{ relatedVideo.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                  <span class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 rounded">
-                    {{ relatedVideo.duration }}
-                  </span>
+            <!-- UP主信息卡片 -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary rounded-full flex items-center justify-center text-white font-bold">
+                  U
                 </div>
                 <div class="flex-1 min-w-0">
-                  <h3 class="font-medium line-clamp-2 group-hover:text-bilibili-primary transition-colors">
-                    {{ relatedVideo.title }}
-                  </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
-                    {{ relatedVideo.author }}
-                  </p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                    {{ relatedVideo.viewCount }} 播放
-                  </p>
+                  <h3 class="font-semibold text-gray-900 dark:text-white truncate">UP主名称</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ Math.floor(Math.random() * 100) }}万粉丝</p>
+                </div>
+                <button class="bg-bilibili-primary hover:bg-bilibili-secondary text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                  关注
+                </button>
+              </div>
+              
+              <!-- 视频统计信息 -->
+              <div class="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ Math.floor(Math.random() * 500) + 100 }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">播放(万)</div>
+                </div>
+                <div>
+                  <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ Math.floor(Math.random() * 50) + 10 }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">弹幕(万)</div>
+                </div>
+                <div>
+                  <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ Math.floor(Math.random() * 20) + 5 }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">收藏(万)</div>
+                </div>
+              </div>
+              
+              <!-- 互动按钮 -->
+              <div class="grid grid-cols-4 gap-2 mt-4">
+                <button class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                  </svg>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">点赞</span>
+                </button>
+                <button class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                  </svg>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">投币</span>
+                </button>
+                <button class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                  </svg>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">收藏</span>
+                </button>
+                <button class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                  </svg>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">分享</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- 推荐视频 -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+              <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">推荐视频</h3>
+              <div class="space-y-4">
+                <div v-for="relatedVideo in relatedVideos" :key="relatedVideo.id" class="flex space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+                  <div class="relative flex-shrink-0 w-32 h-20 rounded overflow-hidden">
+                    <img :src="relatedVideo.poster" alt="{{ relatedVideo.title }}" class="w-full h-full object-cover">
+                    <span class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 rounded">
+                      {{ relatedVideo.duration }}
+                    </span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
+                      {{ relatedVideo.title }}
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ relatedVideo.author }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ relatedVideo.viewCount }} 播放</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 评论区 -->
+        <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+          <div class="p-6 border-b border-gray-200 dark:border-gray-600">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">评论区</h2>
+            
+            <!-- 评论输入框 -->
+            <div class="flex space-x-3 mb-6">
+              <div class="w-10 h-10 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                U
+              </div>
+              <div class="flex-1">
+                <textarea
+                  v-model="newComment"
+                  placeholder="发表你的看法..."
+                  class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-bilibili-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  rows="3"
+                ></textarea>
+                <div class="flex justify-between items-center mt-3">
+                  <div class="flex space-x-2">
+                    <button class="text-gray-500 dark:text-gray-400 hover:text-bilibili-primary transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                    </button>
+                    <button class="text-gray-500 dark:text-gray-400 hover:text-bilibili-primary transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <button
+                    @click="addComment"
+                    :disabled="!newComment.trim()"
+                    class="bg-bilibili-primary hover:bg-bilibili-secondary disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    发表评论
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 评论排序 -->
+            <div class="flex items-center space-x-4 mb-4">
+              <span class="text-sm text-gray-600 dark:text-gray-400">{{ comments.length }} 条评论</span>
+              <div class="flex space-x-2">
+                <button
+                  v-for="sort in commentSortOptions"
+                  :key="sort.value"
+                  @click="currentCommentSort = sort.value"
+                  :class="[
+                    'text-sm px-3 py-1 rounded-full transition-colors',
+                    currentCommentSort === sort.value
+                      ? 'bg-bilibili-primary text-white'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-bilibili-primary'
+                  ]"
+                >
+                  {{ sort.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 评论列表 -->
+          <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            <div v-for="comment in comments" :key="comment.id" class="p-6">
+              <div class="flex space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {{ comment.user.charAt(0) }}
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <span class="font-medium text-gray-900 dark:text-white">{{ comment.user }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ comment.time }}</span>
+                    <span v-if="comment.isUp" class="bg-bilibili-primary text-white text-xs px-2 py-0.5 rounded-full">UP主</span>
+                  </div>
+                  <p class="text-gray-700 dark:text-gray-300 mb-3">{{ comment.content }}</p>
+                  <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                    <button
+                      @click="likeComment(comment)"
+                      class="flex items-center space-x-1 hover:text-bilibili-primary transition-colors"
+                      :class="{ 'text-bilibili-primary': comment.liked }"
+                    >
+                      <svg class="w-4 h-4" :fill="comment.liked ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                      </svg>
+                      <span>{{ comment.likes }}</span>
+                    </button>
+                    <button class="hover:text-bilibili-primary transition-colors">回复</button>
+                    <button class="hover:text-bilibili-primary transition-colors">举报</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -239,10 +447,65 @@ const route = useRoute()
 const videoId = route.params.id as string
 
 // 弹幕相关状态
-const danmakus = ref<Array<{text: string, color: string, left: number, top: number}>>([])
+const danmakus = ref<Array<{text: string, color: string, left: number, top: number, speed: number}>>([])
 const newDanmakuText = ref('')
 const danmakuEnabled = ref(true)
 const danmakuContainer = ref<HTMLDivElement | null>(null)
+const danmakuColor = ref('#FFFFFF')
+const danmakuSpeed = ref(10)
+const danmakuDensity = ref('normal') // low, normal, high
+
+// 评论数据
+const comments = ref<Array<{
+  id: number
+  user: string
+  content: string
+  time: string
+  likes: number
+  liked: boolean
+  isUp: boolean
+}>>([
+  {
+    id: 1,
+    user: '用户123',
+    content: '这个视频制作得太棒了！内容很精彩，期待更多优质内容。',
+    time: '2小时前',
+    likes: 128,
+    liked: false,
+    isUp: false
+  },
+  {
+    id: 2,
+    user: 'UP主',
+    content: '感谢大家的支持！会继续努力的！',
+    time: '3小时前',
+    likes: 256,
+    liked: true,
+    isUp: true
+  },
+  {
+    id: 3,
+    user: '观众A',
+    content: '第一次看这个系列，感觉很有意思，已经关注了！',
+    time: '5小时前',
+    likes: 89,
+    liked: false,
+    isUp: false
+  }
+])
+
+// 弹幕轨道系统
+const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
+let currentTrackIndex = 0
+let danmakuInterval: number | null = null
+
+// 评论相关状态
+const newComment = ref('')
+const currentCommentSort = ref('hot')
+const commentSortOptions = [
+  { value: 'hot', label: '最热' },
+  { value: 'new', label: '最新' }
+]
 
 // 视频控制状态
 const isPlaying = ref(false)
@@ -412,25 +675,41 @@ const toggleFullscreen = () => {
   } else {
     document.exitFullscreen()
   }
-}
-
 // 切换弹幕显示
 const toggleDanmaku = () => {
   danmakuEnabled.value = !danmakuEnabled.value
+  if (!danmakuEnabled.value) {
+    // 关闭弹幕时清空
+    danmakus.value = []
+    if (danmakuInterval) {
+      clearInterval(danmakuInterval)
+      danmakuInterval = null
+    }
+  } else if (isPlaying.value) {
+    // 重新开启弹幕时重新生成
+    simulateDanmakus()
+  }
+  
   if (danmakuContainer.value) {
     danmakuContainer.value.style.pointerEvents = danmakuEnabled.value ? 'none' : 'auto'
   }
+}
 }
 
 // 发送弹幕
 const sendDanmaku = () => {
   if (!newDanmakuText.value.trim() || !danmakuEnabled.value) return
 
+  // 使用轨道系统避免重叠
+  const track = danmakuTracks[currentTrackIndex]
+  currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
+
   danmakus.value.push({
     text: newDanmakuText.value,
-    color: '#FFFFFF',
+    color: danmakuColor.value,
     left: 100,
-    top: Math.random() * 80 + 10
+    top: track,
+    speed: danmakuSpeed.value
   })
 
   newDanmakuText.value = ''
@@ -440,21 +719,86 @@ const sendDanmaku = () => {
 const simulateDanmakus = () => {
   const sampleTexts = [
     '这个视频太棒了！', '前方高能！', '666', '主播加油！', '哈哈哈哈',
-    '这个操作太秀了', '学习了', '打卡', '支持一下', '路过留名'
+    '这个操作太秀了', '学习了', '打卡', '支持一下', '路过留名',
+    '太厉害了', '收藏了', '已投币', '一键三连', '质量很高',
+    '制作精良', '内容很棒', '继续加油', '期待更新', '支持UP主'
   ]
 
   // 清空现有弹幕
   danmakus.value = []
 
   // 添加初始弹幕
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 12; i++) {
+    const track = danmakuTracks[i % danmakuTracks.length]
     danmakus.value.push({
       text: sampleTexts[Math.floor(Math.random() * sampleTexts.length)],
-      color: '#FFFFFF',
-      left: Math.random() * 80 + 10,
-      top: Math.random() * 80 + 10
+      color: ['#FFFFFF', '#FB7299', '#00A1D6', '#FFD700', '#FF6B6B', '#4ECDC4'][Math.floor(Math.random() * 6)],
+      left: 100,
+      top: track,
+      speed: 8 + Math.random() * 4 // 8-12秒随机速度
     })
   }
+
+  // 持续生成弹幕
+  const danmakuDensityMap = {
+    low: 3000,
+    normal: 1500,
+    high: 800
+  }
+  
+  const interval = danmakuDensityMap[danmakuDensity.value as keyof typeof danmakuDensityMap]
+  
+  if (danmakuInterval) {
+    clearInterval(danmakuInterval)
+  }
+  
+  danmakuInterval = setInterval(() => {
+    if (isPlaying.value && danmakus.value.length < 30) {
+      addNewDanmaku()
+    }
+  }, interval)
+}
+
+// 添加新弹幕
+const addNewDanmaku = () => {
+  const sampleTexts = [
+    '这个视频太棒了！', '前方高能！', '666', '主播加油！', '哈哈哈哈',
+    '这个操作太秀了', '学习了', '打卡', '支持一下', '路过留名'
+  ]
+  
+  const track = danmakuTracks[currentTrackIndex]
+  currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
+  
+  danmakus.value.push({
+    text: sampleTexts[Math.floor(Math.random() * sampleTexts.length)],
+    color: ['#FFFFFF', '#FB7299', '#00A1D6', '#FFD700', '#FF6B6B', '#4ECDC4'][Math.floor(Math.random() * 6)],
+    left: 100,
+    top: track,
+    speed: 8 + Math.random() * 4
+  })
+}
+
+// 评论相关方法
+const addComment = () => {
+  if (!newComment.value.trim()) return
+  
+  const comment = {
+    id: Date.now(),
+    user: '我',
+    content: newComment.value.trim(),
+    time: '刚刚',
+    likes: 0,
+    liked: false,
+    isUp: false
+  }
+  
+  comments.value.unshift(comment)
+  newComment.value = ''
+}
+
+const likeComment = (comment: any) => {
+  comment.liked = !comment.liked
+  comment.likes += comment.liked ? 1 : -1
 }
 
 
@@ -538,13 +882,6 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
-// 生命周期
-onMounted(() => {
-  fetchVideoData()
-  simulateDanmakus()
-  window.addEventListener('keydown', handleKeydown)
-})
-
 // 处理视频加载错误（现在为模拟播放，错误处理简化）
 const handleVideoError = (event: Event) => {
   console.log('视频元素错误（模拟播放模式）:', event)
@@ -621,30 +958,296 @@ onUnmounted(() => {
   if (videoPlayer.value) {
     videoPlayer.value.pause()
   }
+  if (danmakuInterval) {
+    clearInterval(danmakuInterval)
+  }
+  // 清空弹幕
+  danmakus.value = []
 })
 </script>
 
 <style scoped>
-/* 基本样式 */
-.bg-bilibili-primary {
-  background-color: #FB7299;
+/* B站品牌色彩变量 */
+:root {
+  --bilibili-pink: #FB7299;
+  --bilibili-pink-light: #FF85A2;
+  --bilibili-blue: #00A1D6;
+  --bilibili-blue-light: #26B8E9;
+  --bilibili-gray: #9499A0;
+  --bilibili-gray-light: #C9CCD0;
+  --bilibili-bg-primary: #FFFFFF;
+  --bilibili-bg-secondary: #F6F7F8;
+  --bilibili-bg-tertiary: #F1F2F3;
+  --bilibili-text-primary: #18191C;
+  --bilibili-text-secondary: #61666D;
+  --bilibili-text-tertiary: #9499A0;
 }
 
-.text-bilibili-primary {
-  color: #FB7299;
-}
-
+/* 弹幕样式 */
 .danmaku-item {
-  animation: danmaku-scroll 8s linear forwards;
-  font-size: 18px;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  animation: danmaku-scroll 10s linear forwards;
+  font-size: 20px;
+  line-height: 1.2;
+  white-space: nowrap;
+  position: absolute;
   z-index: 10;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  will-change: transform;
 }
 
 @keyframes danmaku-scroll {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-100%); }
+  from {
+    transform: translateX(100vw);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 1;
+  }
+}
+
+.danmaku-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+/* B站风格视频播放器 */
+.video-player-container {
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 控制栏样式 */
+.video-controls {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  backdrop-filter: blur(10px);
+}
+
+.control-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.control-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--bilibili-pink);
+  color: var(--bilibili-pink-light);
+}
+
+/* 进度条样式 */
+.progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--bilibili-pink);
+  border-radius: 2px;
+  transition: width 0.1s ease;
+}
+
+.progress-thumb {
+  width: 12px;
+  height: 12px;
+  background: white;
+  border: 2px solid var(--bilibili-pink);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.progress-thumb:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* 播放按钮样式 */
+.play-button {
+  width: 80px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.play-button:hover {
+  background: rgba(251, 114, 153, 0.8);
+  border-color: white;
+  transform: scale(1.1);
+}
+
+.play-icon {
+  color: white;
+  font-size: 32px;
+  margin-left: 4px;
+}
+
+/* 弹幕输入框样式 */
+.danmaku-input-container {
+  display: flex;
+  background: var(--bilibili-bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--bilibili-gray-light);
+}
+
+.danmaku-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--bilibili-text-primary);
+  outline: none;
+}
+
+.danmaku-input::placeholder {
+  color: var(--bilibili-text-tertiary);
+}
+
+.danmaku-input:focus {
+  background: white;
+}
+
+.danmaku-send-button {
+  background: var(--bilibili-pink);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.danmaku-send-button:hover {
+  background: var(--bilibili-pink-light);
+}
+
+/* 视频信息卡片 */
+.video-info-card {
+  background: var(--bilibili-bg-primary);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.video-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--bilibili-text-primary);
+  line-height: 1.4;
+}
+
+.video-stats {
+  color: var(--bilibili-text-tertiary);
+  font-size: 13px;
+}
+
+/* 相关视频卡片 */
+.related-video-card {
+  background: var(--bilibili-bg-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.related-video-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: var(--bilibili-pink);
+}
+
+.related-video-thumbnail {
+  position: relative;
+  overflow: hidden;
+}
+
+.related-video-thumbnail img {
+  transition: transform 0.3s ease;
+}
+
+.related-video-card:hover .related-video-thumbnail img {
+  transform: scale(1.05);
+}
+
+.duration-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .video-player-container {
+    border-radius: 0;
+  }
+  
+  .control-button {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .play-button {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .play-icon {
+    font-size: 24px;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bilibili-bg-primary: #1C1C1C;
+    --bilibili-bg-secondary: #2B2B2B;
+    --bilibili-bg-tertiary: #3A3A3A;
+    --bilibili-text-primary: #E8E8E8;
+    --bilibili-text-secondary: #B8B8B8;
+    --bilibili-text-tertiary: #888888;
+  }
+}
+
+/* 基本样式 */
+.bg-bilibili-primary {
+  background-color: var(--bilibili-pink);
+}
+
+.text-bilibili-primary {
+  color: var(--bilibili-pink);
 }
 
 .text-shadow {
@@ -665,7 +1268,7 @@ onUnmounted(() => {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #FB7299;
+  background-color: var(--bilibili-pink);
   border-radius: 3px;
 }
 
