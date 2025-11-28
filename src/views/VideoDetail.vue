@@ -675,6 +675,8 @@ const toggleFullscreen = () => {
   } else {
     document.exitFullscreen()
   }
+}
+
 // 切换弹幕显示
 const toggleDanmaku = () => {
   danmakuEnabled.value = !danmakuEnabled.value
@@ -693,7 +695,6 @@ const toggleDanmaku = () => {
   if (danmakuContainer.value) {
     danmakuContainer.value.style.pointerEvents = danmakuEnabled.value ? 'none' : 'auto'
   }
-}
 }
 
 // 发送弹幕
