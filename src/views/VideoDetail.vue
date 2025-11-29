@@ -227,10 +227,16 @@
               <div class="text-sm text-gray-700 dark:text-gray-300">
                 {{ video.note }}
               </div>
-              <div class="mt-4 flex flex-wrap items-center text-xs text-gray-500 dark:text-gray-400">
-                <span class="mr-4">{{ video.tags.join(' ') }}</span>
-                <span class="mr-4">{{ video.author }}</span>
-                <span>{{ video.category }}</span>
+              <div class="mt-4 flex flex-wrap items-center">
+                <span 
+                  v-for="(tag, index) in video.tags" 
+                  :key="index" 
+                  class="tag-bubble mr-3 mb-2 px-3 py-1 rounded-full text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-bilibili-primary hover:text-white transition-colors cursor-pointer"
+                >
+                  {{ tag }}
+                </span>
+                <span class="mr-4 text-xs text-gray-500 dark:text-gray-400">{{ video.author }}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ video.category }}</span>
               </div>
             </div>
           </div>
