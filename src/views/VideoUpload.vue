@@ -70,501 +70,480 @@
 
     <!-- 主要内容区域 -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- 左侧上传区域 -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- 上传卡片 -->
-          <div class="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 class="text-lg font-medium text-gray-900 dark:text-white">上传视频</h2>
+      <!-- 投稿类型导航 -->
+      <div class="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">投稿</h1>
+        </div>
+        <div class="px-6 py-2">
+          <div class="flex space-x-8 border-b border-gray-200 dark:border-gray-700">
+            <button class="py-3 px-1 border-b-2 border-pink-500 text-pink-600 dark:text-pink-400 font-medium">视频投稿</button>
+            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:border-pink-300 dark:hover:border-pink-700 transition-colors">短剧投稿</button>
+            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:border-pink-300 dark:hover:border-pink-700 transition-colors">专栏投稿</button>
+            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:border-pink-300 dark:hover:border-pink-700 transition-colors">互动视频投稿</button>
+            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:border-pink-300 dark:hover:border-pink-700 transition-colors">音频投稿</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 视频上传和信息设置 -->
+      <div class="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+        <div class="p-6">
+          <!-- 视频大小、格式、分辨率提示 -->
+          <div class="bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800 mb-6 p-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white">视频大小</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">视频大小1GB以内，时长10小时以内<br>粉丝数 ≥ 1000，可自动解锁6GB超大文件</p>
+                </div>
+              </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white">视频格式</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">推荐上传 MP4/MOV/MKV 格式，转码更快，过审更顺利</p>
+                </div>
+              </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white">视频分辨率</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">推荐分辨率：1080P、4K，高分辨率更清晰流畅</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 拖拽上传区域 -->
+          <div 
+            class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-10 text-center hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer bg-gray-50 dark:bg-gray-800 transition-all duration-200 mb-8"
+            :class="{ 'border-blue-400 bg-blue-50 dark:bg-blue-900/20': isDragging }"
+            @drop="handleDrop"
+            @dragover="handleDragOver"
+            @dragleave="handleDragLeave"
+            @click="triggerFileInput"
+          >
+            <input
+              ref="fileInput"
+              type="file"
+              accept="video/*"
+              class="hidden"
+              @change="handleFileSelect"
+            >
+            
+            <div v-if="!selectedFile && !uploadProgress" class="flex flex-col items-center">
+              <div class="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-12 h-12 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+              </div>
+              <p class="text-lg font-medium text-gray-900 dark:text-white mb-3">点击上传或拖拽视频到此处</p>
+              <p class="text-gray-500 dark:text-gray-400 mb-8">支持MP4、MOV、MKV等格式，单个文件不超过2GB</p>
+              <button class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors font-medium">
+                上传视频
+              </button>
             </div>
             
-            <div class="p-6">
-              <!-- 拖拽上传区域 -->
-              <div 
-                class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-10 text-center hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer bg-gray-50 dark:bg-gray-800 transition-all duration-200"
-                :class="{ 'border-blue-400 bg-blue-50 dark:bg-blue-900/20': isDragging }"
-                @drop="handleDrop"
-                @dragover="handleDragOver"
-                @dragleave="handleDragLeave"
-                @click="triggerFileInput"
-              >
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept="video/*"
-                  class="hidden"
-                  @change="handleFileSelect"
-                >
-                
-                <div v-if="!selectedFile && !uploadProgress">
-                  <div class="w-20 h-20 bg-pink-100 dark:bg-pink-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                    </svg>
-                  </div>
-                  <p class="text-lg font-medium text-gray-900 dark:text-white mb-3">拖拽视频到此处</p>
-                  <p class="text-gray-500 dark:text-gray-400 mb-8">或者点击选择文件</p>
-                  <button class="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-lg transition-colors font-medium">
-                    选择文件
-                  </button>
+            <div v-else-if="selectedFile && !uploadProgress" class="text-center">
+              <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <p class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ selectedFile.name }}</p>
+              <p class="text-gray-500 dark:text-gray-400 mb-8">{{ formatFileSize(selectedFile.size) }}</p>
+              <div class="flex justify-center space-x-4">
+                <button @click.stop="startUpload" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition-colors font-medium">
+                  开始上传
+                </button>
+                <button @click.stop="resetFile" class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-lg transition-colors font-medium">
+                  重新选择
+                </button>
+              </div>
+            </div>
+            
+            <div v-else-if="uploadProgress" class="w-full">
+              <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  <span>上传中...</span>
+                  <span>{{ uploadProgress }}%</span>
                 </div>
-                
-                <div v-else-if="selectedFile && !uploadProgress" class="text-center">
-                  <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                  </div>
-                  <p class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ selectedFile.name }}</p>
-                  <p class="text-gray-500 dark:text-gray-400 mb-8">{{ formatFileSize(selectedFile.size) }}</p>
-                  <div class="flex justify-center space-x-4">
-                    <button @click.stop="startUpload" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition-colors font-medium">
-                      开始上传
-                    </button>
-                    <button @click.stop="resetFile" class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-lg transition-colors font-medium">
-                      重新选择
-                    </button>
-                  </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden relative">
+                  <div 
+                    class="bg-blue-500 h-3 rounded-full transition-all duration-500 ease-out" 
+                    :style="{ width: uploadProgress + '%' }"
+                  ></div>
                 </div>
-                
-                <div v-else-if="uploadProgress" class="w-full">
-                  <div class="mb-6">
-                    <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-3">
-                      <span>上传中...</span>
-                      <span>{{ uploadProgress }}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden relative">
-                      <div 
-                        class="bg-pink-500 h-3 rounded-full transition-all duration-500 ease-out"
-                        :style="{ width: uploadProgress + '%' }"
-                      ></div>
-                    </div>
-                    <div class="mt-3 flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <div>
-                        <span>正在上传视频文件...</span>
-                        <span v-if="uploadProgress < 100" class="ml-2">剩余时间: {{ formatRemainingTime(remainingTime) }}</span>
-                      </div>
-                      <div class="flex items-center">
-                        <span v-if="uploadProgress < 100" class="mr-2">速度: {{ formatUploadSpeed(uploadSpeed) }}</span>
-                        <span v-if="uploadProgress < 100">请勿关闭页面</span>
-                        <span v-else class="text-green-600 dark:text-green-400">上传完成!</span>
-                      </div>
-                    </div>
+                <div class="mt-3 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div>
+                    <span>正在上传视频文件...</span>
+                    <span v-if="uploadProgress < 100" class="ml-2">剩余时间: {{ formatRemainingTime(remainingTime) }}</span>
                   </div>
-                  <div class="flex items-center justify-between">
-                    <button @click.stop="cancelUpload" class="text-red-600 hover:text-red-700 text-sm flex items-center">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                      取消上传
-                    </button>
-                    <div v-if="uploadProgress === 100" class="flex items-center text-green-600 dark:text-green-400">
-                      <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>上传成功</span>
-                    </div>
+                  <div class="flex items-center">
+                    <span v-if="uploadProgress < 100" class="mr-2">速度: {{ formatUploadSpeed(uploadSpeed) }}</span>
+                    <span v-if="uploadProgress < 100">请勿关闭页面</span>
+                    <span v-else class="text-green-600 dark:text-green-400">上传完成!</span>
                   </div>
                 </div>
               </div>
-              
-              <!-- 上传提示 -->
-              <div class="mt-6 p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">上传须知</h4>
-                <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <p>• 支持格式：MP4, AVI, MOV, WMV, FLV</p>
-                  <p>• 最大文件大小：2GB</p>
-                  <p>• 建议分辨率：1280x720 或更高</p>
+              <div class="flex items-center justify-between">
+                <button @click.stop="cancelUpload" class="text-red-600 hover:text-red-700 text-sm flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  取消上传
+                </button>
+                <div v-if="uploadProgress === 100" class="flex items-center text-green-600 dark:text-green-400">
+                  <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>上传成功</span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 视频预览和基本信息 -->
+          <div v-if="uploadedVideoId" class="mb-8">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
+              <div class="flex items-center space-x-4">
+                <div class="w-24 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
+                  <video 
+                    :src="videoPreviewUrl" 
+                    controls 
+                    class="w-full h-full object-cover"
+                  ></video>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ videoForm.title || selectedFile?.name }}</div>
+                  <div class="text-xs text-green-600 dark:text-green-400">上传完成</div>
+                </div>
+              </div>
+              <div class="mt-4 md:mt-0">
+                <button @click="resetFile" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                  </svg>
+                  重新上传视频
+                </button>
               </div>
             </div>
           </div>
           
-          <!-- 视频信息编辑 -->
-          <div v-if="uploadedVideoId" class="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 class="text-lg font-medium text-gray-900 dark:text-white">编辑视频信息</h3>
-            </div>
-            <div class="p-6">
-              
-              <!-- 视频预览 -->
-              <div class="mb-8">
-                <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
-                  <video 
-                    :src="videoPreviewUrl" 
-                    controls 
-                    class="w-full max-h-64 rounded-lg"
-                  ></video>
-                </div>
-              </div>
-              
-              <!-- 标题 -->
-              <div class="mb-8">
-                <label class="block text-base font-medium text-gray-900 dark:text-white mb-3">
-                  标题 <span class="text-red-500">*</span>
-                  <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">一个好的标题能吸引更多观众</span>
-                </label>
-                <div class="relative">
-                  <input 
-                    v-model="videoForm.title"
-                    type="text" 
-                    maxlength="80"
-                    class="w-full px-4 py-3 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
-                    placeholder="请输入视频标题，建议包含关键词"
+          <!-- 基本设置 -->
+          <div class="mb-8">
+            <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">基本设置</h3>
+            
+            <!-- 封面设置 -->
+            <div class="mb-8">
+              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                <span class="text-red-500">*</span> 封面
+              </label>
+              <div class="flex items-start space-x-4">
+                <div 
+                  @click="triggerCoverInput"
+                  class="relative group w-40 h-28 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 overflow-hidden bg-gray-50 dark:bg-gray-800 transition-all duration-200"
+                >
+                  <input
+                    ref="coverInput"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleCoverSelect"
                   >
-                  <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm px-2 py-1 rounded" 
-                       :class="videoForm.title.length > 70 ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'">
-                    {{ videoForm.title.length }}/80
-                  </div>
-                </div>
-                <div class="mt-3 flex items-center">
-                  <svg class="w-4 h-4 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                  </svg>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">标题建议包含关键词，长度在10-30字之间效果最佳</p>
-                </div>
-              </div>
-              
-              <!-- 简介 -->
-              <div class="mb-8">
-                <label class="block text-base font-medium text-gray-900 dark:text-white mb-3">
-                  简介
-                  <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">详细介绍你的视频内容</span>
-                </label>
-                <div class="relative">
-                  <textarea 
-                    v-model="videoForm.description"
-                    rows="4"
-                    maxlength="2000"
-                    class="w-full px-4 py-3 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none text-base"
-                    placeholder="请输入视频简介，让观众更好地了解你的视频内容，可以包含视频亮点、时间轴等信息"
-                  ></textarea>
-                  <div class="absolute right-3 bottom-3 text-sm px-2 py-1 rounded" 
-                       :class="videoForm.description.length > 1800 ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'">
-                    {{ videoForm.description.length }}/2000
-                  </div>
-                </div>
-                <div class="mt-3 flex items-center">
-                  <svg class="w-4 h-4 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                  </svg>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">详细的简介有助于观众了解视频内容，提高观看率</p>
-                </div>
-              </div>
-              
-              <!-- 视频类型 -->
-              <div class="mb-8">
-                <label class="block text-base font-medium text-gray-900 dark:text-white mb-3">
-                  视频类型 <span class="text-red-500">*</span>
-                </label>
-                <div class="flex space-x-8">
-                  <label class="flex items-center cursor-pointer">
-                    <div class="relative">
-                      <input 
-                        v-model="videoForm.type" 
-                        type="radio" 
-                        value="original" 
-                        class="sr-only peer"
-                      >
-                      <div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-full peer-checked:border-pink-500 peer-checked:bg-pink-500">
-                        <div class="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100"></div>
-                      </div>
-                    </div>
-                    <span class="ml-3 text-gray-700 dark:text-gray-300 text-base">自制</span>
-                  </label>
-                  <label class="flex items-center cursor-pointer">
-                    <div class="relative">
-                      <input 
-                        v-model="videoForm.type" 
-                        type="radio" 
-                        value="repost" 
-                        class="sr-only peer"
-                      >
-                      <div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-full peer-checked:border-pink-500 peer-checked:bg-pink-500">
-                        <div class="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100"></div>
-                      </div>
-                    </div>
-                    <span class="ml-3 text-gray-700 dark:text-gray-300 text-base">转载</span>
-                  </label>
-                </div>
-              </div>
-              
-              <!-- 转载来源信息 -->
-              <div v-if="videoForm.type === 'repost'" class="mb-8 p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
-                <label class="block text-base font-medium text-gray-900 dark:text-white mb-3">
-                  转载来源
-                </label>
-                <div class="relative">
-                  <input 
-                    v-model="videoForm.source"
-                    type="text" 
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
-                    placeholder="请填写转载来源，如：B站UP主名称"
+                  <img 
+                    v-if="coverPreview" 
+                    :src="coverPreview" 
+                    alt="封面预览"
+                    class="w-full h-full object-cover"
                   >
-                </div>
-              </div>
-              
-              <!-- 分区 -->
-              <div class="mb-8">
-                <label class="block text-base font-medium text-gray-900 dark:text-white mb-3">
-                  分区 <span class="text-red-500">*</span>
-                </label>
-                <div class="grid grid-cols-5 gap-4">
-                  <div 
-                    v-for="category in categories" 
-                    :key="category.value"
-                    @click="videoForm.category = category.value"
-                    :class="[
-                      'cursor-pointer p-4 rounded-lg border flex flex-col items-center justify-center transition-all duration-200',
-                      videoForm.category === category.value 
-                        ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20' 
-                        : 'border-gray-200 dark:border-gray-600 hover:border-pink-300 dark:hover:border-pink-700'
-                    ]"
-                  >
-                    <div class="text-2xl mb-2">{{ category.icon }}</div>
-                    <div class="text-sm text-center font-medium" :class="videoForm.category === category.value ? 'text-pink-700 dark:text-pink-300' : 'text-gray-700 dark:text-gray-300'">{{ category.label }}</div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- 标签 -->
-              <div class="mb-8">
-                <label class="block text-base font-medium text-gray-900 dark:text-white mb-3">
-                  标签
-                  <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">最多添加10个标签，每个标签不超过20个字符</span>
-                </label>
-                <div class="flex flex-wrap gap-2 mb-4">
-                  <span 
-                    v-for="tag in videoForm.tags" 
-                    :key="tag"
-                    class="inline-flex items-center px-4 py-2 rounded-full text-sm bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300"
-                  >
-                    {{ tag }}
-                    <button @click="removeTag(tag)" class="ml-2 text-pink-600 hover:text-pink-800 dark:text-pink-400 dark:hover:text-pink-200">
-                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                  <div v-else class="text-center">
+                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2">
+                      <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                       </svg>
-                    </button>
-                  </span>
-                </div>
-                
-                <!-- 热门标签推荐 -->
-                <div class="mb-4">
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">热门标签推荐</p>
-                  <div class="flex flex-wrap gap-2">
-                    <button 
-                      v-for="tag in popularTags" 
-                      :key="tag"
-                      @click="addPopularTag(tag)"
-                      :class="[
-                        'px-3 py-2 rounded-full text-sm',
-                        videoForm.tags.includes(tag) 
-                          ? 'bg-pink-500 text-white' 
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-pink-100 dark:hover:bg-pink-900/30 hover:text-pink-700 dark:hover:text-pink-300'
-                      ]"
-                    >
-                      {{ tag }}
-                    </button>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">点击上传封面</p>
                   </div>
                 </div>
-                
-                <!-- 标签输入框 -->
-                <div class="flex">
-                  <div class="relative flex-1">
-                    <input 
-                      v-model="newTag"
-                      type="text"
-                      maxlength="20"
-                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
-                      placeholder="输入标签后按回车或点击添加"
-                      @keyup.enter="addTag"
-                    >
-                  </div>
-                  <button @click="addTag" class="px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-r-lg flex items-center transition-colors font-medium">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    添加
+                <div class="flex-1">
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">建议尺寸 16:9，大小不超过 2MB</p>
+                  <button 
+                    v-if="coverPreview"
+                    @click="cropCover"
+                    class="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg mr-2 transition-colors font-medium"
+                  >
+                    裁剪封面
+                  </button>
+                  <button 
+                    v-if="coverPreview"
+                    @click="removeCover"
+                    class="px-4 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+                  >
+                    移除封面
                   </button>
                 </div>
               </div>
-              
-              <!-- 封面 -->
-              <div class="mb-8">
-                <label class="block text-base font-medium text-gray-900 dark:text-white mb-3">
-                  封面
-                </label>
-                <div class="flex items-start space-x-4">
-                  <div 
-                    @click="triggerCoverInput"
-                    class="relative group w-40 h-28 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-pink-500 overflow-hidden bg-gray-50 dark:bg-gray-800 transition-all duration-200"
-                  >
-                    <input
-                      ref="coverInput"
-                      type="file"
-                      accept="image/*"
-                      class="hidden"
-                      @change="handleCoverSelect"
-                    >
-                    <img 
-                      v-if="coverPreview" 
-                      :src="coverPreview" 
-                      alt="封面预览"
-                      class="w-full h-full object-cover"
-                    >
-                    <div v-else class="text-center">
-                      <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-full flex items-center justify-center mb-2">
-                        <svg class="w-6 h-6 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                      </div>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">点击上传封面</p>
-                    </div>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">建议尺寸 16:9，大小不超过 2MB</p>
-                    <button 
-                      v-if="coverPreview"
-                      @click="cropCover"
-                      class="px-4 py-2 text-sm bg-pink-500 hover:bg-pink-600 text-white rounded-lg mr-2 transition-colors font-medium"
-                    >
-                      裁剪封面
-                    </button>
-                    <button 
-                      v-if="coverPreview"
-                      @click="removeCover"
-                      class="px-4 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
-                    >
-                      移除封面
-                    </button>
-                  </div>
+            </div>
+            
+            <!-- 标题 -->
+            <div class="mb-8">
+              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                <span class="text-red-500">*</span> 标题
+              </label>
+              <div class="relative">
+                <input 
+                  v-model="videoForm.title"
+                  type="text" 
+                  maxlength="80"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
+                  placeholder="请输入视频标题，建议包含关键词"
+                >
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm px-2 py-1 rounded" 
+                     :class="videoForm.title.length > 70 ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'">
+                  {{ videoForm.title.length }}/80
                 </div>
               </div>
-              
-              <!-- 封面裁剪弹窗 -->
-              <div v-if="showCropModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl">
-                  <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">裁剪封面</h3>
-                    <button @click="showCropModal = false" class="rounded-full p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </button>
-                  </div>
-                  <div class="mb-6">
-                    <div class="w-full h-64 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
-                      <img 
-                        ref="cropImage"
-                        :src="coverPreview" 
-                        alt="裁剪图片"
-                        class="max-w-full max-h-full"
-                      >
+              <p v-if="formErrors.title" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ formErrors.title }}</p>
+            </div>
+            
+            <!-- 视频类型 -->
+            <div class="mb-8">
+              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                类型
+              </label>
+              <div class="flex space-x-8">
+                <label class="flex items-center cursor-pointer">
+                  <div class="relative">
+                    <input 
+                      v-model="videoForm.type" 
+                      type="radio" 
+                      value="original" 
+                      class="sr-only peer"
+                    >
+                    <div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-full peer-checked:border-blue-500 peer-checked:bg-blue-500">
+                      <div class="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100"></div>
                     </div>
                   </div>
-                  <div class="flex justify-end space-x-3">
-                    <button 
-                      @click="showCropModal = false"
-                      class="px-6 py-3 text-gray-700 bg-gray-200 dark:bg-gray-600 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-medium"
+                  <span class="ml-3 text-gray-700 dark:text-gray-300 text-sm">自制</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                  <div class="relative">
+                    <input 
+                      v-model="videoForm.type" 
+                      type="radio" 
+                      value="repost" 
+                      class="sr-only peer"
                     >
-                      取消
-                    </button>
-                    <button 
-                      @click="applyCrop"
-                      class="px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-colors font-medium"
-                    >
-                      应用
-                    </button>
+                    <div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-full peer-checked:border-blue-500 peer-checked:bg-blue-500">
+                      <div class="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100"></div>
+                    </div>
                   </div>
-                </div>
+                  <span class="ml-3 text-gray-700 dark:text-gray-300 text-sm">转载</span>
+                </label>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- 右侧设置区域 -->
-        <div class="lg:col-span-1">
-          <!-- 发布设置 -->
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
-            <div class="bg-pink-500 p-4">
-              <h3 class="text-lg font-semibold text-white">发布设置</h3>
+          
+          <!-- 详细信息 -->
+          <div class="mb-8">
+            <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">详细信息</h3>
+            
+            <!-- 分区 -->
+            <div class="mb-8">
+              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                <span class="text-red-500">*</span> 分区
+              </label>
+              <div class="relative">
+                <select 
+                  v-model="videoForm.category" 
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white appearance-none text-base"
+                >
+                  <option value="">请选择分区</option>
+                  <option value="game">游戏</option>
+                  <option value="music">音乐</option>
+                  <option value="dance">舞蹈</option>
+                  <option value="tech">科技数码</option>
+                  <option value="life">生活</option>
+                  <option value="food">美食</option>
+                  <option value="animal">动物圈</option>
+                  <option value="sport">运动</option>
+                  <option value="movie">影视</option>
+                  <option value="entertainment">娱乐</option>
+                  <option value="knowledge">知识</option>
+                  <option value="fashion">时尚</option>
+                  <option value="travel">旅行</option>
+                  <option value="car">汽车</option>
+                  <option value="finance">财经</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+              <p v-if="formErrors.category" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ formErrors.category }}</p>
             </div>
-            <div class="p-6">
-              <!-- 发布时间 -->
-              <div class="mb-6">
-                <label class="flex items-center mb-3 cursor-pointer">
-                  <input v-model="publishSettings.immediate" type="radio" name="publishTime" value="immediate" class="mr-3 w-4 h-4 text-pink-600 focus:ring-pink-500">
-                  <span class="text-gray-700 dark:text-gray-300 text-base">立即发布</span>
-                </label>
-                <label class="flex items-center mb-3 cursor-pointer">
-                  <input v-model="publishSettings.immediate" type="radio" name="publishTime" value="scheduled" class="mr-3 w-4 h-4 text-pink-600 focus:ring-pink-500">
-                  <span class="text-gray-700 dark:text-gray-300 text-base">定时发布</span>
-                </label>
-                <div class="relative" v-if="publishSettings.immediate === 'scheduled'">
-                  <input 
-                    v-model="publishSettings.scheduledTime"
-                    type="datetime-local"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
-                  >
-                </div>
-              </div>
-              
-              <!-- 权限设置 -->
-              <div class="mb-6">
-                <label class="block text-base font-medium text-gray-900 dark:text-white mb-3">权限</label>
-                <div class="relative">
-                  <select 
-                    v-model="publishSettings.privacy"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white appearance-none text-base"
-                  >
-                    <option value="public">公开</option>
-                    <option value="unlisted">不公开</option>
-                    <option value="private">私密</option>
-                  </select>
-                  <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            
+            <!-- 标签 -->
+            <div class="mb-8">
+              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                <span class="text-red-500">*</span> 标签
+                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">按回车键Enter创建标签</span>
+              </label>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span 
+                  v-for="tag in videoForm.tags" 
+                  :key="tag"
+                  class="inline-flex items-center px-4 py-2 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
+                >
+                  {{ tag }}
+                  <button @click="removeTag(tag)" class="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                     </svg>
-                  </div>
+                  </button>
+                </span>
+              </div>
+              
+              <!-- 热门标签推荐 -->
+              <div class="mb-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">推荐标签</p>
+                <div class="flex flex-wrap gap-2">
+                  <button 
+                    v-for="tag in popularTags" 
+                    :key="tag"
+                    @click="addPopularTag(tag)"
+                    :class="[
+                      'px-3 py-2 rounded-full text-sm',
+                      videoForm.tags.includes(tag) 
+                        ? 'bg-blue-500 text-white' 
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300'
+                    ]"
+                  >
+                    {{ tag }}
+                  </button>
+                </div>
+                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  还可以添加{{ 10 - videoForm.tags.length }}个标签
                 </div>
               </div>
               
-              <!-- 评论设置 -->
-              <div class="mb-6">
-                <label class="flex items-center cursor-pointer">
-                  <input v-model="publishSettings.allowComments" type="checkbox" class="mr-3 w-4 h-4 text-pink-600 focus:ring-pink-500 rounded">
-                  <span class="text-gray-700 dark:text-gray-300 text-base">允许评论</span>
-                </label>
+              <!-- 标签输入框 -->
+              <div class="flex">
+                <div class="relative flex-1">
+                  <input 
+                    v-model="newTag"
+                    type="text"
+                    maxlength="20"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
+                    placeholder="输入标签后按回车或点击添加"
+                    @keyup.enter="addTag"
+                  >
+                </div>
               </div>
-              
-              <!-- 弹幕设置 -->
-              <div class="mb-6">
-                <label class="flex items-center cursor-pointer group">
-                  <input v-model="publishSettings.allowDanmu" type="checkbox" class="mr-3 w-4 h-4 text-pink-600 focus:ring-pink-500 rounded">
-                  <span class="text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors text-base">允许弹幕</span>
+              <p v-if="formErrors.tags" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ formErrors.tags }}</p>
+            </div>
+            
+            <!-- 简介 -->
+            <div class="mb-8">
+              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                简介
+              </label>
+              <div class="relative">
+                <textarea 
+                  v-model="videoForm.description"
+                  rows="4"
+                  maxlength="2000"
+                  class="w-full px-4 py-3 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none text-base"
+                  placeholder="填写更全面的相关信息，让更多的人能找到你的视频吧"
+                ></textarea>
+                <div class="absolute right-3 bottom-3 text-sm px-2 py-1 rounded" 
+                     :class="videoForm.description.length > 1800 ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'">
+                  {{ videoForm.description.length }}/2000
+                </div>
+              </div>
+            </div>
+            
+            <!-- 参与话题 -->
+            <div class="mb-8">
+              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                参与话题：
+              </label>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <button 
+                  v-for="topic in popularTopics" 
+                  :key="topic"
+                  class="px-3 py-2 rounded-full text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300"
+                >
+                  {{ topic }}
+                  <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">（活动）</span>
+                </button>
+              </div>
+              <button class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
+                搜索更多话题 →
+              </button>
+            </div>
+            
+            <!-- 定时发布 -->
+            <div class="mb-8">
+              <div class="flex items-center justify-between mb-3">
+                <label class="block text-sm font-medium text-gray-900 dark:text-white">
+                  定时发布
                 </label>
+                <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                  <input 
+                    v-model="publishSettings.scheduled" 
+                    type="checkbox" 
+                    class="sr-only peer"
+                  >
+                  <div class="block bg-gray-200 dark:bg-gray-700 w-10 h-5 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </div>
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                可选择距离当前最早≥2小时/最晚≤15天的时间，火花稿件或距发布不足5分钟时不可修改/取消
+              </div>
+              <div class="mt-3" v-if="publishSettings.scheduled">
+                <input 
+                  v-model="publishSettings.scheduledTime"
+                  type="datetime-local"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
+                >
               </div>
             </div>
           </div>
           
           <!-- 发布按钮 -->
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="p-6">
-              <button 
-                @click="submitVideo"
-                :disabled="!canSubmit"
-                class="w-full bg-pink-600 hover:bg-pink-700 disabled:bg-gray-400 text-white py-3 rounded-lg font-medium transition-colors shadow-md disabled:shadow-none text-base"
-              >
-                {{ isEditing ? '保存修改' : '立即投稿' }}
-              </button>
-              <button 
-                @click="saveAsDraft"
-                class="w-full mt-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-3 rounded-lg font-medium transition-colors shadow-md text-base"
-              >
-                保存草稿
-              </button>
-            </div>
+          <div v-if="uploadedVideoId" class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <button 
+              @click="saveAsDraft"
+              :disabled="isPublishing"
+              class="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 disabled:bg-gray-400 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors shadow-md disabled:shadow-none text-base"
+            >
+              存草稿
+            </button>
+            <button 
+              @click="submitVideo"
+              :disabled="!canSubmit || isPublishing"
+              class="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors shadow-md disabled:shadow-none text-base flex items-center justify-center"
+            >
+              <span v-if="isPublishing" class="mr-2 animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+              {{ isPublishing ? '投稿中...' : '立即投稿' }}
+            </button>
           </div>
         </div>
       </div>
@@ -755,6 +734,8 @@ import { videoAPI } from '@/api/video'
 const router = useRouter()
 const userStore = useUserStore()
 
+
+
 // 文件相关
 const fileInput = ref<HTMLInputElement>()
 const coverInput = ref<HTMLInputElement>()
@@ -788,32 +769,11 @@ const videoForm = ref({
   source: ''
 })
 
-// 分区选项
-const categories = [
-  { value: 'game', label: '游戏', icon: '🎮' },
-  { value: 'music', label: '音乐', icon: '🎵' },
-  { value: 'dance', label: '舞蹈', icon: '💃' },
-  { value: 'tech', label: '科技', icon: '💻' },
-  { value: 'life', label: '生活', icon: '🌱' },
-  { value: 'food', label: '美食', icon: '🍔' },
-  { value: 'animal', label: '动物', icon: '🐾' },
-  { value: 'sport', label: '运动', icon: '⚽' },
-  { value: 'movie', label: '影视', icon: '🎬' },
-  { value: 'entertainment', label: '娱乐', icon: '🎭' },
-  { value: 'knowledge', label: '知识', icon: '📚' },
-  { value: 'fashion', label: '时尚', icon: '👗' },
-  { value: 'travel', label: '旅行', icon: '✈️' },
-  { value: 'car', label: '汽车', icon: '🚗' },
-  { value: 'finance', label: '财经', icon: '💰' }
-]
-
-// 发布设置
-const publishSettings = ref({
-  immediate: 'immediate' as 'immediate' | 'scheduled',
-  scheduledTime: '',
-  privacy: 'public' as 'public' | 'unlist' | 'private',
-  allowComments: true,
-  allowDanmu: true
+// 表单验证错误
+const formErrors = ref({
+  title: '',
+  category: '',
+  tags: ''
 })
 
 // 热门标签
@@ -822,9 +782,22 @@ const popularTags = [
   '游戏', '舞蹈', '科技', '知识', '萌宠', '运动', '时尚', '影视'
 ]
 
+// 热门话题
+const popularTopics = [
+  '家是关于爱的表达', '开箱爷爷粉喜欢的家', '把兴趣玩出名堂', '网友车衣俱乐部'
+]
+
 const newTag = ref('')
 const isEditing = ref(false)
 const showLoginModal = ref(false)
+
+// 发布设置
+const publishSettings = ref({
+  scheduled: false,
+  scheduledTime: '',
+  allowSecondaryCreation: false,
+  allowCommercial: false
+})
 
 // 登录表单数据
 const loginForm = ref({
@@ -840,13 +813,59 @@ const countdown = ref(0)
 const loginType = ref<'phone' | 'password'>('phone')
 const showPassword = ref(false)
 
+// 加载状态
+const isLoading = ref(false)
+const isPublishing = ref(false)
+
 // 计算属性
 const canSubmit = computed(() => {
   return uploadedVideoId.value && 
          videoForm.value.title.trim() && 
          videoForm.value.category &&
-         userStore.isLoggedIn
+         userStore.isLoggedIn &&
+         videoForm.value.tags.length > 0 &&
+         !formErrors.value.title &&
+         !formErrors.value.category &&
+         !formErrors.value.tags
 })
+
+// 表单验证
+const validateForm = () => {
+  let isValid = true
+  
+  // 重置错误信息
+  formErrors.value = {
+    title: '',
+    category: '',
+    tags: ''
+  }
+  
+  // 验证标题
+  if (!videoForm.value.title.trim()) {
+    formErrors.value.title = '标题不能为空'
+    isValid = false
+  } else if (videoForm.value.title.length > 80) {
+    formErrors.value.title = '标题不能超过80个字符'
+    isValid = false
+  }
+  
+  // 验证分区
+  if (!videoForm.value.category) {
+    formErrors.value.category = '请选择分区'
+    isValid = false
+  }
+  
+  // 验证标签
+  if (videoForm.value.tags.length === 0) {
+    formErrors.value.tags = '请至少添加一个标签'
+    isValid = false
+  } else if (videoForm.value.tags.length > 10) {
+    formErrors.value.tags = '最多添加10个标签'
+    isValid = false
+  }
+  
+  return isValid
+}
 
 // 方法
 const triggerFileInput = () => {
@@ -892,9 +911,6 @@ const handleFileSelect = (e: Event) => {
 // 封面相关
 const showCropModal = ref(false)
 const cropImage = ref<HTMLImageElement | null>(null)
-
-// 选择封面
-// Note: triggerCoverInput function is already defined above
 
 // 处理封面选择
 const handleCoverSelect = (e: Event) => {
@@ -981,9 +997,18 @@ const startUpload = async () => {
     return
   }
   
+  // 验证视频文件
+  if (selectedFile.value.size > 2 * 1024 * 1024 * 1024) {
+    alert('视频大小不能超过2GB')
+    return
+  }
+  
   const formData = new FormData()
   formData.append('video', selectedFile.value)
   formData.append('title', videoForm.value.title || selectedFile.value.name)
+  formData.append('description', videoForm.value.description)
+  formData.append('category', videoForm.value.category)
+  formData.append('tags', JSON.stringify(videoForm.value.tags))
   
   try {
     uploadProgress.value = 0
@@ -1031,64 +1056,91 @@ const startUpload = async () => {
       progressInterval = null
     }
     
+    console.log('Upload response:', response)
+    
     if (response.data) {
-      // 模拟最后阶段的进度更新
-      finalProgress = setInterval(() => {
-        if (uploadProgress.value < 100) {
-          uploadProgress.value += 2
-          
-          // 更新速度和剩余时间
-          const currentTime = Date.now()
-          const timeDiff = (currentTime - lastProgressTime.value) / 1000
-          const progressDiff = uploadProgress.value - lastProgressValue.value
-          
-          if (timeDiff > 0 && progressDiff > 0) {
-            uploadSpeed.value = (selectedFile.value!.size / 1024) / ((currentTime - uploadStartTime.value) / 1000)
-            remainingTime.value = ((100 - uploadProgress.value) / progressDiff) * timeDiff
-          }
-          
-          lastProgressTime.value = currentTime
-          lastProgressValue.value = uploadProgress.value
-        } else {
-          if (finalProgress) {
-            clearInterval(finalProgress)
-            finalProgress = null
-          }
-          uploadSpeed.value = 0
-          remainingTime.value = 0
-        }
-      }, 100)
+      // 处理不同的响应格式，提取视频ID
+      let videoId: string | null = null
+      let videoUrl: string | null = null
       
-      // 处理不同的响应格式
       // 格式1: {message, video_id, video_url}
-      if (response.data.video_id) {
-        uploadedVideoId.value = response.data.video_id.toString()
-        videoPreviewUrl.value = response.data.video_url || URL.createObjectURL(selectedFile.value!)
+      if ((response.data as any).video_id) {
+        videoId = (response.data as any).video_id.toString()
+        videoUrl = (response.data as any).video_url || null
       } 
       // 格式2: {data: {id, ...}}
-      else if (response.data.data && response.data.data.id) {
-        uploadedVideoId.value = response.data.data.id
-        videoPreviewUrl.value = URL.createObjectURL(selectedFile.value!)
+      else if ((response.data as any).data && (response.data as any).data.id) {
+        videoId = (response.data as any).data.id
       }
       // 格式3: 直接包含id
-      else if (response.data.id) {
-        uploadedVideoId.value = response.data.id
-        videoPreviewUrl.value = URL.createObjectURL(selectedFile.value!)
+      else if ((response.data as any).id) {
+        videoId = (response.data as any).id
       }
-      else {
-        throw new Error('响应中未找到视频ID')
+      // 格式4: 数组形式
+      else if (Array.isArray((response.data as any).data) && (response.data as any).data.length > 0) {
+        videoId = (response.data as any).data[0].id
+      }
+      // 格式5: 其他可能的格式
+      else if (typeof (response.data as any) === 'object') {
+        // 尝试从对象中查找id字段
+        const findId = (obj: any): string | null => {
+          if (typeof obj !== 'object' || obj === null) return null
+          if (obj.id) return obj.id
+          for (const key in obj) {
+            const result = findId(obj[key])
+            if (result) return result
+          }
+          return null
+        }
+        videoId = findId(response.data)
       }
       
-      // 显示上传成功消息
-      setTimeout(() => {
-        alert('视频上传成功')
-      }, 500)
+      if (videoId) {
+        // 确保uploadedVideoId.value被正确设置
+        uploadedVideoId.value = videoId
+        videoPreviewUrl.value = videoUrl || URL.createObjectURL(selectedFile.value!)
+        
+        console.log('Video ID extracted:', videoId)
+        console.log('Video URL:', videoPreviewUrl.value)
+        console.log('uploadedVideoId.value after assignment:', uploadedVideoId.value)
+        
+        // 直接将进度设置为100%，确保用户看到完整的上传状态
+        uploadProgress.value = 100
+        uploadSpeed.value = 0
+        remainingTime.value = 0
+        
+        // 清除所有定时器
+        if (finalProgress) {
+          clearInterval(finalProgress)
+          finalProgress = null
+        }
+        
+        // 显示上传成功消息
+        setTimeout(() => {
+          alert('视频上传成功，现在可以编辑视频信息并发布')
+        }, 300)
+      } else {
+        // 清除所有定时器
+        if (finalProgress) {
+          clearInterval(finalProgress)
+          finalProgress = null
+        }
+        
+        throw new Error('响应中未找到视频ID，请检查服务器响应格式')
+      }
     } else {
-      throw new Error('上传失败')
+      // 清除所有定时器
+      if (finalProgress) {
+        clearInterval(finalProgress)
+        finalProgress = null
+      }
+      
+      throw new Error('上传失败，服务器返回空数据')
     }
     
-  } catch (error) {
-    alert('上传失败，请重试')
+  } catch (error: any) {
+    console.error('上传失败:', error)
+    alert(`上传失败：${error.message || '请重试'}`)
     
     // 清除进度定时器
     if (progressInterval) {
@@ -1167,6 +1219,8 @@ const removeTag = (tag: string) => {
   }
 }
 
+
+
 const submitVideo = async () => {
   if (!canSubmit.value) return
   
@@ -1176,16 +1230,23 @@ const submitVideo = async () => {
     return
   }
   
+  // 表单验证
+  if (!validateForm()) {
+    alert('请检查表单填写是否正确')
+    return
+  }
+  
   try {
+    isPublishing.value = true
     const formData = new FormData()
     formData.append('video_id', uploadedVideoId.value)
     formData.append('title', videoForm.value.title)
     formData.append('description', videoForm.value.description)
     formData.append('category', videoForm.value.category)
     formData.append('tags', JSON.stringify(videoForm.value.tags))
-    formData.append('privacy', publishSettings.value.privacy)
-    formData.append('allow_comments', publishSettings.value.allowComments.toString())
-    formData.append('allow_danmu', publishSettings.value.allowDanmu.toString())
+    formData.append('privacy', 'public')
+    formData.append('allow_comments', 'true')
+    formData.append('allow_danmu', 'true')
     formData.append('type', videoForm.value.type)
     formData.append('source', videoForm.value.source)
     
@@ -1197,14 +1258,16 @@ const submitVideo = async () => {
     const response = await videoAPI.publishVideo(formData)
     
     if (response.data) {
-      alert(isEditing.value ? '修改成功' : '投稿成功')
+      alert(isEditing.value ? '修改成功' : '投稿成功，视频已进入审核流程')
       router.push('/')
     } else {
       throw new Error('发布失败')
     }
     
-  } catch (error) {
-    alert('发布失败，请重试')
+  } catch (error: any) {
+    alert(`发布失败：${error.message || '请重试'}`)
+  } finally {
+    isPublishing.value = false
   }
 }
 
@@ -1283,30 +1346,14 @@ const handleLogin = async () => {
       loginError.value = '请输入6位验证码'
       return
     }
-  } else {
-    if (!loginForm.value.password) {
-      loginError.value = '请输入密码'
-      return
-    }
-    
-    if (loginForm.value.password.length < 6) {
-      loginError.value = '密码长度至少6位'
-      return
-    }
   }
 
   try {
-    if (loginType.value === 'phone') {
-      await userStore.login({
-        phone: loginForm.value.phone,
-        verificationCode: loginForm.value.verificationCode
-      })
-    } else {
-      await userStore.login({
-        phone: loginForm.value.phone,
-        password: loginForm.value.password
-      })
-    }
+    // 目前只支持验证码登录
+    await userStore.login({
+      phone: loginForm.value.phone,
+      verificationCode: loginForm.value.verificationCode
+    })
     showLoginModal.value = false
     loginError.value = ''
     loginForm.value = { phone: '', verificationCode: '', password: '', rememberMe: false }
@@ -1334,6 +1381,11 @@ const handleLogout = async () => {
   }
 }
 
+// 监听需要登录的事件
+const handleLoginRequired = () => {
+  showLoginModal.value = true
+}
+
 // 生命周期
 onMounted(() => {
   // 检查用户是否已登录，如果未登录则显示登录弹窗
@@ -1341,17 +1393,12 @@ onMounted(() => {
     showLoginModal.value = true
   }
   
-  // 监听需要登录的事件
-  const handleLoginRequired = () => {
-    showLoginModal.value = true
-  }
-  
   window.addEventListener('show-login-required', handleLoginRequired)
-  
-  // 组件卸载时移除事件监听
-  onUnmounted(() => {
-    window.removeEventListener('show-login-required', handleLoginRequired)
-  })
+})
+
+// 组件卸载时移除事件监听
+onUnmounted(() => {
+  window.removeEventListener('show-login-required', handleLoginRequired)
 })
 </script>
 

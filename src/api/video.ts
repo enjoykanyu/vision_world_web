@@ -216,9 +216,10 @@ export const videoAPI = {
    * @param formData 包含视频文件的 FormData
    * @returns 上传结果
    */
-  uploadVideo(formData: FormData) {
+  uploadVideo(formData: FormData, options?: any) {
     return http.post('/api/video/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
+      ...options
     })
   },
 
