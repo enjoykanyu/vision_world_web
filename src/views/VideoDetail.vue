@@ -78,7 +78,7 @@
               </div>
 
               <!-- 自定义视频控制栏 -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" :class="{ 'opacity-100': !isPlaying || showControls }" id="video-controls">
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 transition-opacity duration-300" :class="{ 'opacity-100': !isPlaying || showControls }" id="video-controls">
                 <!-- 进度条 -->
                 <div class="relative h-1 bg-gray-500 rounded-full mb-4 cursor-pointer" 
                      @click="seek" 
@@ -721,12 +721,12 @@ const onMouseMove = () => {
     clearTimeout(controlsTimeout)
   }
   
-  // 1秒后自动隐藏控制栏
+  // 0.5秒后自动隐藏控制栏
   controlsTimeout = window.setTimeout(() => {
     if (isPlaying.value) {
       showControls.value = false
     }
-  }, 1000)
+  }, 500)
 }
 
 // 鼠标离开事件，隐藏控制栏
