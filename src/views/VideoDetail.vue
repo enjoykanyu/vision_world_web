@@ -56,6 +56,7 @@
                 @pause="onVideoPause"
                 @ended="onVideoEnded"
                 @click="togglePlay"
+                @dblclick="toggleFullscreen"
                 @error="handleVideoError"
                 crossorigin="anonymous"
                 preload="auto"
@@ -94,11 +95,11 @@
                 <!-- 控制按钮和时间 -->
                 <div class="flex items-center justify-between text-white">
                   <div class="flex items-center space-x-4">
-                    <button @click="togglePlay" class="hover:text-bilibili-primary transition-colors">
+                    <button @click="togglePlay" class="hover:text-bilibili-primary transition-colors text-xl">
                       <i class="fas" :class="isPlaying ? 'fa-pause' : 'fa-play'"></i>
                     </button>
                     <div class="flex items-center space-x-2">
-                      <button @click="toggleMute" class="hover:text-bilibili-primary transition-colors">
+                      <button @click="toggleMute" class="hover:text-bilibili-primary transition-colors text-xl">
                         <i class="fas" :class="isMuted ? 'fa-volume-mute' : 'fa-volume-up'"></i>
                       </button>
                       <input type="range" min="0" max="100" v-model="volume" class="w-20 accent-bilibili-primary" @input="setVolume">
@@ -108,16 +109,19 @@
                     </div>
                   </div>
                   <div class="flex items-center space-x-4">
-                    <button @click="toggleDanmaku" class="hover:text-bilibili-primary transition-colors">
+                    <button @click="toggleDanmaku" class="hover:text-bilibili-primary transition-colors text-xl">
                       <i class="fas" :class="danmakuEnabled ? 'fa-comment-dots' : 'fa-comment-slash'"></i>
                     </button>
-                    <button @click="toggleFullscreen" class="hover:text-bilibili-primary transition-colors">
+                    <button @click="toggleFullscreen" class="hover:text-bilibili-primary transition-colors text-xl">
                     <i class="fas fa-expand"></i>
                   </button>
                   <!-- 播放速度 -->
                   <div class="playback-speed flex items-center space-x-2">
-                    <span class="speed-label text-sm">速度</span>
-                    <select v-model="playbackRate" @change="setPlaybackRate(playbackRate)" class="speed-select bg-transparent text-white border border-gray-600 rounded px-1 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-bilibili-primary">
+                    <select
+                      v-model="playbackRate"
+                      @change="setPlaybackRate(playbackRate)"
+                      class="speed-select bg-transparent text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-bilibili-primary"
+                    >
                       <option value="0.5">0.5x</option>
                       <option value="0.75">0.75x</option>
                       <option value="1">1x</option>
@@ -149,21 +153,42 @@
               <!-- 视频基本信息 -->
               <div class="flex flex-wrap items-center justify-between mb-4">
                 <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-4">
-                  <span>播放量: {{ video.viewCount }}</span>
-                  <span>点赞: {{ video.likeCount }}</span>
-                  <span>时长: {{ video.duration }}</span>
+                  <span>播放量: {{ videoStats.viewCount }}</span>
+                  <span>弹幕: {{ videoStats.danmakuCount }}</span>
+                  <span>发布时间: {{ videoStats.publishTime }}</span>
                 </div>
               </div>
               
               <!-- 视频说明 -->
-              <div v-if="video.note" class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <p class="text-sm text-blue-800 dark:text-blue-200">{{ video.note }}</p>
+              <div v-if="video.note" class="mb-6 p-4 bg-gray-50 dark:bg-gray-700/20 rounded-lg">
+                <p class="text-sm text-gray-700 dark:text-gray-300">{{ video.note }}</p>
+              </div>
+              
+              <!-- 正在观看人数 -->
+              <div class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+                <i class="fas fa-eye mr-1"></i> 正在观看: {{ videoStats.watchingCount }}人
+              </div>
+              
+              <!-- 点赞收藏转发 -->
+              <div class="flex items-center space-x-6 mb-6">
+                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-primary transition-colors" @click="toggleLike">
+                  <i class="fas fa-heart text-xl" :class="isLiked ? 'text-bilibili-primary' : ''"></i>
+                  <span>{{ videoStats.likeCount }}</span>
+                </button>
+                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-primary transition-colors" @click="toggleFavorite">
+                  <i class="fas fa-bookmark text-xl" :class="isFavorited ? 'text-bilibili-primary' : ''"></i>
+                  <span>{{ videoStats.favoriteCount }}</span>
+                </button>
+                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-primary transition-colors" @click="shareVideo">
+                  <i class="fas fa-share text-xl"></i>
+                  <span>{{ videoStats.shareCount }}</span>
+                </button>
               </div>
               
               <!-- 弹幕控制面板 -->
-              <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+              <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                 <div class="flex items-center justify-between mb-3">
-                  <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">弹幕设置</h3>
+                  <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">发送弹幕</h3>
                   <div class="flex items-center space-x-2">
                     <button
                       @click="toggleDanmaku"
@@ -522,6 +547,21 @@ const isHovered = ref(false)
 const videoLoadError = ref(false)
 const showControls = ref(false) // 控制栏显示状态
 let controlsTimeout: number | null = null
+
+// 模拟数据
+const videoStats = ref({
+  viewCount: '1.2万',
+  danmakuCount: '856',
+  likeCount: '1234',
+  favoriteCount: '567',
+  shareCount: '89',
+  publishTime: '2024-01-15',
+  watchingCount: '123'
+})
+
+// 点赞收藏转发状态
+const isLiked = ref(false)
+const isFavorited = ref(false)
 
 // 进度条拖动状态
 const isSeeking = ref(false)
@@ -974,6 +1014,33 @@ const fetchVideoData = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// 点赞功能
+const toggleLike = () => {
+  isLiked.value = !isLiked.value
+  if (isLiked.value) {
+    videoStats.value.likeCount = (parseInt(videoStats.value.likeCount) + 1).toString()
+  } else {
+    videoStats.value.likeCount = (parseInt(videoStats.value.likeCount) - 1).toString()
+  }
+}
+
+// 收藏功能
+const toggleFavorite = () => {
+  isFavorited.value = !isFavorited.value
+  if (isFavorited.value) {
+    videoStats.value.favoriteCount = (parseInt(videoStats.value.favoriteCount) + 1).toString()
+  } else {
+    videoStats.value.favoriteCount = (parseInt(videoStats.value.favoriteCount) - 1).toString()
+  }
+}
+
+// 分享功能
+const shareVideo = () => {
+  videoStats.value.shareCount = (parseInt(videoStats.value.shareCount) + 1).toString()
+  // 实际应用中应该调用分享API
+  console.log('分享视频')
 }
 
 // 键盘快捷键（模拟播放模式）
