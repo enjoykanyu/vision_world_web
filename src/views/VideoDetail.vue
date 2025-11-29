@@ -78,7 +78,7 @@
               </div>
 
               <!-- 自定义视频控制栏 -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" :class="{ 'opacity-100': !isPlaying }">
                 <!-- 进度条 -->
                 <div class="relative h-1 bg-gray-500 rounded-full mb-4 cursor-pointer" 
                      @click="seek" 
@@ -131,8 +131,8 @@
               </div>
 
               <!-- 播放按钮覆盖层 - 只在未播放且鼠标未悬停时显示 -->
-              <div v-if="!isPlaying" class="absolute inset-0 flex items-center justify-center pointer-events-auto">
-                <button @click="togglePlay" class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors">
+              <div v-if="!isPlaying" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <button @click="togglePlay" class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors pointer-events-auto">
                   <i class="fas fa-play text-4xl text-white"></i>
                 </button>
               </div>
@@ -140,31 +140,23 @@
 
             <!-- 视频信息 -->
             <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
-              <h1 class="text-2xl font-bold mb-2">{{ video.title }}</h1>
-              <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
-                <span>播放量: {{ video.viewCount }}</span>
-                <span class="mx-2">•</span>
-                <span>点赞: {{ video.likeCount }}</span>
-                <span class="mx-2">•</span>
-                <span>时长: {{ video.duration }}</span>
+              <!-- 视频标题 -->
+              <h1 class="text-2xl font-bold mb-3">{{ video.title }}</h1>
+              
+              <!-- 视频基本信息 -->
+              <div class="flex flex-wrap items-center justify-between mb-4">
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-4">
+                  <span>播放量: {{ video.viewCount }}</span>
+                  <span>点赞: {{ video.likeCount }}</span>
+                  <span>时长: {{ video.duration }}</span>
+                </div>
               </div>
               
               <!-- 视频说明 -->
-              <div v-if="video.note" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div v-if="video.note" class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <p class="text-sm text-blue-800 dark:text-blue-200">{{ video.note }}</p>
               </div>
-              <!-- 键盘快捷键提示 -->
-              <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/20 rounded-lg">
-                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">键盘快捷键：</p>
-                <div class="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">空格键: 播放/暂停</span>
-                  <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">←: 后退10秒</span>
-                  <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">→: 前进10秒</span>
-                  <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">↑: 增加音量</span>
-                  <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">↓: 减少音量</span>
-                  <span class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">M: 静音切换</span>
-                </div>
-              </div>
+              
               <!-- 弹幕控制面板 -->
               <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                 <div class="flex items-center justify-between mb-3">
@@ -189,26 +181,26 @@
                 </div>
                 
                 <!-- 弹幕输入区域 -->
-                <div class="danmaku-input-container">
+                <div class="flex items-center space-x-2">
                   <input
                     v-model="newDanmakuText"
                     @keyup.enter="sendDanmaku"
                     placeholder="发送弹幕..."
-                    class="danmaku-input"
+                    class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-bilibili-primary dark:bg-gray-700 dark:text-white"
                     :disabled="!danmakuEnabled"
                   >
-                  <div class="flex items-center border-l border-gray-200 dark:border-gray-600">
+                  <div class="flex items-center border-t border-b border-gray-300 dark:border-gray-600">
                     <!-- 颜色选择器 -->
                     <input
                       v-model="danmakuColor"
                       type="color"
-                      class="w-8 h-8 border-none cursor-pointer"
+                      class="w-10 h-10 border-none cursor-pointer"
                       title="弹幕颜色"
                     >
                     <!-- 速度选择 -->
                     <select
                       v-model="danmakuSpeed"
-                      class="text-xs border-none bg-transparent px-2 py-1"
+                      class="text-xs border-none bg-transparent px-2 py-1 dark:bg-gray-700 dark:text-white"
                       title="弹幕速度"
                     >
                       <option value="6">超快</option>
@@ -221,16 +213,15 @@
                   <button
                     @click="sendDanmaku"
                     :disabled="!danmakuEnabled || !newDanmakuText.trim()"
-                    class="danmaku-send-button"
+                    class="bg-bilibili-primary hover:bg-bilibili-secondary text-white px-4 py-2 rounded-r-lg font-medium transition-colors disabled:bg-gray-300 dark:disabled:bg-gray-600"
                   >
                     发送
                   </button>
                 </div>
                 
                 <!-- 弹幕统计 -->
-                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex justify-between">
-                  <span>当前弹幕: {{ danmakus.length }}</span>
-                  <span>速度: {{ danmakuSpeed }}秒</span>
+                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  当前弹幕: {{ danmakus.length }} | 速度: {{ danmakuSpeed }}秒
                 </div>
               </div>
             </div>
@@ -254,7 +245,7 @@
               </div>
               
               <!-- 视频统计信息 -->
-              <div class="grid grid-cols-3 gap-4 text-center">
+              <div class="grid grid-cols-3 gap-4 text-center mb-4">
                 <div>
                   <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ Math.floor(Math.random() * 500) + 100 }}</div>
                   <div class="text-xs text-gray-500 dark:text-gray-400">播放(万)</div>
@@ -270,26 +261,26 @@
               </div>
               
               <!-- 互动按钮 -->
-              <div class="grid grid-cols-4 gap-2 mt-4">
-                <button class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div class="flex justify-between items-center space-x-2">
+                <button class="flex-1 flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                   </svg>
                   <span class="text-xs text-gray-600 dark:text-gray-400">点赞</span>
                 </button>
-                <button class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <button class="flex-1 flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                   </svg>
                   <span class="text-xs text-gray-600 dark:text-gray-400">投币</span>
                 </button>
-                <button class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <button class="flex-1 flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
                   </svg>
                   <span class="text-xs text-gray-600 dark:text-gray-400">收藏</span>
                 </button>
-                <button class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <button class="flex-1 flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
                   </svg>
