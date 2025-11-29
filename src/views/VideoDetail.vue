@@ -30,7 +30,7 @@
           <!-- Left side: Video Player and Info -->
           <div class="lg:col-span-8">
             <!-- 视频播放器容器 -->
-            <div class="relative bg-black rounded-lg overflow-hidden shadow-2xl group">
+            <div class="relative bg-black rounded-lg overflow-hidden shadow-2xl group" id="video-container">
               <!-- 弹幕容器 -->
             <div class="absolute inset-0 pointer-events-none" ref="danmakuContainer">
               <div v-for="(danmaku, index) in danmakus" :key="index" 
@@ -45,7 +45,7 @@
                 ref="videoPlayer"
                 :src="video.src"
                 :poster="video.poster"
-                class="w-full aspect-video object-contain"
+                class="w-full h-full object-cover"
                 @timeupdate="onTimeUpdate"
                 @loadedmetadata="initPlayer"
                 @loadeddata="onVideoLoaded"
@@ -78,7 +78,7 @@
               </div>
 
               <!-- 自定义视频控制栏 -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" :class="{ 'opacity-100': !isPlaying }">
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" :class="{ 'opacity-100': !isPlaying || showControls }" id="video-controls">
                 <!-- 进度条 -->
                 <div class="relative h-1 bg-gray-500 rounded-full mb-4 cursor-pointer" 
                      @click="seek" 
@@ -136,6 +136,9 @@
                   <i class="fas fa-play text-4xl text-white"></i>
                 </button>
               </div>
+              
+              <!-- 鼠标移动检测，用于显示/隐藏控制栏 -->
+              <div class="absolute inset-0 pointer-events-none" @mousemove="onMouseMove" @mouseleave="onMouseLeave"></div>
             </div>
 
             <!-- 视频信息 -->
@@ -232,16 +235,21 @@
             <!-- UP主信息卡片 -->
             <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600">
               <div class="flex items-center space-x-3 mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary rounded-full flex items-center justify-center text-white font-bold">
+                <div class="w-12 h-12 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:opacity-90 transition-opacity" @click="goToUserHome">
                   U
                 </div>
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-gray-900 dark:text-white truncate">UP主名称</h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400">{{ Math.floor(Math.random() * 100) }}万粉丝</p>
                 </div>
-                <button class="bg-bilibili-primary hover:bg-bilibili-secondary text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  关注
-                </button>
+                <div class="flex space-x-2">
+                  <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-envelope"></i>
+                  </button>
+                  <button class="bg-bilibili-primary hover:bg-bilibili-secondary text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    关注
+                  </button>
+                </div>
               </div>
               
               <!-- 视频统计信息 -->
@@ -512,6 +520,8 @@ const isFullscreen = ref(false)
 const progress = ref(0)
 const isHovered = ref(false)
 const videoLoadError = ref(false)
+const showControls = ref(false) // 控制栏显示状态
+let controlsTimeout: number | null = null
 
 // 进度条拖动状态
 const isSeeking = ref(false)
@@ -669,7 +679,7 @@ const stopSeeking = () => {
 
 // 切换全屏
 const toggleFullscreen = () => {
-  const container = videoPlayer.value?.parentElement
+  const container = document.getElementById('video-container')
   if (!container) return
 
   if (!document.fullscreenElement) {
@@ -679,6 +689,57 @@ const toggleFullscreen = () => {
   } else {
     document.exitFullscreen()
   }
+}
+
+// 监听全屏变化事件
+const handleFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement
+  
+  // 确保视频元素在全屏时充满容器
+  if (document.fullscreenElement && videoPlayer.value) {
+    videoPlayer.value.style.objectFit = 'cover'
+    videoPlayer.value.style.width = '100%'
+    videoPlayer.value.style.height = '100%'
+  }
+}
+
+// 添加全屏变化事件监听器
+onMounted(() => {
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  
+  onUnmounted(() => {
+    document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  })
+})
+
+// 鼠标移动事件，显示控制栏
+const onMouseMove = () => {
+  showControls.value = true
+  
+  // 清除之前的定时器
+  if (controlsTimeout) {
+    clearTimeout(controlsTimeout)
+  }
+  
+  // 1秒后自动隐藏控制栏
+  controlsTimeout = window.setTimeout(() => {
+    if (isPlaying.value) {
+      showControls.value = false
+    }
+  }, 1000)
+}
+
+// 鼠标离开事件，隐藏控制栏
+const onMouseLeave = () => {
+  if (isPlaying.value) {
+    showControls.value = false
+  }
+}
+
+// 跳转到用户主页
+const goToUserHome = () => {
+  console.log('跳转到用户主页')
+  // 实际应用中应该使用router.push或window.location.href
 }
 
 // 切换弹幕显示
@@ -1120,6 +1181,9 @@ onMounted(() => {
   
   onUnmounted(() => {
     clearInterval(danmakuUpdateInterval)
+    if (controlsTimeout) {
+      clearTimeout(controlsTimeout)
+    }
   })
 })
 
