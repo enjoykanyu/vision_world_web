@@ -48,7 +48,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 // 请求拦截器
 request.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: any) => {
     // 添加请求ID
     config.headers = config.headers || {}
     config.headers['X-Request-ID'] = generateRequestId()
@@ -136,7 +136,12 @@ request.interceptors.response.use(
         // 获取刷新令牌
         const refreshToken = localStorage.getItem('refresh_token')
         if (!refreshToken) {
-          throw new Error('No refresh token available')
+          // 没有refreshToken，直接返回错误
+          processQueue(new Error('No refresh token available'), null)
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          window.dispatchEvent(new CustomEvent('auth-logout'))
+          return Promise.reject(error)
         }
         
         // 调用token刷新API
@@ -144,19 +149,14 @@ request.interceptors.response.use(
         const tokenData = response.data.data
         
         // 更新本地存储的token
-        localStorage.setItem('access_token', tokenData.access_token || tokenData.token)
-        
-        // 如果返回了新的refresh token，也更新它
-        if (tokenData.refresh_token) {
-          localStorage.setItem('refresh_token', tokenData.refresh_token)
-        }
+        localStorage.setItem('access_token', tokenData.access_token)
         
         // 处理等待队列
-        processQueue(null, newToken)
+        processQueue(null, tokenData.access_token)
         
         // 重试原始请求
         if (originalRequest.headers) {
-          originalRequest.headers['Authorization'] = `Bearer ${newToken}`
+          originalRequest.headers['Authorization'] = `Bearer ${tokenData.access_token}`
         }
         return request(originalRequest)
       } catch (refreshError) {
