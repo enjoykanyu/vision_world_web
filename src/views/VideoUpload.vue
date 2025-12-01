@@ -726,7 +726,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { videoAPI } from '@/api/video'
@@ -819,11 +819,10 @@ const isPublishing = ref(false)
 
 // 计算属性
 const canSubmit = computed(() => {
+  // 简化逻辑，只检查uploadedVideoId、登录状态和表单错误
+  // 表单错误已经包含了对标题、分区和标签的验证
   return uploadedVideoId.value && 
-         videoForm.value.title.trim() && 
-         videoForm.value.category &&
          userStore.isLoggedIn &&
-         videoForm.value.tags.length > 0 &&
          !formErrors.value.title &&
          !formErrors.value.category &&
          !formErrors.value.tags
@@ -866,6 +865,15 @@ const validateForm = () => {
   
   return isValid
 }
+
+// 监听表单变化，自动更新错误状态
+watch(
+  () => [videoForm.value.title, videoForm.value.category, videoForm.value.tags],
+  () => {
+    validateForm()
+  },
+  { deep: true }
+)
 
 // 方法
 const triggerFileInput = () => {
@@ -1096,30 +1104,33 @@ const startUpload = async () => {
       }
       
       if (videoId) {
-        // 确保uploadedVideoId.value被正确设置
-        uploadedVideoId.value = videoId
-        videoPreviewUrl.value = videoUrl || URL.createObjectURL(selectedFile.value!)
-        
-        console.log('Video ID extracted:', videoId)
-        console.log('Video URL:', videoPreviewUrl.value)
-        console.log('uploadedVideoId.value after assignment:', uploadedVideoId.value)
-        
-        // 直接将进度设置为100%，确保用户看到完整的上传状态
-        uploadProgress.value = 100
-        uploadSpeed.value = 0
-        remainingTime.value = 0
-        
-        // 清除所有定时器
-        if (finalProgress) {
-          clearInterval(finalProgress)
-          finalProgress = null
-        }
-        
-        // 显示上传成功消息
-        setTimeout(() => {
-          alert('视频上传成功，现在可以编辑视频信息并发布')
-        }, 300)
-      } else {
+          // 确保uploadedVideoId.value被正确设置
+          uploadedVideoId.value = videoId
+          videoPreviewUrl.value = videoUrl || URL.createObjectURL(selectedFile.value!)
+          
+          console.log('Video ID extracted:', videoId)
+          console.log('Video URL:', videoPreviewUrl.value)
+          console.log('uploadedVideoId.value after assignment:', uploadedVideoId.value)
+          
+          // 直接将进度设置为100%，确保用户看到完整的上传状态
+          uploadProgress.value = 100
+          uploadSpeed.value = 0
+          remainingTime.value = 0
+          
+          // 清除所有定时器
+          if (finalProgress) {
+            clearInterval(finalProgress)
+            finalProgress = null
+          }
+          
+          // 视频上传成功后，更新表单错误状态，确保"立即投稿"按钮可用
+          validateForm()
+          
+          // 显示上传成功消息
+          setTimeout(() => {
+            alert('视频上传成功，现在可以编辑视频信息并发布')
+          }, 300)
+        } else {
         // 清除所有定时器
         if (finalProgress) {
           clearInterval(finalProgress)
