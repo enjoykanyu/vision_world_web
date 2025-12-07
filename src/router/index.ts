@@ -9,6 +9,7 @@ import Messages from '@/views/Messages.vue'
 import Live from '@/views/Live.vue'
 import StreamSetup from '@/views/StreamSetup.vue'
 import VideoUpload from '@/views/VideoUpload.vue'
+import VideoManage from '@/views/VideoManage.vue'
 import { useUserStore } from '@/stores/userStore'
 
 const router = createRouter({
@@ -77,6 +78,15 @@ const router = createRouter({
       component: VideoUpload,
       meta: {
         title: '投稿 - Vision World',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/manage/videos',
+      name: 'videoManage',
+      component: VideoManage,
+      meta: {
+        title: '创作中心 - Vision World',
         requiresAuth: true
       }
     }

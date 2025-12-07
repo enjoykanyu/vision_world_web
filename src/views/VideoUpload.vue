@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- 发布成功动画 -->
+    <SuccessAnimation 
+      :visible="successVisible" 
+      :video-title="videoForm.title"
+      @close="successVisible = false"
+    />
     <!-- 头部导航 -->
     <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -730,6 +736,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { videoAPI } from '@/api/video'
+import SuccessAnimation from '@/components/SuccessAnimation.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -816,6 +823,7 @@ const showPassword = ref(false)
 // 加载状态
 const isLoading = ref(false)
 const isPublishing = ref(false)
+const successVisible = ref(false)
 
 // 计算属性
 const canSubmit = computed(() => {
@@ -1269,8 +1277,8 @@ const submitVideo = async () => {
     const response = await videoAPI.publishVideo(formData)
     
     if (response.data) {
-      alert(isEditing.value ? '修改成功' : '投稿成功，视频已进入审核流程')
-      router.push('/')
+      // 显示发布成功动画
+      successVisible.value = true
     } else {
       throw new Error('发布失败')
     }
