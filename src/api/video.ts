@@ -232,6 +232,22 @@ export const videoAPI = {
     return http.post<{ data: Video }>('/api/video/publish', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
+  },
+
+  /**
+   * 获取用户发布的视频列表
+   * @param params 请求参数，包含分页信息
+   * @returns 用户发布的视频列表
+   */
+  getUserPublishedVideos(params: { page?: number; page_size?: number }) {
+    const { page = 1, page_size = 10 } = params
+    return http.get<{ 
+      status_code: number; 
+      status_msg: string; 
+      videos: ApiVideo[]; 
+      total: number; 
+      has_more: boolean 
+    }>(`/api/video/user/published?page=${page}&page_size=${page_size}`)
   }
 }
 
