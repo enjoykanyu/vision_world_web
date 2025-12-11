@@ -7,61 +7,63 @@
       @close="successVisible = false"
     />
     <!-- 头部导航 -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+    <div class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 transition-all duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+        <div class="flex items-center justify-between h-10 sm:h-12">
           <div class="flex items-center space-x-4">
-            <router-link to="/" class="flex items-center group">
-              <div class="w-10 h-10 bg-pink-500 rounded flex items-center justify-center">
+            <router-link to="/" class="flex items-center space-x-2 transition-transform duration-200 group">
+              <div class="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center shadow-sm transition-all duration-200 group-hover:bg-pink-600 group-hover:shadow-md">
                 <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm-1 14.5v-9l7 4.5-7 4.5z"/>
                 </svg>
               </div>
-              <span class="ml-2 text-xl font-semibold text-gray-900 dark:text-white">VisionWorld</span>
+              <span class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors duration-200">VisionWorld</span>
             </router-link>
-            <div class="hidden md:flex items-center space-x-1">
-              <span class="text-gray-400">/</span>
-              <span class="text-gray-600 dark:text-gray-300 ml-1">创作中心</span>
+            <div class="hidden md:flex items-center space-x-1 text-sm">
+              <span class="text-gray-500 dark:text-gray-400 mx-1">/</span>
+              <span class="text-gray-700 dark:text-gray-300 font-medium">创作中心</span>
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <button class="p-2 text-gray-600 dark:text-gray-300 hover:text-pink-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button class="relative p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200 transform hover:scale-110">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
+              <!-- 通知未读提示 -->
+              <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <button class="p-2 text-gray-600 dark:text-gray-300 hover:text-pink-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button class="relative p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200 transform hover:scale-110">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
             </button>
             <!-- 用户头像下拉菜单 -->
             <div class="relative group">
-              <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-pink-600 transition-colors">
-                <span class="text-white text-base font-semibold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
+              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full flex items-center justify-center cursor-pointer hover:from-pink-600 hover:to-pink-700 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105">
+                <span class="text-white text-sm sm:text-base font-semibold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
               </div>
               
               <!-- 下拉菜单 -->
-              <div class="absolute right-0 top-12 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50">
+              <div class="absolute right-0 top-8 sm:top-12 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50 transition-all duration-200 transform translate-y-[-8px] group-hover:translate-y-0">
                 <div class="py-1">
-                  <router-link to="/profile" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <router-link to="/profile" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                     个人账号中心
                   </router-link>
                   
-                  <router-link to="/manage/videos" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <router-link to="/manage/videos" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                     </svg>
                     投稿管理
                   </router-link>
                   
-                  <hr class="my-1 border-gray-200 dark:border-gray-600">
+                  <div class="my-0.5 border-t border-gray-200 dark:border-gray-600"></div>
                   
-                  <button @click="handleLogout" class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
-                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button @click="handleLogout" class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-3 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                     </svg>
                     退出登录
