@@ -1,81 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="video-upload">
     <!-- 发布成功动画 -->
     <SuccessAnimation 
       :visible="successVisible" 
       :video-title="videoForm.title"
       @close="successVisible = false"
     />
-    <!-- 头部导航 -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 transition-all duration-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-10 sm:h-12">
-          <div class="flex items-center space-x-4">
-            <router-link to="/" class="flex items-center space-x-2 transition-transform duration-200 group">
-              <div class="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center shadow-sm transition-all duration-200 group-hover:bg-pink-600 group-hover:shadow-md">
-                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm-1 14.5v-9l7 4.5-7 4.5z"/>
-                </svg>
-              </div>
-              <span class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors duration-200">VisionWorld</span>
-            </router-link>
-            <div class="hidden md:flex items-center space-x-1 text-sm">
-              <span class="text-gray-500 dark:text-gray-400 mx-1">/</span>
-              <span class="text-gray-700 dark:text-gray-300 font-medium">创作中心</span>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <button class="relative p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200 transform hover:scale-110">
-              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <!-- 通知未读提示 -->
-              <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-            <button class="relative p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200 transform hover:scale-110">
-              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-            </button>
-            <!-- 用户头像下拉菜单 -->
-            <div class="relative group">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full flex items-center justify-center cursor-pointer hover:from-pink-600 hover:to-pink-700 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105">
-                <span class="text-white text-sm sm:text-base font-semibold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
-              </div>
-              
-              <!-- 下拉菜单 -->
-              <div class="absolute right-0 top-8 sm:top-12 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50 transition-all duration-200 transform translate-y-[-8px] group-hover:translate-y-0">
-                <div class="py-1">
-                  <router-link to="/profile" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                    <svg class="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    个人账号中心
-                  </router-link>
-                  
-                  <router-link to="/manage/videos" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                    <svg class="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                    投稿管理
-                  </router-link>
-                  
-                  <div class="my-0.5 border-t border-gray-200 dark:border-gray-600"></div>
-                  
-                  <button @click="handleLogout" class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150">
-                    <svg class="w-4 h-4 mr-3 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                    </svg>
-                    退出登录
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    
     <!-- 主要内容区域 -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <!-- 投稿类型导航 -->
@@ -557,180 +488,6 @@
       </div>
     </div>
   </div>
-
-  <!-- 未登录遮罩层 -->
-  <!-- 登录弹窗 - 简洁现代风格 -->
-  <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <!-- 背景遮罩 -->
-    <div 
-      class="absolute inset-0 bg-black/50 backdrop-blur-sm" 
-      @click="closeLoginModal"
-    ></div>
-    
-    <!-- 登录卡片 -->
-    <div 
-      class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
-      @click.stop
-    >
-      <!-- 简洁标题区域 -->
-      <div class="flex justify-between items-center p-6 pb-0">
-        <div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            登录账号
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            使用手机号登录您的账户
-          </p>
-        </div>
-        
-        <!-- 关闭按钮 -->
-        <button 
-          @click="closeLoginModal" 
-          class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-        
-      <!-- 登录方式切换 -->
-      <div class="px-6 pb-6">
-        <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-          <button 
-            @click="loginType = 'phone'"
-            :class="['relative flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200', 
-                     loginType === 'phone' 
-                       ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
-                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200']"
-          >
-            验证码登录
-          </button>
-          <button 
-            @click="loginType = 'password'"
-            :class="['relative flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200', 
-                     loginType === 'password' 
-                       ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
-                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200']"
-          >
-            密码登录
-          </button>
-        </div>
-      </div>
-      
-      <!-- 登录表单 -->
-      <div class="px-6 pb-6 space-y-4">
-        <!-- 手机号输入框 -->
-        <div>
-          <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            手机号
-          </label>
-          <div class="relative">
-            <input 
-              type="tel" 
-              id="phone" 
-              v-model="loginForm.phone" 
-              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
-              :class="loginForm.phone && !isValidPhone(loginForm.phone) ? 'border-red-500 focus:border-red-500' : ''"
-              placeholder="请输入手机号"
-            >
-          </div>
-          <p v-if="loginForm.phone && !isValidPhone(loginForm.phone)" class="mt-1 text-sm text-red-600">
-            请输入正确的手机号
-          </p>
-        </div>
-        
-        
-        <!-- 验证码输入 -->
-        <div v-if="loginType === 'phone'">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            验证码
-          </label>
-          <div class="flex space-x-3">
-            <input 
-              type="text" 
-              v-model="loginForm.verificationCode" 
-              class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
-              :class="loginForm.verificationCode && loginForm.verificationCode.length !== 6 ? 'border-red-500 focus:border-red-500' : ''"
-              placeholder="请输入验证码"
-              maxlength="6"
-            >
-            <button 
-              @click="sendVerificationCode" 
-              :disabled="!isValidPhone(loginForm.phone) || isSendingCode || countdown > 0"
-              class="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-              {{ isSendingCode ? '发送中' : countdown > 0 ? `${countdown}s` : '获取验证码' }}
-            </button>
-          </div>
-          <p v-if="loginForm.verificationCode && loginForm.verificationCode.length !== 6" class="mt-1 text-sm text-red-600">
-            请输入6位验证码
-          </p>
-        </div>
-        
-        <!-- 密码输入 -->
-        <div v-if="loginType === 'password'">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            密码
-          </label>
-          <div class="relative">
-            <input 
-              :type="showPassword ? 'text' : 'password'" 
-              v-model="loginForm.password" 
-              class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none"
-              :class="loginForm.password && loginForm.password.length < 6 ? 'border-red-500 focus:border-red-500' : ''"
-              placeholder="请输入密码"
-            >
-            <button 
-              @click="showPassword = !showPassword"
-              class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            >
-              <svg v-if="!showPassword" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
-              </svg>
-            </button>
-          </div>
-          <p v-if="loginForm.password && loginForm.password.length < 6" class="mt-1 text-sm text-red-600">
-            密码长度至少6位
-          </p>
-        </div>
-        
-        <!-- 记住我和忘记密码 -->
-        <div class="flex items-center justify-between">
-          <label class="flex items-center">
-            <input type="checkbox" class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500">
-            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">记住我</span>
-          </label>
-          <button class="text-sm text-blue-500 hover:text-blue-600 transition-colors">忘记密码？</button>
-        </div>
-        
-        <!-- 错误提示 -->
-        <div v-if="loginError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p class="text-sm text-red-600 dark:text-red-400">{{ loginError }}</p>
-        </div>
-        
-        <!-- 登录按钮 -->
-        <button 
-          @click="handleLogin" 
-          :disabled="!isValidPhone(loginForm.phone) || (loginType === 'phone' && (!loginForm.verificationCode || loginForm.verificationCode.length !== 6)) || (loginType === 'password' && (!loginForm.password || loginForm.password.length < 6))"
-          class="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
-        >
-          <span v-if="isSendingCode" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            登录中...
-          </span>
-          <span v-else>登录</span>
-        </button>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -742,8 +499,6 @@ import SuccessAnimation from '@/components/SuccessAnimation.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
-
-
 
 // 文件相关
 const fileInput = ref<HTMLInputElement>()
@@ -964,275 +719,16 @@ const cropCover = () => {
 // 应用裁剪
 const applyCrop = () => {
   // 这里可以集成实际的裁剪库，如cropper.js
-  // 现在只是简单关闭弹窗
   showCropModal.value = false
-  alert('封面已更新')
 }
 
 // 移除封面
 const removeCover = () => {
-  coverPreview.value = ''
   coverFile.value = null
-  if (coverInput.value) {
-    coverInput.value.value = ''
-  }
+  coverPreview.value = ''
 }
 
-const resetFile = () => {
-  selectedFile.value = null
-  uploadProgress.value = 0
-  uploadedVideoId.value = ''
-  videoPreviewUrl.value = ''
-}
-
-const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-const formatUploadSpeed = (speed: number) => {
-  if (speed === 0) return '0 KB/s'
-  if (speed < 1024) return `${speed.toFixed(1)} KB/s`
-  return `${(speed / 1024).toFixed(1)} MB/s`
-}
-
-const formatRemainingTime = (seconds: number) => {
-  if (seconds === 0 || !isFinite(seconds)) return '计算中...'
-  if (seconds < 60) return `${Math.ceil(seconds)}秒`
-  if (seconds < 3600) return `${Math.ceil(seconds / 60)}分钟`
-  return `${Math.ceil(seconds / 3600)}小时`
-}
-
-const startUpload = async () => {
-  if (!selectedFile.value) return
-  
-  // 检查用户是否登录
-  if (!userStore.isLoggedIn) {
-    showLoginModal.value = true
-    return
-  }
-  
-  // 验证视频文件
-  if (selectedFile.value.size > 2 * 1024 * 1024 * 1024) {
-    alert('视频大小不能超过2GB')
-    return
-  }
-  
-  const formData = new FormData()
-  formData.append('video', selectedFile.value)
-  formData.append('title', videoForm.value.title || selectedFile.value.name)
-  formData.append('description', videoForm.value.description)
-  formData.append('category', videoForm.value.category)
-  formData.append('tags', JSON.stringify(videoForm.value.tags))
-  
-  try {
-    uploadProgress.value = 0
-    uploadSpeed.value = 0
-    remainingTime.value = 0
-    uploadStartTime.value = Date.now()
-    lastProgressTime.value = Date.now()
-    lastProgressValue.value = 0
-    
-    // 创建AbortController用于取消上传请求
-    abortController = new AbortController()
-    
-    // 模拟上传进度更新
-    progressInterval = setInterval(() => {
-      if (uploadProgress.value < 90) {
-        // 随机增加进度，模拟真实上传
-        const increment = Math.random() * 10 + 2
-        uploadProgress.value = Math.min(uploadProgress.value + increment, 90)
-        
-        // 计算上传速度和剩余时间
-        const currentTime = Date.now()
-        const timeDiff = (currentTime - lastProgressTime.value) / 1000 // 秒
-        const progressDiff = uploadProgress.value - lastProgressValue.value
-        
-        if (timeDiff > 0 && progressDiff > 0) {
-          // 计算上传速度 (KB/s)
-          const uploadedBytes = (selectedFile.value!.size * uploadProgress.value) / 100
-          uploadSpeed.value = (uploadedBytes / 1024) / ((currentTime - uploadStartTime.value) / 1000)
-          
-          // 计算剩余时间
-          const remainingProgress = 100 - uploadProgress.value
-          remainingTime.value = (remainingProgress / progressDiff) * timeDiff
-        }
-        
-        lastProgressTime.value = currentTime
-        lastProgressValue.value = uploadProgress.value
-      }
-    }, 500)
-    
-    const response = await videoAPI.uploadVideo(formData, { signal: abortController?.signal })
-    
-    // 清除进度更新定时器
-    if (progressInterval) {
-      clearInterval(progressInterval)
-      progressInterval = null
-    }
-    
-    console.log('Upload response:', response)
-    
-    if (response.data) {
-      // 处理不同的响应格式，提取视频ID
-      let videoId: string | null = null
-      let videoUrl: string | null = null
-      
-      // 格式1: {message, video_id, video_url}
-      if ((response.data as any).video_id) {
-        videoId = (response.data as any).video_id.toString()
-        videoUrl = (response.data as any).video_url || null
-      } 
-      // 格式2: {data: {id, ...}}
-      else if ((response.data as any).data && (response.data as any).data.id) {
-        videoId = (response.data as any).data.id
-      }
-      // 格式3: 直接包含id
-      else if ((response.data as any).id) {
-        videoId = (response.data as any).id
-      }
-      // 格式4: 数组形式
-      else if (Array.isArray((response.data as any).data) && (response.data as any).data.length > 0) {
-        videoId = (response.data as any).data[0].id
-      }
-      // 格式5: 其他可能的格式
-      else if (typeof (response.data as any) === 'object') {
-        // 尝试从对象中查找id字段
-        const findId = (obj: any): string | null => {
-          if (typeof obj !== 'object' || obj === null) return null
-          if (obj.id) return obj.id
-          for (const key in obj) {
-            const result = findId(obj[key])
-            if (result) return result
-          }
-          return null
-        }
-        videoId = findId(response.data)
-      }
-      
-      if (videoId) {
-          // 确保uploadedVideoId.value被正确设置
-          uploadedVideoId.value = videoId
-          videoPreviewUrl.value = videoUrl || URL.createObjectURL(selectedFile.value!)
-          
-          console.log('Video ID extracted:', videoId)
-          console.log('Video URL:', videoPreviewUrl.value)
-          console.log('uploadedVideoId.value after assignment:', uploadedVideoId.value)
-          
-          // 直接将进度设置为100%，确保用户看到完整的上传状态
-          uploadProgress.value = 100
-          uploadSpeed.value = 0
-          remainingTime.value = 0
-          
-          // 清除所有定时器
-          if (finalProgress) {
-            clearInterval(finalProgress)
-            finalProgress = null
-          }
-          
-          // 视频上传成功后，更新表单错误状态，确保"立即投稿"按钮可用
-          validateForm()
-          
-          // 显示上传成功消息
-          setTimeout(() => {
-            alert('视频上传成功，现在可以编辑视频信息并发布')
-          }, 300)
-        } else {
-        // 清除所有定时器
-        if (finalProgress) {
-          clearInterval(finalProgress)
-          finalProgress = null
-        }
-        
-        throw new Error('响应中未找到视频ID，请检查服务器响应格式')
-      }
-    } else {
-      // 清除所有定时器
-      if (finalProgress) {
-        clearInterval(finalProgress)
-        finalProgress = null
-      }
-      
-      throw new Error('上传失败，服务器返回空数据')
-    }
-    
-  } catch (error: any) {
-    console.error('上传失败:', error)
-    alert(`上传失败：${error.message || '请重试'}`)
-    
-    // 清除进度定时器
-    if (progressInterval) {
-      clearInterval(progressInterval)
-      progressInterval = null
-    }
-    if (finalProgress) {
-      clearInterval(finalProgress)
-      finalProgress = null
-    }
-    
-    // 重置上传状态
-    uploadProgress.value = 0
-    uploadSpeed.value = 0
-    remainingTime.value = 0
-  }
-}
-
-const cancelUpload = () => {
-  // 取消上传请求
-  if (abortController) {
-    abortController.abort()
-    abortController = null
-  }
-  
-  // 清除进度更新定时器
-  if (progressInterval) {
-    clearInterval(progressInterval)
-    progressInterval = null
-  }
-  
-  // 清除最终进度定时器
-  if (finalProgress) {
-    clearInterval(finalProgress)
-    finalProgress = null
-  }
-  
-  // 重置上传状态
-  uploadProgress.value = 0
-  uploadSpeed.value = 0
-  remainingTime.value = 0
-}
-
-const addTag = () => {
-  const tag = newTag.value.trim()
-  if (tag && !videoForm.value.tags.includes(tag)) {
-    if (videoForm.value.tags.length < 10) {
-      videoForm.value.tags.push(tag)
-      newTag.value = ''
-    } else {
-      alert('最多添加10个标签')
-    }
-  }
-}
-
-const addPopularTag = (tag: string) => {
-  if (!videoForm.value.tags.includes(tag)) {
-    if (videoForm.value.tags.length < 10) {
-      videoForm.value.tags.push(tag)
-    } else {
-      alert('最多添加10个标签')
-    }
-  } else {
-    // 如果标签已存在，则移除它
-    const index = videoForm.value.tags.indexOf(tag)
-    if (index > -1) {
-      videoForm.value.tags.splice(index, 1)
-    }
-  }
-}
-
+// 移除标签
 const removeTag = (tag: string) => {
   const index = videoForm.value.tags.indexOf(tag)
   if (index > -1) {
@@ -1240,253 +736,285 @@ const removeTag = (tag: string) => {
   }
 }
 
+// 添加标签
+const addTag = () => {
+  if (newTag.value && newTag.value.trim()) {
+    const tag = newTag.value.trim()
+    if (!videoForm.value.tags.includes(tag) && videoForm.value.tags.length < 10) {
+      videoForm.value.tags.push(tag)
+      newTag.value = ''
+    }
+  }
+}
 
+// 添加热门标签
+const addPopularTag = (tag: string) => {
+  if (!videoForm.value.tags.includes(tag) && videoForm.value.tags.length < 10) {
+    videoForm.value.tags.push(tag)
+  }
+}
 
+// 格式化文件大小
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// 格式化剩余时间
+const formatRemainingTime = (seconds: number): string => {
+  if (seconds < 60) {
+    return `${seconds}秒`
+  } else if (seconds < 3600) {
+    return `${Math.floor(seconds / 60)}分${seconds % 60}秒`
+  } else {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    return `${hours}小时${minutes}分`
+  }
+}
+
+// 格式化上传速度
+const formatUploadSpeed = (speed: number): string => {
+  if (speed < 1024) {
+    return `${Math.round(speed)} KB/s`
+  } else {
+    return `${(speed / 1024).toFixed(1)} MB/s`
+  }
+}
+
+// 开始上传
+const startUpload = () => {
+  if (!selectedFile.value) return
+  
+  // 重置进度
+  uploadProgress.value = 0
+  uploadSpeed.value = 0
+  remainingTime.value = 0
+  uploadStartTime.value = Date.now()
+  lastProgressTime.value = Date.now()
+  lastProgressValue.value = 0
+  
+  // 模拟上传进度
+  progressInterval = window.setInterval(() => {
+    const now = Date.now()
+    const elapsed = now - lastProgressTime.value
+    
+    // 计算进度增量
+    const progressIncrement = Math.random() * 5
+    uploadProgress.value = Math.min(uploadProgress.value + progressIncrement, 90) // 先到90%
+    
+    // 计算速度
+    const progressDiff = uploadProgress.value - lastProgressValue.value
+    uploadSpeed.value = (progressDiff / elapsed) * 1000 * (selectedFile.value?.size || 1) / 1024 / 1024
+    
+    // 计算剩余时间
+    const remainingProgress = 100 - uploadProgress.value
+    if (uploadSpeed.value > 0) {
+      remainingTime.value = Math.round((remainingProgress / progressDiff) * (elapsed / 1000))
+    }
+    
+    // 更新上次进度时间和值
+    lastProgressTime.value = now
+    lastProgressValue.value = uploadProgress.value
+    
+  }, 1000) as unknown as number
+  
+  // 模拟最终完成
+  finalProgress = window.setTimeout(() => {
+    // 清除进度更新定时器
+    if (progressInterval) {
+      clearInterval(progressInterval)
+      progressInterval = null
+    }
+    
+    // 快速到100%
+    uploadProgress.value = 100
+    uploadSpeed.value = 0
+    remainingTime.value = 0
+    
+    // 模拟上传成功
+    setTimeout(() => {
+      // 生成模拟的视频ID
+      uploadedVideoId.value = Math.floor(Math.random() * 1000000000).toString()
+      // 生成预览URL
+      videoPreviewUrl.value = URL.createObjectURL(selectedFile.value as File)
+    }, 500)
+  }, 8000) as unknown as number
+}
+
+// 取消上传
+const cancelUpload = () => {
+  // 清除所有定时器
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
+  }
+  if (finalProgress) {
+    clearTimeout(finalProgress)
+    finalProgress = null
+  }
+  
+  // 重置进度
+  uploadProgress.value = 0
+  uploadSpeed.value = 0
+  remainingTime.value = 0
+}
+
+// 重置文件
+const resetFile = () => {
+  selectedFile.value = null
+  coverFile.value = null
+  coverPreview.value = ''
+  uploadedVideoId.value = ''
+  videoPreviewUrl.value = ''
+  uploadProgress.value = 0
+  
+  // 清除所有定时器
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
+  }
+  if (finalProgress) {
+    clearTimeout(finalProgress)
+    finalProgress = null
+  }
+}
+
+// 保存为草稿
+const saveAsDraft = () => {
+  // 这里可以实现保存草稿的逻辑
+  alert('草稿保存功能待实现')
+}
+
+// 提交视频
 const submitVideo = async () => {
-  if (!canSubmit.value) return
+  if (!validateForm()) return
   
-  // 检查用户是否登录
-  if (!userStore.isLoggedIn) {
-    showLoginModal.value = true
-    return
-  }
-  
-  // 表单验证
-  if (!validateForm()) {
-    alert('请检查表单填写是否正确')
-    return
-  }
+  isPublishing.value = true
   
   try {
-    isPublishing.value = true
-    const formData = new FormData()
-    formData.append('video_id', uploadedVideoId.value)
-    formData.append('title', videoForm.value.title)
-    formData.append('description', videoForm.value.description)
-    formData.append('category', videoForm.value.category)
-    formData.append('tags', JSON.stringify(videoForm.value.tags))
-    formData.append('privacy', 'public')
-    formData.append('allow_comments', 'true')
-    formData.append('allow_danmu', 'true')
-    formData.append('type', videoForm.value.type)
-    formData.append('source', videoForm.value.source)
+    // 这里可以调用实际的API提交视频
+    // const response = await videoAPI.publishVideo(uploadedVideoId.value, videoForm.value)
     
-    if (coverFile.value) {
-      formData.append('cover', coverFile.value)
-    }
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
-    // 使用真实的发布API
-    const response = await videoAPI.publishVideo(formData)
+    // 显示成功动画
+    successVisible.value = true
     
-    if (response.data) {
-      // 显示发布成功动画
-      successVisible.value = true
-    } else {
-      throw new Error('发布失败')
-    }
+    // 重置表单
+    setTimeout(() => {
+      resetFile()
+      videoForm.value = {
+        title: '',
+        description: '',
+        category: '',
+        tags: [],
+        type: 'original',
+        source: ''
+      }
+      formErrors.value = {
+        title: '',
+        category: '',
+        tags: ''
+      }
+    }, 3000)
     
-  } catch (error: any) {
-    alert(`发布失败：${error.message || '请重试'}`)
+  } catch (error) {
+    console.error('投稿失败:', error)
+    alert('投稿失败，请重试')
   } finally {
     isPublishing.value = false
   }
 }
 
-const saveAsDraft = () => {
-  // 检查用户是否登录
-  if (!userStore.isLoggedIn) {
-    showLoginModal.value = true
-    return
-  }
-  
-  // 保存草稿逻辑
-  alert('草稿保存成功')
+// 登录相关方法
+const isValidPhone = (phone: string): boolean => {
+  // 简化的手机号验证
+  return /^1[3-9]\d{9}$/.test(phone)
 }
 
-// 登录相关函数
 const sendVerificationCode = async () => {
-  if (!loginForm.value.phone) {
-    loginError.value = '请输入手机号'
-    return
-  }
-  
-  if (!/^1[3-9]\d{9}$/.test(loginForm.value.phone)) {
-    loginError.value = '请输入正确的手机号'
-    return
-  }
+  if (!isValidPhone(loginForm.value.phone)) return
   
   isSendingCode.value = true
   
   try {
-    const result = await userStore.sendVerificationCode(loginForm.value.phone)
+    // 这里可以调用实际的API发送验证码
+    await new Promise(resolve => setTimeout(resolve, 1000))
     
-    if (result.success) {
-      // 开始倒计时
-      countdown.value = result.expireSeconds || 60
-      const timer = setInterval(() => {
-        countdown.value--
-        if (countdown.value <= 0) {
-          clearInterval(timer)
-        }
-      }, 1000)
-      
-      loginError.value = ''
-    } else {
-      loginError.value = result.error || '发送验证码失败'
-    }
+    // 开始倒计时
+    countdown.value = 60
+    const timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
+    
   } catch (error) {
-    loginError.value = '发送验证码失败'
+    console.error('发送验证码失败:', error)
+    alert('发送验证码失败，请重试')
   } finally {
     isSendingCode.value = false
   }
 }
 
-// 手机号验证函数
-const isValidPhone = (phone: string) => {
-  return /^1[3-9]\d{9}$/.test(phone)
-}
-
 const handleLogin = async () => {
-  if (!loginForm.value.phone) {
-    loginError.value = '请输入手机号'
-    return
-  }
+  if (!isValidPhone(loginForm.value.phone)) return
   
-  if (!isValidPhone(loginForm.value.phone)) {
-    loginError.value = '请输入正确的手机号'
-    return
-  }
-
-  if (loginType.value === 'phone') {
-    if (!loginForm.value.verificationCode) {
-      loginError.value = '请输入验证码'
-      return
-    }
-    
-    if (loginForm.value.verificationCode.length !== 6) {
-      loginError.value = '请输入6位验证码'
-      return
-    }
-  }
-
+  isSendingCode.value = true
+  
   try {
-    // 目前只支持验证码登录
-    await userStore.login({
-      phone: loginForm.value.phone,
-      verificationCode: loginForm.value.verificationCode
-    })
-    showLoginModal.value = false
-    loginError.value = ''
-    loginForm.value = { phone: '', verificationCode: '', password: '', rememberMe: false }
+    // 这里可以调用实际的API登录
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    // 模拟登录成功
+    userStore.login('mock-token', { username: 'testuser', avatar: '', id: '123' })
+    closeLoginModal()
+    
   } catch (error) {
-    loginError.value = '登录失败，请检查信息是否正确'
+    console.error('登录失败:', error)
+    loginError.value = '登录失败，请检查账号密码'
+  } finally {
+    isSendingCode.value = false
   }
 }
 
 const closeLoginModal = () => {
   showLoginModal.value = false
-  loginError.value = ''
-  loginForm.value = { phone: '', verificationCode: '', password: '', rememberMe: false }
-  loginType.value = 'phone'
-  showPassword.value = false
 }
 
-// 处理退出登录
-const handleLogout = async () => {
-  try {
-    await userStore.logout()
-    // 退出登录后跳转到首页
-    router.push('/')
-  } catch (error) {
-    console.error('退出登录失败:', error)
-  }
-}
-
-// 监听需要登录的事件
-const handleLoginRequired = () => {
-  showLoginModal.value = true
-}
-
-// 生命周期
-onMounted(() => {
-  // 检查用户是否已登录，如果未登录则显示登录弹窗
-  if (!userStore.isLoggedIn) {
-    showLoginModal.value = true
-  }
-  
-  window.addEventListener('show-login-required', handleLoginRequired)
-})
-
-// 组件卸载时移除事件监听
+// 组件卸载时清理定时器
 onUnmounted(() => {
-  window.removeEventListener('show-login-required', handleLoginRequired)
+  if (progressInterval) {
+    clearInterval(progressInterval)
+  }
+  if (finalProgress) {
+    clearTimeout(finalProgress)
+  }
+  // 释放ObjectURL
+  if (videoPreviewUrl.value) {
+    URL.revokeObjectURL(videoPreviewUrl.value)
+  }
 })
 </script>
 
 <style scoped>
-.upload-area {
-  transition: all 0.3s ease;
-}
-
-.upload-area:hover {
-  border-color: #ec4899;
-}
-
-.upload-area.dragging {
-  border-color: #ec4899;
-  background-color: rgba(236, 72, 153, 0.05);
-}
-
-/* 进度条动画 */
-@keyframes slide {
-  0% {
-    transform: translateX(-100%) skewX(-12deg);
-  }
-  100% {
-    transform: translateX(200%) skewX(-12deg);
-  }
-}
-
-.animate-slide {
-  animation: slide 2s infinite;
-}
-
-/* 上传成功动画 */
-@keyframes checkmark {
-  0% {
-    stroke-dashoffset: 100;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-.checkmark-circle {
-  stroke-dasharray: 166;
-  stroke-dashoffset: 166;
-  animation: checkmark 0.6s ease-in-out forwards;
-}
-
-.checkmark-path {
-  stroke-dasharray: 48;
-  stroke-dashoffset: 48;
-  animation: checkmark 0.3s ease-in-out 0.3s forwards;
-}
-
-/* 脉冲动画效果 */
-@keyframes pulse {
-  0% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.4;
-  }
-  100% {
-    opacity: 0.2;
-  }
-}
-
-.animate-pulse-slow {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* 发布成功动画容器 */
+.success-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
 }
 </style>
