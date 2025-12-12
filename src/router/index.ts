@@ -10,6 +10,8 @@ import Live from '@/views/Live.vue'
 import StreamSetup from '@/views/StreamSetup.vue'
 import VideoUpload from '@/views/VideoUpload.vue'
 import VideoManage from '@/views/VideoManage.vue'
+import CreatorHome from '@/views/CreatorHome.vue'
+import CreatorLayout from '@/layouts/CreatorLayout.vue'
 import { useUserStore } from '@/stores/userStore'
 
 const router = createRouter({
@@ -72,6 +74,115 @@ const router = createRouter({
         requiresAuth: true
       }
     },
+    // 创作中心路由
+    {
+      path: '/creator',
+      name: 'creator',
+      component: CreatorLayout,
+      meta: {
+        requiresAuth: true,
+        title: '创作中心 - Vision World'
+      },
+      children: [
+        {
+          path: 'home',
+          name: 'creatorHome',
+          component: CreatorHome,
+          meta: {
+            title: '创作中心首页 - Vision World'
+          }
+        },
+        {
+          path: 'upload',
+          name: 'creatorUpload',
+          component: VideoUpload,
+          meta: {
+            title: '发布视频 - Vision World'
+          }
+        },
+        {
+          path: 'manage/videos',
+          name: 'creatorVideoManage',
+          component: VideoManage,
+          meta: {
+            title: '稿件管理 - Vision World'
+          }
+        },
+        {
+          path: 'data/overview',
+          name: 'dataOverview',
+          component: () => import('@/views/DataCenter.vue'),
+          meta: {
+            title: '数据概览 - Vision World'
+          }
+        },
+        {
+          path: 'data/content',
+          name: 'dataContent',
+          component: () => import('@/views/DataCenter.vue'),
+          meta: {
+            title: '内容数据 - Vision World'
+          }
+        },
+        {
+          path: 'data/audience',
+          name: 'dataAudience',
+          component: () => import('@/views/DataCenter.vue'),
+          meta: {
+            title: '观众分析 - Vision World'
+          }
+        },
+        {
+          path: 'earnings/overview',
+          name: 'earningsOverview',
+          component: () => import('@/views/Earnings.vue'),
+          meta: {
+            title: '收益概览 - Vision World'
+          }
+        },
+        {
+          path: 'earnings/detail',
+          name: 'earningsDetail',
+          component: () => import('@/views/Earnings.vue'),
+          meta: {
+            title: '收益明细 - Vision World'
+          }
+        },
+        {
+          path: 'earnings/withdraw',
+          name: 'earningsWithdraw',
+          component: () => import('@/views/Earnings.vue'),
+          meta: {
+            title: '提现管理 - Vision World'
+          }
+        },
+        {
+          path: 'settings/profile',
+          name: 'settingsProfile',
+          component: () => import('@/views/UserProfile.vue'),
+          meta: {
+            title: '账号资料 - Vision World'
+          }
+        },
+        {
+          path: 'settings/security',
+          name: 'settingsSecurity',
+          component: () => import('@/views/UserProfile.vue'),
+          meta: {
+            title: '安全设置 - Vision World'
+          }
+        },
+        {
+          path: 'settings/notifications',
+          name: 'settingsNotifications',
+          component: () => import('@/views/UserProfile.vue'),
+          meta: {
+            title: '通知设置 - Vision World'
+          }
+        }
+      ]
+    },
+    // 保留原有路由作为备用
     {
       path: '/upload',
       name: 'videoUpload',

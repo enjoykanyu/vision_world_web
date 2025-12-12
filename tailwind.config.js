@@ -68,11 +68,34 @@ module.exports = {
           bg: '#0A0A0A'
         },
         'bilibili': {
-          primary: '#FB7299',
-          secondary: '#00A1D6',
+          primary: '#00A1D6',    // B站主色调（蓝色）
+          primaryLight: '#40C4FF',
+          primaryDark: '#0077B6',
+          secondary: '#FB7299',  // B站辅助色（粉色）
+          pink: '#FF6B9D',
+          pinkLight: '#FF8FB1',
+          blue: '#00A1D6',
+          success: '#4CAF50',
+          warning: '#FF9800',
+          error: '#F44336',
+          info: '#2196F3',
           dark: '#161616',
           light: '#F4F4F4',
-          bg: '#1A1A1A'
+          bg: '#ffffff',
+          bgSecondary: '#F5F7FA',
+          bgTertiary: '#F0F2F5',
+          gray: {
+            50: '#fafafa',
+            100: '#f5f5f5',
+            200: '#eeeeee',
+            300: '#e0e0e0',
+            400: '#bdbdbd',
+            500: '#9e9e9e',
+            600: '#757575',
+            700: '#616161',
+            800: '#424242',
+            900: '#212121'
+          }
         },
         'xiaohongshu': {
           primary: '#FF2442',
