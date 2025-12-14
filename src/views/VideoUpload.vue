@@ -958,11 +958,33 @@ const submitVideo = async () => {
   isPublishing.value = true
   
   try {
-    // 这里可以调用实际的API提交视频
-    // const response = await videoAPI.publishVideo(uploadedVideoId.value, videoForm.value)
+    // 创建FormData对象，包含所有视频信息
+    const formData = new FormData()
+    formData.append('title', videoForm.value.title)
+    formData.append('description', videoForm.value.description)
+    formData.append('category', videoForm.value.category)
+    formData.append('video_url', videoPreviewUrl.value)
+    formData.append('video_id', uploadedVideoId.value)
+    formData.append('type', videoForm.value.type)
+    formData.append('user_id', userStore.userId.toString()) // 添加当前用户ID
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    if (videoForm.value.source) {
+      formData.append('source', videoForm.value.source)
+    }
+    
+    if (coverFile.value) {
+      formData.append('cover', coverFile.value as File)
+    } else if (coverPreview.value) {
+      formData.append('cover_url', coverPreview.value)
+    }
+    
+    // 添加tags数组
+    videoForm.value.tags.forEach(tag => {
+      formData.append('tags', tag)
+    })
+    
+    // 调用真实的发布API
+    const response = await videoAPI.publishVideo(formData)
     
     // 显示成功动画
     successVisible.value = true
