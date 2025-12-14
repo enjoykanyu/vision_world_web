@@ -10,17 +10,17 @@
     <!-- 主要内容区域 -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <!-- 投稿类型导航 -->
-      <div class="bg-white border border-gray-200 mb-6">
-        <div class="px-6 py-4 border-b border-gray-200">
+      <div class="bg-white rounded-bilibili border border-bilibili-gray-200 shadow-sm mb-6">
+        <div class="px-6 py-4 border-b border-bilibili-gray-200">
           <h1 class="text-xl font-semibold text-bilibili-primary">投稿</h1>
         </div>
         <div class="px-6 py-0">
-          <div class="flex space-x-8 border-b border-gray-200">
+          <div class="flex space-x-8 border-b border-bilibili-gray-200">
             <button class="py-3 px-1 border-b-2 border-bilibili-primary text-bilibili-primary font-medium">视频投稿</button>
-            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-bilibili-primary hover:border-bilibili-primary/50 transition-colors duration-200">短剧投稿</button>
-            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-bilibili-primary hover:border-bilibili-primary/50 transition-colors duration-200">专栏投稿</button>
-            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-bilibili-primary hover:border-bilibili-primary/50 transition-colors duration-200">互动视频投稿</button>
-            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-bilibili-primary hover:border-bilibili-primary/50 transition-colors duration-200">音频投稿</button>
+            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-bilibili-primary hover:border-bilibili-primary/50 transition-all duration-200">短剧投稿</button>
+            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-bilibili-primary hover:border-bilibili-primary/50 transition-all duration-200">专栏投稿</button>
+            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-bilibili-primary hover:border-bilibili-primary/50 transition-all duration-200">互动视频投稿</button>
+            <button class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-bilibili-primary hover:border-bilibili-primary/50 transition-all duration-200">音频投稿</button>
           </div>
         </div>
       </div>
@@ -29,38 +29,38 @@
       <div class="bg-white border border-gray-200 mb-6">
         <div class="p-6">
           <!-- 视频大小、格式、分辨率提示 -->
-          <div class="bg-white border border-gray-200 rounded-lg mb-6 p-4">
+          <div class="bg-white rounded-bilibili border border-bilibili-gray-200 mb-6 p-6 shadow-sm">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="flex items-start space-x-3">
-                <div class="w-8 h-8 bg-bilibili-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg class="w-5 h-5 text-bilibili-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-start space-x-4">
+                <div class="w-10 h-10 bg-bilibili-blue/10 rounded-bilibili flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-bilibili-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-sm font-medium text-bilibili-primary">视频大小</h3>
+                  <h3 class="text-sm font-medium text-bilibili-blue mb-1">视频大小</h3>
                   <p class="text-sm text-gray-600">视频大小1GB以内，时长10小时以内<br>粉丝数 ≥ 1000，可自动解锁6GB超大文件</p>
                 </div>
               </div>
-              <div class="flex items-start space-x-3">
-                <div class="w-8 h-8 bg-bilibili-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg class="w-5 h-5 text-bilibili-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-start space-x-4">
+                <div class="w-10 h-10 bg-bilibili-blue/10 rounded-bilibili flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-bilibili-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-sm font-medium text-bilibili-primary">视频格式</h3>
+                  <h3 class="text-sm font-medium text-bilibili-blue mb-1">视频格式</h3>
                   <p class="text-sm text-gray-600">推荐上传 MP4/MOV/MKV 格式，转码更快，过审更顺利</p>
                 </div>
               </div>
-              <div class="flex items-start space-x-3">
-                <div class="w-8 h-8 bg-bilibili-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg class="w-5 h-5 text-bilibili-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-start space-x-4">
+                <div class="w-10 h-10 bg-bilibili-blue/10 rounded-bilibili flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-bilibili-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-sm font-medium text-bilibili-primary">视频分辨率</h3>
+                  <h3 class="text-sm font-medium text-bilibili-blue mb-1">视频分辨率</h3>
                   <p class="text-sm text-gray-600">推荐分辨率：1080P、4K，高分辨率更清晰流畅</p>
                 </div>
               </div>
@@ -69,8 +69,8 @@
 
           <!-- 拖拽上传区域 -->
           <div 
-            class="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:border-bilibili-primary cursor-pointer bg-white transition-all duration-300 mb-8"
-            :class="{ 'border-bilibili-primary bg-bilibili-primary/5': isDragging }"
+            class="border-2 border-dashed border-bilibili-gray-200 rounded-bilibili p-10 text-center hover:border-bilibili-primary hover:bg-bilibili-blue/5 cursor-pointer bg-white transition-all duration-300 mb-8 shadow-sm"
+            :class="{ 'border-bilibili-primary bg-bilibili-blue/5': isDragging }"
             @drop="handleDrop"
             @dragover="handleDragOver"
             @dragleave="handleDragLeave"
@@ -85,14 +85,14 @@
             >
             
             <div v-if="!selectedFile && !uploadProgress" class="flex flex-col items-center">
-              <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6">
-                <svg class="w-12 h-12 text-bilibili-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-24 h-24 bg-bilibili-blue/10 rounded-bilibili flex items-center justify-center mb-6">
+                <svg class="w-12 h-12 text-bilibili-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                 </svg>
               </div>
               <p class="text-lg font-medium text-gray-900 mb-3">点击上传或拖拽视频到此处</p>
               <p class="text-gray-500 mb-8">支持MP4、MOV、MKV等格式，单个文件不超过2GB</p>
-              <button class="bg-bilibili-primary hover:bg-bilibili-primary/90 text-white px-8 py-3 rounded-full transition-all duration-200 font-medium">
+              <button class="bg-bilibili-primary hover:bg-bilibili-primary/90 text-white px-8 py-3 rounded-bilibili transition-all duration-200 font-medium shadow-bilibili">
                 上传视频
               </button>
             </div>
@@ -106,51 +106,78 @@
               <p class="text-lg font-medium text-gray-900 mb-2">{{ selectedFile.name }}</p>
               <p class="text-gray-500 mb-8">{{ formatFileSize(selectedFile.size) }}</p>
               <div class="flex justify-center space-x-4">
-                <button @click.stop="startUpload" class="bg-bilibili-primary hover:bg-bilibili-primary/90 text-white px-8 py-3 rounded-full transition-all duration-200 font-medium">
+                <button @click.stop="startUpload" class="bg-bilibili-primary hover:bg-bilibili-primary/90 text-white px-8 py-3 rounded-bilibili transition-all duration-200 font-medium shadow-bilibili">
                   开始上传
                 </button>
-                <button @click.stop="resetFile" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-8 py-3 rounded-full transition-all duration-200 font-medium">
+                <button @click.stop="resetFile" class="bg-white border border-bilibili-gray-200 hover:bg-bilibili-gray-50 text-gray-700 px-8 py-3 rounded-bilibili transition-all duration-200 font-medium">
                   重新选择
                 </button>
               </div>
             </div>
             
-            <div v-else-if="uploadProgress" class="w-full">
+            <div v-else-if="uploadProgress < 100" class="w-full">
               <div class="mb-6">
                 <div class="flex justify-between text-sm text-gray-600 mb-3">
                   <span>上传中...</span>
                   <span>{{ uploadProgress }}%</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div class="w-full bg-bilibili-gray-100 rounded-bilibili h-3 overflow-hidden">
                   <div 
-                    class="bg-bilibili-primary h-3 rounded-full transition-all duration-500 ease-out" 
+                    class="bg-gradient-to-r from-bilibili-blue to-bilibili-primary h-3 rounded-bilibili transition-all duration-500 ease-out" 
                     :style="{ width: uploadProgress + '%' }"
                   ></div>
                 </div>
                 <div class="mt-3 flex justify-between text-xs text-gray-500">
                   <div>
                     <span>正在上传视频文件...</span>
-                    <span v-if="uploadProgress < 100" class="ml-2">剩余时间: {{ formatRemainingTime(remainingTime) }}</span>
+                    <span class="ml-2">剩余时间: {{ formatRemainingTime(remainingTime) }}</span>
                   </div>
                   <div class="flex items-center">
-                    <span v-if="uploadProgress < 100" class="mr-2">速度: {{ formatUploadSpeed(uploadSpeed) }}</span>
-                    <span v-if="uploadProgress < 100">请勿关闭页面</span>
-                    <span v-else class="text-green-600">上传完成!</span>
+                    <span class="mr-2">速度: {{ formatUploadSpeed(uploadSpeed) }}</span>
+                    <span>请勿关闭页面</span>
                   </div>
                 </div>
               </div>
               <div class="flex items-center justify-between">
-                <button @click.stop="cancelUpload" class="text-red-600 hover:text-red-700 text-sm flex items-center transition-colors duration-200">
+                <button @click.stop="cancelUpload" class="text-red-600 hover:text-red-700 text-sm flex items-center transition-all duration-200">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
                   取消上传
                 </button>
-                <div v-if="uploadProgress === 100" class="flex items-center text-green-600">
+              </div>
+            </div>
+            
+            <div v-else-if="uploadProgress === 100" class="w-full">
+              <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-3">
+                  <span>上传完成!</span>
+                  <span>{{ uploadProgress }}%</span>
+                </div>
+                <div class="w-full bg-bilibili-gray-100 rounded-bilibili h-3 overflow-hidden">
+                  <div 
+                    class="bg-gradient-to-r from-bilibili-blue to-bilibili-primary h-3 rounded-bilibili transition-all duration-500 ease-out" 
+                    :style="{ width: uploadProgress + '%' }"
+                  ></div>
+                </div>
+                <div class="mt-3 flex justify-between text-xs text-gray-500">
+                  <div>
+                    <span>视频文件上传成功，正在处理中...</span>
+                  </div>
+                  <div class="flex items-center">
+                    <span class="text-green-600">上传完成!</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <button @click.stop="resetFile" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-bilibili transition-colors duration-200 font-medium">
+                  重新上传
+                </button>
+                <div class="flex items-center text-green-600">
                   <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <span>上传成功</span>
+                  <span>处理中...</span>
                 </div>
               </div>
             </div>
@@ -160,7 +187,7 @@
           <div v-if="uploadedVideoId" class="mb-8">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
               <div class="flex items-center space-x-4">
-                <div class="w-24 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
+                <div class="w-24 h-16 bg-bilibili-gray-100 rounded-bilibili overflow-hidden flex items-center justify-center">
                   <video 
                     :src="videoPreviewUrl" 
                     controls 
@@ -173,7 +200,7 @@
                 </div>
               </div>
               <div class="mt-4 md:mt-0">
-                <button @click="resetFile" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
+                <button @click="resetFile" class="text-sm text-bilibili-blue hover:text-bilibili-primary transition-all duration-200">
                   <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                   </svg>
@@ -195,7 +222,7 @@
               <div class="flex items-start space-x-4">
                 <div 
                   @click="triggerCoverInput"
-                  class="relative group w-40 h-28 border border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-bilibili-primary overflow-hidden bg-white transition-all duration-200"
+                  class="relative group w-40 h-28 border border-dashed border-bilibili-gray-200 rounded-bilibili flex flex-col items-center justify-center cursor-pointer hover:border-bilibili-primary hover:bg-bilibili-blue/5 overflow-hidden bg-white transition-all duration-200"
                 >
                   <input
                     ref="coverInput"
@@ -208,15 +235,15 @@
                     v-if="coverPreview" 
                     :src="coverPreview" 
                     alt="封面预览"
-                    class="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+                    class="w-full h-full object-cover rounded-bilibili transition-transform duration-300 group-hover:scale-105"
                   >
                   <div v-else class="text-center">
-                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2">
-                      <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-bilibili-blue/10 rounded-bilibili flex items-center justify-center mb-2">
+                      <svg class="w-6 h-6 text-bilibili-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                       </svg>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">点击上传封面</p>
+                    <p class="text-xs text-gray-500">点击上传封面</p>
                   </div>
                 </div>
                 <div class="flex-1">
@@ -224,14 +251,14 @@
                   <button 
                   v-if="coverPreview"
                   @click="cropCover"
-                  class="px-4 py-2 text-sm bg-bilibili-primary hover:bg-bilibili-primary/90 text-white rounded-lg mr-2 transition-colors duration-200 font-medium"
+                  class="px-4 py-2 text-sm bg-bilibili-primary hover:bg-bilibili-primary/90 text-white rounded-bilibili mr-2 transition-all duration-200 font-medium shadow-bilibili"
                 >
                   裁剪封面
                 </button>
                 <button 
                   v-if="coverPreview"
                   @click="removeCover"
-                  class="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors duration-200 font-medium"
+                  class="px-4 py-2 text-sm bg-white border border-bilibili-gray-200 hover:bg-bilibili-gray-50 text-gray-700 rounded-bilibili transition-all duration-200 font-medium"
                 >
                   移除封面
                 </button>
@@ -249,11 +276,11 @@
                 v-model="videoForm.title"
                 type="text" 
                 maxlength="80"
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 text-base transition-colors duration-200"
+                class="w-full px-4 py-3 border border-bilibili-gray-200 rounded-bilibili focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 text-base transition-all duration-200"
                 placeholder="请输入视频标题，建议包含关键词"
               >
-              <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm px-2 py-1 rounded-full" 
-                   :class="videoForm.title.length > 70 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'">
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm px-2 py-1 rounded-bilibili" 
+                   :class="videoForm.title.length > 70 ? 'bg-red-100 text-red-600' : 'bg-bilibili-gray-100 text-gray-600'">
                 {{ videoForm.title.length }}/80
               </div>
             </div>
@@ -274,11 +301,11 @@
                       value="original" 
                       class="sr-only peer"
                     >
-                    <div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-full peer-checked:border-pink-500 peer-checked:bg-pink-500 transition-all duration-200 group-hover:border-pink-300 dark:group-hover:border-pink-700">
+                    <div class="w-5 h-5 border-2 border-bilibili-gray-200 peer-checked:border-bilibili-blue peer-checked:bg-bilibili-blue transition-all duration-200 group-hover:border-bilibili-blue/70">
                       <div class="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100 transition-opacity duration-200"></div>
                     </div>
                   </div>
-                  <span class="ml-3 text-gray-700 dark:text-gray-300 text-sm transition-colors duration-200 group-hover:text-pink-600 dark:group-hover:text-pink-400">自制</span>
+                  <span class="ml-3 text-gray-700 text-sm transition-all duration-200 group-hover:text-bilibili-blue">自制</span>
                 </label>
                 <label class="flex items-center cursor-pointer group">
                   <div class="relative">
@@ -288,11 +315,11 @@
                       value="repost" 
                       class="sr-only peer"
                     >
-                    <div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-full peer-checked:border-pink-500 peer-checked:bg-pink-500 transition-all duration-200 group-hover:border-pink-300 dark:group-hover:border-pink-700">
+                    <div class="w-5 h-5 border-2 border-bilibili-gray-200 peer-checked:border-bilibili-blue peer-checked:bg-bilibili-blue transition-all duration-200 group-hover:border-bilibili-blue/70">
                       <div class="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100 transition-opacity duration-200"></div>
                     </div>
                   </div>
-                  <span class="ml-3 text-gray-700 dark:text-gray-300 text-sm transition-colors duration-200 group-hover:text-pink-600 dark:group-hover:text-pink-400">转载</span>
+                  <span class="ml-3 text-gray-700 text-sm transition-all duration-200 group-hover:text-bilibili-blue">转载</span>
                 </label>
               </div>
             </div>
@@ -310,7 +337,7 @@
             <div class="relative">
               <select 
                 v-model="videoForm.category" 
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 appearance-none text-base transition-colors duration-200"
+                class="w-full px-4 py-3 border border-bilibili-gray-200 rounded-bilibili focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 appearance-none text-base transition-all duration-200"
               >
                 <option value="">请选择分区</option>
                 <option value="game">游戏</option>
@@ -330,7 +357,7 @@
                 <option value="finance">财经</option>
               </select>
               <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-bilibili-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </div>
@@ -348,10 +375,10 @@
                 <span 
                   v-for="tag in videoForm.tags" 
                   :key="tag"
-                  class="inline-flex items-center px-3 py-1 rounded-lg text-sm bg-bilibili-primary text-white transition-colors duration-200"
+                  class="inline-flex items-center px-3 py-1 bg-bilibili-blue/10 text-bilibili-blue rounded-bilibili text-sm"
                 >
                   {{ tag }}
-                  <button @click="removeTag(tag)" class="ml-2 text-white/80 hover:text-white transition-colors duration-200">
+                  <button @click="removeTag(tag)" class="ml-2 text-bilibili-blue hover:text-bilibili-primary transition-all duration-200">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                     </svg>
@@ -386,14 +413,20 @@
               <div class="flex">
                 <div class="relative flex-1">
                   <input 
-                    v-model="newTag"
-                    type="text"
-                    maxlength="20"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 text-base transition-colors duration-200"
-                    placeholder="输入标签后按回车或点击添加"
-                    @keyup.enter="addTag"
-                  >
+                v-model="newTag"
+                type="text"
+                maxlength="20"
+                class="w-full px-4 py-3 border border-bilibili-gray-200 rounded-bilibili focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 text-base transition-all duration-200"
+                placeholder="输入标签后按回车或点击添加"
+                @keyup.enter="addTag"
+              >
                 </div>
+                <button 
+                  @click="addTag"
+                  class="ml-3 px-6 py-3 bg-bilibili-blue text-white rounded-bilibili hover:bg-bilibili-primary transition-all duration-200 font-medium shadow-bilibili"
+                >
+                  添加标签
+                </button>
               </div>
               <p v-if="formErrors.tags" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ formErrors.tags }}</p>
             </div>
@@ -408,11 +441,11 @@
                 v-model="videoForm.description"
                 rows="4"
                 maxlength="2000"
-                class="w-full px-4 py-3 pr-20 border border-gray-200 rounded-lg focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 resize-y text-base transition-colors duration-200"
+                class="w-full px-4 py-3 pr-20 border border-bilibili-gray-200 rounded-bilibili focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 resize-y text-base transition-all duration-200"
                 placeholder="填写更全面的相关信息，让更多的人能找到你的视频吧"
               ></textarea>
-              <div class="absolute right-3 bottom-3 text-sm px-2 py-1 rounded-full" 
-                   :class="videoForm.description.length > 1800 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'">
+              <div class="absolute right-3 bottom-3 text-sm px-2 py-1 rounded-bilibili" 
+                   :class="videoForm.description.length > 1800 ? 'bg-red-100 text-red-600' : 'bg-bilibili-gray-100 text-bilibili-gray-600'">
                 {{ videoForm.description.length }}/2000
               </div>
             </div>
@@ -420,20 +453,20 @@
             
             <!-- 参与话题 -->
             <div class="mb-8">
-              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+              <label class="block text-sm font-medium text-gray-900 mb-3">
                 参与话题：
               </label>
               <div class="flex flex-wrap gap-2 mb-4">
                 <button 
                   v-for="topic in popularTopics" 
                   :key="topic"
-                  class="px-3 py-1.5 rounded-full text-sm bg-bilibili-primary text-white transition-colors duration-200 hover:bg-bilibili-primary/90"
+                  class="px-3 py-1.5 rounded-bilibili text-sm bg-bilibili-blue text-white transition-all duration-200 hover:bg-bilibili-primary"
                 >
                   {{ topic }}
                   <span class="ml-1 text-xs text-white/80">（活动）</span>
                 </button>
               </div>
-              <button class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
+              <button class="text-sm text-bilibili-blue hover:text-bilibili-primary transition-all duration-200">
                 搜索更多话题 →
               </button>
             </div>
@@ -441,7 +474,7 @@
             <!-- 定时发布 -->
             <div class="mb-8">
               <div class="flex items-center justify-between mb-3">
-                <label class="block text-sm font-medium text-gray-900 dark:text-white">
+                <label class="block text-sm font-medium text-gray-900">
                   定时发布
                 </label>
                 <div class="relative inline-block w-10 mr-2 align-middle select-none">
@@ -450,35 +483,35 @@
                     type="checkbox" 
                     class="sr-only peer"
                   >
-                  <div class="block bg-gray-200 dark:bg-gray-700 w-10 h-5 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="block bg-bilibili-gray-200 w-10 h-5 rounded-bilibili peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-bilibili-gray-300 after:border after:rounded-bilibili after:h-4 after:w-4 after:transition-all peer-checked:bg-bilibili-blue"></div>
                 </div>
               </div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">
+              <div class="text-xs text-bilibili-gray-500">
                 可选择距离当前最早≥2小时/最晚≤15天的时间，火花稿件或距发布不足5分钟时不可修改/取消
               </div>
               <div class="mt-3" v-if="publishSettings.scheduled">
                 <input 
                   v-model="publishSettings.scheduledTime"
                   type="datetime-local"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 text-base transition-colors duration-200"
+                  class="w-full px-4 py-3 border border-bilibili-gray-200 rounded-bilibili focus:ring-1 focus:ring-bilibili-primary focus:border-bilibili-primary bg-white text-gray-900 text-base transition-all duration-200"
                 >
               </div>
             </div>
           </div>
           
           <!-- 发布按钮 -->
-          <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+          <div class="flex justify-end space-x-4 pt-6 border-t border-bilibili-gray-200">
             <button 
               @click="saveAsDraft"
               :disabled="isPublishing || !uploadedVideoId"
-              class="px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 rounded-lg font-medium transition-colors duration-200 disabled:opacity-60 text-base"
+              class="px-6 py-3 bg-white border border-bilibili-gray-200 hover:bg-bilibili-gray-50 disabled:bg-bilibili-gray-100 text-gray-700 rounded-bilibili font-medium transition-all duration-200 disabled:opacity-60 text-base"
             >
               存草稿
             </button>
             <button 
               @click="submitVideo"
               :disabled="!canSubmit || isPublishing"
-              class="px-6 py-3 bg-bilibili-primary hover:bg-bilibili-primary/90 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-60 text-base flex items-center justify-center"
+              class="px-6 py-3 bg-bilibili-blue hover:bg-bilibili-primary disabled:bg-bilibili-gray-300 text-white rounded-bilibili font-medium transition-all duration-200 disabled:opacity-60 text-base flex items-center justify-center shadow-bilibili"
             >
               <span v-if="isPublishing" class="mr-2 animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
               {{ isPublishing ? '投稿中...' : '立即投稿' }}
@@ -786,7 +819,7 @@ const formatUploadSpeed = (speed: number): string => {
 }
 
 // 开始上传
-const startUpload = () => {
+const startUpload = async () => {
   if (!selectedFile.value) return
   
   // 重置进度
@@ -797,52 +830,81 @@ const startUpload = () => {
   lastProgressTime.value = Date.now()
   lastProgressValue.value = 0
   
-  // 模拟上传进度
-  progressInterval = window.setInterval(() => {
-    const now = Date.now()
-    const elapsed = now - lastProgressTime.value
+  try {
+    // 创建FormData对象，仅包含视频文件和文件名（根据需求：上传仅需文件）
+    const formData = new FormData()
+    formData.append('video', selectedFile.value as File)
+    formData.append('file_name', selectedFile.value.name)
     
-    // 计算进度增量
-    const progressIncrement = Math.random() * 5
-    uploadProgress.value = Math.min(uploadProgress.value + progressIncrement, 90) // 先到90%
+    // 为兼容后端接口，添加默认值（根据需求：只有发布才需title等）
+    formData.append('title', selectedFile.value.name.replace(/\.[^/.]+$/, "")) // 使用文件名作为默认标题
+    formData.append('description', '') // 默认空描述
+    formData.append('category', '') // 默认空分类
     
-    // 计算速度
-    const progressDiff = uploadProgress.value - lastProgressValue.value
-    uploadSpeed.value = (progressDiff / elapsed) * 1000 * (selectedFile.value?.size || 1) / 1024 / 1024
+    // 调用真实的上传API
+    const response = await videoAPI.uploadVideo(formData, {
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          // 计算真实进度
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          uploadProgress.value = progress
+          
+          // 计算上传速度
+          const now = Date.now()
+          const elapsed = now - lastProgressTime.value
+          if (elapsed > 0) {
+            const bytesUploaded = progressEvent.loaded - (lastProgressValue.value / 100) * progressEvent.total
+            uploadSpeed.value = (bytesUploaded / elapsed) * 1000 / 1024 / 1024 // MB/s
+            
+            // 计算剩余时间
+            if (progress < 100 && uploadSpeed.value > 0) {
+              const remainingBytes = progressEvent.total - progressEvent.loaded
+              remainingTime.value = Math.round((remainingBytes / (uploadSpeed.value * 1024 * 1024)) * 1000 / 1000) // 秒
+            } else {
+              remainingTime.value = 0
+            }
+          }
+          
+          // 更新上次进度时间和值
+          lastProgressTime.value = now
+          lastProgressValue.value = progress
+        }
+      }
+    })
     
-    // 计算剩余时间
-    const remainingProgress = 100 - uploadProgress.value
-    if (uploadSpeed.value > 0) {
-      remainingTime.value = Math.round((remainingProgress / progressDiff) * (elapsed / 1000))
-    }
-    
-    // 更新上次进度时间和值
-    lastProgressTime.value = now
-    lastProgressValue.value = uploadProgress.value
-    
-  }, 1000) as unknown as number
-  
-  // 模拟最终完成
-  finalProgress = window.setTimeout(() => {
-    // 清除进度更新定时器
-    if (progressInterval) {
-      clearInterval(progressInterval)
-      progressInterval = null
-    }
-    
-    // 快速到100%
+    // 上传成功
     uploadProgress.value = 100
     uploadSpeed.value = 0
     remainingTime.value = 0
     
-    // 模拟上传成功
-    setTimeout(() => {
-      // 生成模拟的视频ID
+    // 处理上传成功后的逻辑
+    if (response && response.data) {
+      // 使用真实的视频ID和URL
+      uploadedVideoId.value = response.data.video_id || Math.floor(Math.random() * 1000000000).toString()
+      videoPreviewUrl.value = response.data.video_url || URL.createObjectURL(selectedFile.value as File)
+    } else {
+      // 降级处理
       uploadedVideoId.value = Math.floor(Math.random() * 1000000000).toString()
-      // 生成预览URL
       videoPreviewUrl.value = URL.createObjectURL(selectedFile.value as File)
-    }, 500)
-  }, 8000) as unknown as number
+    }
+  } catch (error) {
+    console.error('上传失败:', error)
+    alert('视频上传失败，请重试')
+    // 重置进度
+    uploadProgress.value = 0
+    uploadSpeed.value = 0
+    remainingTime.value = 0
+  } finally {
+    // 清除所有定时器
+    if (progressInterval) {
+      clearInterval(progressInterval)
+      progressInterval = null
+    }
+    if (finalProgress) {
+      clearTimeout(finalProgress)
+      finalProgress = null
+    }
+  }
 }
 
 // 取消上传

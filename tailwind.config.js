@@ -68,33 +68,46 @@ module.exports = {
           bg: '#0A0A0A'
         },
         'bilibili': {
-          primary: '#00A1D6',    // B站主色调（蓝色）
-          primaryLight: '#40C4FF',
-          primaryDark: '#0077B6',
-          secondary: '#FB7299',  // B站辅助色（粉色）
-          pink: '#FF6B9D',
-          pinkLight: '#FF8FB1',
-          blue: '#00A1D6',
-          success: '#4CAF50',
-          warning: '#FF9800',
-          error: '#F44336',
-          info: '#2196F3',
+          primary: '#00A1D6',      // 主色 - 蓝色
+          secondary: '#FB7299',    // 辅助色 - 粉色
           dark: '#161616',
-          light: '#F4F4F4',
-          bg: '#ffffff',
-          bgSecondary: '#F5F7FA',
-          bgTertiary: '#F0F2F5',
+          light: '#F4F4F4',        // 背景色
+          bg: '#F4F4F4',           // 统一背景色
+          blue: {
+            50: '#E6F4FF',
+            100: '#CCE9FF',
+            200: '#99D3FF',
+            300: '#66BDFF',
+            400: '#33A7FF',
+            500: '#00A1D6',  // 主蓝色
+            600: '#0080B3',
+            700: '#006699',
+            800: '#004D80',
+            900: '#003366'
+          },
+          pink: {
+            50: '#FFF0F5',
+            100: '#FFE4E1',
+            200: '#FFC1CC',
+            300: '#FF9EB8',
+            400: '#FF7BA3',
+            500: '#FB7299',  // 主粉色
+            600: '#E85D8A',
+            700: '#D4487B',
+            800: '#BF336B',
+            900: '#AA1E5C'
+          },
           gray: {
-            50: '#fafafa',
-            100: '#f5f5f5',
-            200: '#eeeeee',
-            300: '#e0e0e0',
-            400: '#bdbdbd',
-            500: '#9e9e9e',
-            600: '#757575',
-            700: '#616161',
-            800: '#424242',
-            900: '#212121'
+            50: '#F9FAFB',
+            100: '#F3F4F6',
+            200: '#E5E7EB',
+            300: '#D1D5DB',
+            400: '#9CA3AF',
+            500: '#6B7280',
+            600: '#4B5563',
+            700: '#374151',
+            800: '#1F2937',
+            900: '#111827'
           }
         },
         'xiaohongshu': {
@@ -110,6 +123,14 @@ module.exports = {
         'glow-lg': '0 0 40px rgba(99, 102, 241, 0.4)',
         'card': '0 10px 30px rgba(0, 0, 0, 0.1)',
         'card-lg': '0 20px 40px rgba(0, 0, 0, 0.15)',
+        // B站风格阴影
+        'bilibili': '0 2px 8px rgba(0, 161, 214, 0.15)',
+        'bilibili-lg': '0 4px 16px rgba(0, 161, 214, 0.25)',
+      },
+      borderRadius: {
+        // B站风格圆角
+        'bilibili': '8px',
+        'bilibili-lg': '12px',
       },
       backdropBlur: {
         'xs': '2px',
