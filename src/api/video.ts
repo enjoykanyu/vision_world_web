@@ -248,6 +248,69 @@ export const videoAPI = {
       total: number; 
       has_more: boolean 
     }>(`/api/video/user/published?page=${page}&page_size=${page_size}`)
+  },
+
+  /**
+   * 获取视频评论列表
+   * @param params 请求参数，包含视频ID、分页信息和排序方式
+   * @returns 评论列表
+   */
+  getVideoComments(params: { 
+    video_id: number; 
+    page?: number; 
+    page_size?: number; 
+    sort_order?: string;
+    token?: string;
+  }) {
+    const { video_id, page = 1, page_size = 10, sort_order = 'hot', token } = params
+    let url = `/api/video/comments?video_id=${video_id}&page=${page}&page_size=${page_size}&sort_order=${sort_order}`
+    if (token) {
+      url += `&token=${token}`
+    }
+    return http.get<{ 
+      status_code: number; 
+      status_msg: string; 
+      comments: any[]; 
+      total: number; 
+      has_more: boolean 
+    }>(url)
+  },
+
+  /**
+   * 发布评论
+   * @param params 请求参数，包含视频ID、评论内容和父评论ID（可选）
+   * @returns 评论结果
+   */
+  commentVideo(params: { 
+    video_id: number; 
+    content: string; 
+    parent_id?: number;
+    reply_to_user_id?: number;
+    token?: string;
+  }) {
+    return http.post<{ 
+      status_code: number; 
+      status_msg: string; 
+      comment: any 
+    }>('/api/video/comment', params)
+  },
+
+  /**
+   * 点赞/取消点赞评论
+   * @param params 请求参数，包含评论ID和操作类型
+   * @returns 操作结果
+   */
+  likeComment(params: { 
+    comment_id: number; 
+    action_type: boolean; // true为点赞，false为取消点赞
+    token?: string;
+  }) {
+    return http.post<{ 
+      status_code: number; 
+      status_msg: string; 
+      like_count: number; 
+      is_liked: boolean 
+    }>('/api/video/comment/like', params)
   }
 }
 

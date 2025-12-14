@@ -26,6 +26,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/search/:keyword',
+      name: 'searchResult',
+      component: () => import('@/views/SearchResult.vue'),
+      meta: {
+        title: '搜索结果 - Vision World'
+      }
+    },
+    {
       path: '/live',
       name: 'live',
       component: Live,

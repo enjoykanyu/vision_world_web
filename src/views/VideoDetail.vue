@@ -239,6 +239,9 @@
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ video.category }}</span>
               </div>
             </div>
+
+            <!-- 评论区 -->
+            <CommentSection :video-id="video.id" />
           </div>
 
           <!-- 右侧: 视频信息展示区域 -->
@@ -296,6 +299,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
+import CommentSection from '@/components/CommentSection.vue'
 
 // 使用store
 const userStore = {

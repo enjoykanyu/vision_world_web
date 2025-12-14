@@ -460,6 +460,66 @@ export const useVideoStore = defineStore('video', () => {
     return 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
   }
 
+  // 获取视频评论
+  async function getVideoComments(params: { 
+    videoId: number; 
+    page?: number; 
+    pageSize?: number; 
+    sortOrder?: string;
+  }): Promise<{ 
+    status_code: number; 
+    status_msg: string; 
+    comments: any[]; 
+    total: number; 
+    has_more: boolean 
+  }> {
+    const { videoId, page = 1, pageSize = 10, sortOrder = 'hot' } = params
+    const userStore = useUserStore()
+    
+    try {
+      const result = await videoAPI.getVideoComments({
+        video_id: videoId,
+        page,
+        page_size: pageSize,
+        sort_order: sortOrder,
+        token: userStore.accessToken
+      })
+      return result
+    } catch (error: any) {
+      console.error('获取评论失败:', error)
+      return { status_code: 500, status_msg: error.message || '获取评论失败', comments: [], total: 0, has_more: false }
+    }
+  }
+
+  // 发布评论
+  async function commentVideo(params: { 
+    videoId: number; 
+    content: string; 
+    parent_id?: number;
+    reply_to_user_id?: number;
+  }): Promise<{ 
+    status_code: number; 
+    status_msg: string; 
+    comment?: any 
+  }> {
+    const { videoId, content, parent_id, reply_to_user_id } = params
+    const userStore = useUserStore()
+    
+    try {
+      const result = await videoAPI.commentVideo({
+        video_id: videoId,
+        content,
+        parent_id,
+        reply_to_user_id,
+        token: userStore.accessToken
+      })
+      return result
+    } catch (error: any) {
+      console.error('发布评论失败:', error)
+      return { status_code: 500, status_msg: error.message || '发布评论失败' }
+    }
+  }
+
   return {
     // 状态
     currentVideo,
@@ -484,6 +544,8 @@ export const useVideoStore = defineStore('video', () => {
     unfollowUser,
     setCurrentVideo,
     setTestVideos,
-    clearCurrentVideo
+    clearCurrentVideo,
+    getVideoComments,
+    commentVideo
   }
 })
