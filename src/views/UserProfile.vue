@@ -110,7 +110,7 @@
     
     <!-- 登录弹窗 (样式保持不变) -->
     <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg w-96 p-6 shadow-xl" @click.stop>
+      <div class="bg-white rounded-bilibili-xl w-96 p-6 shadow-bilibili-xl" @click.stop>
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-xl font-bold text-gray-800">登录</h3>
           <button @click="closeLoginModal" class="text-gray-500 hover:text-gray-700">
@@ -122,23 +122,23 @@
         <div class="mb-6">
           <div class="mb-4">
             <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
-            <input type="tel" id="phone" v-model="loginForm.phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="请输入手机号">
+            <input type="tel" id="phone" v-model="loginForm.phone" class="w-full px-3 py-2 border border-bilibili-gray-200 rounded-bilibili-md focus:outline-none focus:ring-2 focus:ring-bilibili-primary focus:border-bilibili-primary" placeholder="请输入手机号">
           </div>
           <div class="mb-4">
             <label for="verificationCode" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
             <div class="flex space-x-3">
-              <input type="text" id="verificationCode" v-model="loginForm.code" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="请输入验证码">
+              <input type="text" id="verificationCode" v-model="loginForm.code" class="flex-1 px-3 py-2 border border-bilibili-gray-200 rounded-bilibili-md focus:outline-none focus:ring-2 focus:ring-bilibili-primary focus:border-bilibili-primary" placeholder="请输入验证码">
               <button 
                 @click="sendVerificationCode" 
                 :disabled="isSendingCode || countdown > 0"
-                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm font-medium transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-4 py-2 bg-bilibili-primary hover:bg-bilibili-primary-dark text-white rounded-bilibili-md text-sm font-medium transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {{ countdown > 0 ? `${countdown}秒后重试` : '发送验证码' }}
               </button>
             </div>
           </div>
           <div v-if="loginError" class="mb-4 text-sm text-red-500">{{ loginError }}</div>
-          <button @click="handleLogin" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-medium transition-colors duration-300">登录</button>
+          <button @click="handleLogin" class="w-full bg-bilibili-primary hover:bg-bilibili-primary-dark text-white py-2 rounded-bilibili-md font-medium transition-colors duration-300">登录</button>
         </div>
       </div>
     </div>

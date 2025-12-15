@@ -7,7 +7,7 @@
     />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden" style="height: calc(100vh - 140px);">
+      <div class="bg-white rounded-bilibili-lg shadow-bilibili-sm overflow-hidden" style="height: calc(100vh - 140px);">
         <div class="flex h-full">
           <!-- 左侧消息中心导航 -->
           <div class="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
@@ -154,7 +154,7 @@
                   v-model="searchQuery"
                   type="text"
                   placeholder="搜索联系人..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bilibili-primary focus:border-transparent text-sm"
+                  class="w-full pl-10 pr-4 py-2 border border-bilibili-gray-200 rounded-bilibili-lg focus:ring-2 focus:ring-bilibili-primary focus:border-transparent text-sm"
                 >
                 <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>

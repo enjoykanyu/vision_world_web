@@ -73,7 +73,7 @@
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
           <div v-for="video in recommendedVideos" :key="video.id"
-               class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+               class="bg-white dark:bg-gray-800 rounded-bilibili-xl overflow-hidden shadow-bilibili-md hover:shadow-bilibili-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 hover:scale-105"
                @click="handleVideoClick(video); router.push(`/video/${video.id}`)">
             <div class="relative aspect-video group">
               <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
@@ -90,8 +90,8 @@
               </div>
             </div>
             <div class="p-4">
-              <h3 class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-2 line-clamp-2 h-10">{{ video.title }}</h3>
-              <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+              <h3 class="text-sm font-medium text-bilibili-text-primary dark:text-gray-100 mb-2 line-clamp-2 h-10 hover:text-bilibili-primary transition-colors">{{ video.title }}</h3>
+              <div class="flex items-center text-xs text-bilibili-text-secondary dark:text-gray-400">
                 <span class="flex items-center">
                   <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z"/>
@@ -218,12 +218,12 @@
       <!-- 视频网格 -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6" v-if="!isMobile">
         <div v-for="video in videos" :key="video.id"
-             class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+             class="bg-white dark:bg-gray-800 rounded-bilibili-xl overflow-hidden shadow-bilibili-md hover:shadow-bilibili-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 hover:scale-105"
              @click="handleVideoClick(video); router.push(`/video/${video.id}`)">
           <div class="relative aspect-video group">
             <img :src="video.cover" :alt="video.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
             <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-md">
+            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-bilibili-sm">
               {{ video.duration }}
             </div>
             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -235,8 +235,8 @@
             </div>
           </div>
           <div class="p-4">
-            <h3 class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-2 line-clamp-2 h-10">{{ video.title }}</h3>
-            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+            <h3 class="text-sm font-medium text-bilibili-text-primary dark:text-gray-100 mb-2 line-clamp-2 h-10 hover:text-bilibili-primary transition-colors">{{ video.title }}</h3>
+            <div class="flex items-center justify-between text-xs text-bilibili-text-secondary dark:text-gray-400">
               <span class="flex items-center">
                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z"/>
