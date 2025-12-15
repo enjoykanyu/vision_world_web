@@ -56,7 +56,7 @@
           </button>
           
           <!-- 搜索框 -->
-          <div class="hidden md:block relative search-container">
+          <div v-if="showSearchBox" class="hidden md:block relative search-container">
             <div 
               class="search-input-group flex items-center bg-gray-100 dark:bg-gray-700 px-4 py-2 w-64 lg:w-72 xl:w-80 transition-all duration-300 group focus-within:ring-2 focus-within:ring-purple-600 focus-within:ring-opacity-50 focus-within:bg-white dark:focus-within:bg-gray-600 focus-within:shadow-md"
               :class="{'rounded-b-none': showSearchTrending}"
@@ -67,6 +67,7 @@
                 class="search-input bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none text-sm flex-1 transition-all duration-300 group-focus-within:placeholder-purple-400 dark:group-focus-within:placeholder-purple-300 group-focus-within:text-purple-700 dark:group-focus-within:text-purple-300"
                 @focus="showSearchTrending = true"
                 @blur="handleSearchBlur"
+                @keyup.enter="handleSearch"
                 v-model="searchQuery"
               >
               <svg 
@@ -174,7 +175,7 @@
           
           <!-- 投稿入口 -->
           <router-link 
-            to="/upload" 
+            to="/creator/upload" 
             class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center"
           >
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -410,9 +411,8 @@ const handleSearchBlur = (e: FocusEvent) => {
 // 处理搜索
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
-    console.log('搜索:', searchQuery.value)
-    // 这里可以添加实际的搜索逻辑
     showSearchTrending.value = false
+    router.push({ path: `/search/${searchQuery.value}` })
   }
 }
 
@@ -520,6 +520,10 @@ const props = defineProps({
   username: {
     type: String,
     default: ''
+  },
+  showSearchBox: {
+    type: Boolean,
+    default: true
   }
 })
 
