@@ -314,6 +314,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 import CommentSection from '@/components/CommentSection.vue'
+import { danmakuAPI } from '@/api/danmaku'
 
 // 使用store
 const userStore = {
@@ -606,33 +607,53 @@ const toggleDanmaku = () => {
 }
 
 // 发送弹幕
-const sendDanmaku = () => {
+const sendDanmaku = async () => {
   if (!newDanmakuText.value.trim() || !danmakuEnabled.value) return
 
-  // 使用轨道系统避免重叠
-  const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
-  let currentTrackIndex = 0
-  const track = danmakuTracks[currentTrackIndex]
-  currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
-  
   // 用户发送的弹幕，时间戳为当前视频时间
   const currentVideoTime = videoPlayer.value?.currentTime || 0
 
-  const newDanmaku = {
-    text: newDanmakuText.value,
-    color: danmakuColor.value,
-    top: track,
-    speed: danmakuSpeed.value === 'normal' ? 10 : danmakuSpeed.value === 'fast' ? 8 : 12,
-    timestamp: currentVideoTime,
-    visible: true,
-    translateX: 0
-  }
-  
-  danmakus.value.push(newDanmaku)
-  // 也添加到弹幕池，以便进度条跳转时能找到
-  danmakuPool.value.push(newDanmaku)
+  try {
+    // 调用API发送弹幕
+    const response = await danmakuAPI.sendDanmaku({
+      video_id: parseInt(videoId),
+      text: newDanmakuText.value,
+      color: danmakuColor.value,
+      video_timestamp: currentVideoTime,
+      speed: danmakuSpeed.value
+    })
 
-  newDanmakuText.value = ''
+    if (response.success) {
+      // 使用轨道系统避免重叠
+      const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
+      let currentTrackIndex = 0
+      const track = danmakuTracks[currentTrackIndex]
+      currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
+
+      // 创建本地弹幕对象
+      const newDanmaku = {
+        text: response.danmaku.text,
+        color: response.danmaku.color,
+        top: track,
+        speed: response.danmaku.speed === 'normal' ? 10 : response.danmaku.speed === 'fast' ? 8 : 12,
+        timestamp: response.danmaku.video_timestamp,
+        visible: true,
+        translateX: 0
+      }
+
+      // 添加到当前显示的弹幕列表
+      danmakus.value.push(newDanmaku)
+      // 也添加到弹幕池，以便进度条跳转时能找到
+      danmakuPool.value.push(newDanmaku)
+
+      // 清空输入框
+      newDanmakuText.value = ''
+    } else {
+      console.error('发送弹幕失败:', response.message)
+    }
+  } catch (error) {
+    console.error('发送弹幕出错:', error)
+  }
 }
 
 // 模拟弹幕
@@ -837,6 +858,39 @@ const fetchVideoData = async () => {
       },
       tags: ['动画', '测试', '视频'],
       category: '动画'
+    }
+
+    // 加载弹幕数据
+    try {
+      const response = await danmakuAPI.getDanmakus(parseInt(videoId))
+      if (response.danmakus) {
+        // 清空现有的弹幕池
+        danmakuPool.value = []
+        
+        // 初始化弹幕池
+        const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
+        let currentTrackIndex = 0
+
+        response.danmakus.forEach(danmaku => {
+          const track = danmakuTracks[currentTrackIndex]
+          currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
+
+          danmakuPool.value.push({
+            text: danmaku.text,
+            color: danmaku.color,
+            top: track,
+            speed: danmaku.speed === 'normal' ? 10 : danmaku.speed === 'fast' ? 8 : 12,
+            timestamp: danmaku.video_timestamp,
+            visible: false,
+            translateX: 0
+          })
+        })
+
+        // 按时间戳排序
+        danmakuPool.value.sort((a, b) => a.timestamp - b.timestamp)
+      }
+    } catch (error) {
+      console.error('加载弹幕失败:', error)
     }
   } catch (error) {
     videoError.value = true
