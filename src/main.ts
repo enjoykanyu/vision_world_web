@@ -39,16 +39,34 @@ window.addEventListener('auth-logout', () => {
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       
-      // 重定向到登录页
-      router.push('/login')
+      // 检查当前路由是否需要登录
+      const currentRoute = router.currentRoute.value
+      const requiresAuth = currentRoute.matched.some(record => record.meta?.requiresAuth)
+      
+      // 只有当前页面需要登录时，才重定向到登录页
+      if (requiresAuth) {
+        router.push('/')
+      }
     }
   } catch (error) {
     console.error('处理auth-logout事件失败:', error)
-    // 即使出错也要清除localStorage并跳转
+    // 即使出错也要清除localStorage
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
-    router.push('/login')
+    
+    // 检查当前路由是否需要登录
+    try {
+      const currentRoute = router.currentRoute.value
+      const requiresAuth = currentRoute.matched.some(record => record.meta?.requiresAuth)
+      
+      // 只有当前页面需要登录时，才重定向到登录页
+      if (requiresAuth) {
+        router.push('/')
+      }
+    } catch (routeError) {
+      console.error('处理路由重定向失败:', routeError)
+    }
   }
 })
 
