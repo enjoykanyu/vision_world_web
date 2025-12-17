@@ -78,7 +78,7 @@ request.interceptors.response.use(
         return response
       } else {
         // 处理业务错误
-        handleBusinessError(data.code, data.message)
+        handleBusinessError(data.code, data.message, response.config)
         return Promise.reject(new Error(data.message || '请求失败'))
       }
     } else {
@@ -190,19 +190,39 @@ function generateRequestId(): string {
 }
 
 // 业务错误处理
-const handleBusinessError = (code: number, message: string) => {
+const handleBusinessError = (code: number, message: string, config?: AxiosRequestConfig) => {
   console.error(`业务错误 [${code}]: ${message}`)
+  
+  // 定义不需要强制认证的公开接口
+  const publicEndpoints = [
+    '/api/videos/recommended',
+    '/api/videos/hot',
+    '/api/videos/category/',
+    '/api/videos/search',
+    '/api/videos/',
+    '/api/auth/verify-code',
+    '/api/auth/login',
+    '/api/auth/register'
+  ]
+  
+  // 检查是否是公开接口
+  const isPublicEndpoint = config && config.url && publicEndpoints.some(endpoint => 
+    config.url.includes(endpoint)
+  )
   
   // 根据错误码进行特殊处理
   switch (code) {
     case 20001: // 未登录
     case 20002: // 登录过期
-      // 清除本地token
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      
-      // 触发全局登出事件
-      window.dispatchEvent(new CustomEvent('auth-logout'))
+      // 只有非公开接口才触发登出事件
+      if (!isPublicEndpoint) {
+        // 清除本地token
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        
+        // 触发全局登出事件
+        window.dispatchEvent(new CustomEvent('auth-logout'))
+      }
       break
     default:
       // 其他业务错误可以在这里统一处理
