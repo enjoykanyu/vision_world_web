@@ -16,18 +16,28 @@
       @close="closeLoginAnimation" 
     />
     
+    <!-- 全局登录弹窗组件 -->
+    <LoginModal 
+      :visible="showLoginModal" 
+      @close="handleLoginModalClose" 
+    />
+    
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import VAssistant from './components/VAssistant.vue'
 import LoginSuccessAnimation from './components/LoginSuccessAnimation.vue'
+import LoginModal from './components/LoginModal.vue'
 import { useLoginAnimation } from '@/composables/useLoginAnimation'
 import { useUserStore } from '@/stores/userStore'
 
 const { showLoginAnimation, consecutiveLoginDays, closeLoginAnimation, triggerLoginSuccessAnimation } = useLoginAnimation()
 const userStore = useUserStore()
+
+// 登录弹窗状态
+const showLoginModal = ref(false)
 
 // 方案B：在全局监听登录成功事件，统一触发动画
 const handleLoginSuccessEvent = (e: Event) => {
@@ -40,20 +50,24 @@ const handleLoginRequired = () => {
   // 显示登录提示
   console.log('需要登录才能访问该页面')
   
-  // 如果当前在首页，直接触发登录弹窗事件
-  if (window.location.pathname === '/') {
-    window.dispatchEvent(new CustomEvent('show-login-modal'))
-  } else {
-    // 其他页面重定向到首页后显示登录弹窗
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('show-login-modal'))
-    }, 500)
-  }
+  // 显示全局登录弹窗
+  showLoginModal.value = true
+}
+
+// 处理登录弹窗关闭事件
+const handleLoginModalClose = () => {
+  showLoginModal.value = false
+}
+
+// 处理显示登录弹窗事件
+const handleShowLoginModalEvent = () => {
+  showLoginModal.value = true
 }
 
 onMounted(() => {
   window.addEventListener('login-success', handleLoginSuccessEvent as EventListener)
   window.addEventListener('show-login-required', handleLoginRequired)
+  window.addEventListener('show-login-modal', handleShowLoginModalEvent)
   
   // 注释掉mock数据初始化 - 使用真实后端
   // if (import.meta.env.DEV) {
@@ -70,6 +84,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('login-success', handleLoginSuccessEvent as EventListener)
   window.removeEventListener('show-login-required', handleLoginRequired)
+  window.removeEventListener('show-login-modal', handleShowLoginModalEvent)
 })
 // App组件逻辑
 </script>
