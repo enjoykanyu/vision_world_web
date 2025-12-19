@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-bilibili-bg-secondary dark:bg-bilibili-bg-dark text-bilibili-text-primary dark:text-bilibili-text-dark">
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     <!-- 使用公用导航头组件 -->
     <NavHeader 
       :isLoggedIn="userStore.isLoggedIn" 
@@ -7,7 +7,7 @@
       @login="handleLogin"
     ></NavHeader>
 
-    <main class="max-w-[1256px] mx-auto px-4 sm:px-6 lg:px-0 py-2">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- 视频状态容器 -->
       <div>
         <!-- 加载状态 -->
@@ -26,11 +26,11 @@
         </div>
 
         <!-- 视频内容 -->
-        <div v-else-if="video" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div v-else-if="video" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <!-- Left side: Video Player and Info -->
           <div class="lg:col-span-8">
             <!-- 视频播放器容器 -->
-            <div class="relative bg-black rounded-lg overflow-hidden shadow-lg group" id="video-container">
+            <div class="relative bg-black rounded-lg overflow-hidden shadow-2xl group" id="video-container">
               <!-- 弹幕容器 -->
               <div class="absolute inset-0 pointer-events-none" ref="danmakuContainer">
                 <div v-for="(danmaku, index) in danmakus" :key="index" 
@@ -79,16 +79,14 @@
               </div>
 
               <!-- 自定义视频控制栏 -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 opacity-0 transition-opacity duration-300 ease-in-out" :class="{ 'opacity-100': !isPlaying || showControls }" id="video-controls">
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 transition-opacity duration-300" :class="{ 'opacity-100': !isPlaying || showControls }" id="video-controls">
                 <!-- 进度条 -->
-                <div class="relative h-1.5 bg-gray-700 rounded-full mb-3 cursor-pointer group/seek" 
+                <div class="relative h-1 bg-gray-500 rounded-full mb-4 cursor-pointer" 
                      @click="seek" 
                      @mousedown="startSeeking"
                      @touchstart="startSeeking">
-                  <div class="absolute h-full bg-gray-500 rounded-full" :style="{ width: `${progress}%` }">
-                    <div class="absolute h-full bg-bilibili-pink rounded-full transition-all duration-100 ease-out" :style="{ width: `${progress}%` }"></div>
-                  </div>
-                  <div class="absolute h-4 w-4 bg-white rounded-full -mt-1.25 cursor-grab active:cursor-grabbing shadow-lg opacity-0 group-hover/seek:opacity-100 transition-opacity duration-100 ease-out" 
+                  <div class="absolute h-full bg-bilibili-primary rounded-full" :style="{ width: `${progress}%` }"></div>
+                  <div class="absolute h-3 w-3 bg-white rounded-full -mt-1 cursor-grab active:cursor-grabbing" 
                        :style="{ left: `${progress}%` }"
                        @mousedown="startSeeking"
                        @touchstart="startSeeking"></div>
@@ -96,25 +94,25 @@
 
                 <!-- 控制按钮和时间 -->
                 <div class="flex items-center justify-between text-white">
-                  <div class="flex items-center space-x-5">
-                    <button @click="togglePlay" class="hover:text-bilibili-pink transition-colors duration-200 text-xl">
+                  <div class="flex items-center space-x-4">
+                    <button @click="togglePlay" class="hover:text-bilibili-primary transition-colors text-xl">
                       <i class="fas" :class="isPlaying ? 'fa-pause' : 'fa-play'"></i>
                     </button>
                     <div class="flex items-center space-x-2">
-                      <button @click="toggleMute" class="hover:text-bilibili-pink transition-colors duration-200 text-xl">
+                      <button @click="toggleMute" class="hover:text-bilibili-primary transition-colors text-xl">
                         <i class="fas" :class="isMuted ? 'fa-volume-mute' : 'fa-volume-up'"></i>
                       </button>
-                      <input type="range" min="0" max="100" v-model="volume" class="w-20 accent-bilibili-pink" @input="setVolume">
+                      <input type="range" min="0" max="100" v-model="volume" class="w-20 accent-bilibili-primary" @input="setVolume">
                     </div>
-                    <div class="text-sm font-medium">
+                    <div class="text-sm">
                       {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
                     </div>
                   </div>
-                  <div class="flex items-center space-x-5">
-                    <button @click="toggleDanmaku" class="hover:text-bilibili-pink transition-colors duration-200 text-xl">
+                  <div class="flex items-center space-x-4">
+                    <button @click="toggleDanmaku" class="hover:text-bilibili-primary transition-colors text-xl">
                       <i class="fas" :class="danmakuEnabled ? 'fa-comment-dots' : 'fa-comment-slash'"></i>
                     </button>
-                    <button @click="toggleFullscreen" class="hover:text-bilibili-pink transition-colors duration-200 text-xl">
+                    <button @click="toggleFullscreen" class="hover:text-bilibili-primary transition-colors text-xl">
                       <i class="fas" :class="isFullscreen ? 'fa-compress' : 'fa-expand'"></i>
                     </button>
                     <!-- 播放速度 -->
@@ -122,7 +120,7 @@
                       <select
                         v-model="playbackRate"
                         @change="setPlaybackRate(playbackRate)"
-                        class="bg-black/40 backdrop-blur-sm text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-bilibili-pink"
+                        class="bg-transparent text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-bilibili-primary"
                       >
                         <option value="0.5">0.5x</option>
                         <option value="0.75">0.75x</option>
@@ -130,8 +128,6 @@
                         <option value="1.25">1.25x</option>
                         <option value="1.5">1.5x</option>
                         <option value="2">2x</option>
-                        <option value="3">3x</option>
-                        <option value="4">4x</option>
                       </select>
                     </div>
                   </div>
@@ -140,8 +136,8 @@
 
               <!-- 播放按钮覆盖层 - 只在未播放且鼠标未悬停时显示 -->
               <div v-if="!isPlaying" class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <button @click="togglePlay" class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-all duration-300 transform hover:scale-105 pointer-events-auto">
-                  <i class="fas fa-play text-4xl text-white pl-1"></i>
+                <button @click="togglePlay" class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors pointer-events-auto">
+                  <i class="fas fa-play text-4xl text-white"></i>
                 </button>
               </div>
               
@@ -162,38 +158,38 @@
             </div>
             
             <!-- 点赞、投币、收藏、转发 -->
-            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md">
               <div class="flex items-center space-x-8">
-                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="toggleLike">
-                  <i class="fas fa-thumbs-up text-xl group-hover:scale-110 transition-transform" :class="isLiked ? 'text-bilibili-pink' : ''"></i>
-                  <span class="font-medium">{{ videoStats.likeCount }}</span>
+                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-primary transition-colors" @click="toggleLike">
+                  <i class="fas fa-thumbs-up text-xl" :class="isLiked ? 'text-bilibili-primary' : ''"></i>
+                  <span>{{ videoStats.likeCount }}</span>
                 </button>
-                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="toggleCoin">
-                  <i class="fas fa-coins text-xl group-hover:scale-110 transition-transform" :class="isCoined ? 'text-bilibili-pink' : ''"></i>
-                  <span class="font-medium">{{ videoStats.coinCount }}</span>
+                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-primary transition-colors" @click="toggleCoin">
+                  <i class="fas fa-coins text-xl" :class="isCoined ? 'text-bilibili-primary' : ''"></i>
+                  <span>{{ videoStats.coinCount }}</span>
                 </button>
-                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="toggleFavorite">
-                  <i class="fas fa-bookmark text-xl group-hover:scale-110 transition-transform" :class="isFavorited ? 'text-bilibili-pink' : ''"></i>
-                  <span class="font-medium">{{ videoStats.favoriteCount }}</span>
+                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-primary transition-colors" @click="toggleFavorite">
+                  <i class="fas fa-bookmark text-xl" :class="isFavorited ? 'text-bilibili-primary' : ''"></i>
+                  <span>{{ videoStats.favoriteCount }}</span>
                 </button>
-                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="shareVideo">
-                  <i class="fas fa-share text-xl group-hover:scale-110 transition-transform"></i>
-                  <span class="font-medium">{{ videoStats.shareCount }}</span>
+                <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-primary transition-colors" @click="shareVideo">
+                  <i class="fas fa-share text-xl"></i>
+                  <span>{{ videoStats.shareCount }}</span>
                 </button>
               </div>
             </div>
             
             <!-- 正在观看人数和弹幕发送 -->
-            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-              <div class="flex items-center justify-between mb-3">
+            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md">
+              <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
                   <i class="fas fa-eye mr-1"></i> {{ videoStats.watchingCount }}人正在看，已装填{{ videoStats.danmakuCount }}条弹幕
                 </div>
                 <div class="flex items-center space-x-2">
-                  <button class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
+                  <button class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full transition-colors">
                     <i class="fas fa-shield-alt mr-1"></i> 防挡弹幕
                   </button>
-                  <button class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
+                  <button class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full transition-colors">
                     <i class="fas fa-list mr-1"></i> 弹幕列表
                   </button>
                 </div>
@@ -205,29 +201,21 @@
                   v-model="newDanmakuText"
                   @keyup.enter="sendDanmaku"
                   placeholder="发个友善的弹幕见证当下"
-                  class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-bilibili-pink dark:bg-gray-700 dark:text-white transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:border-gray-200 dark:disabled:border-gray-700"
-                  :disabled="!danmakuEnabled"
-                >
-                <!-- 弹幕颜色选择器 -->
-                <input
-                  type="color"
-                  v-model="danmakuColor"
-                  class="w-10 h-10 border border-gray-300 dark:border-gray-600 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-bilibili-pink transition-all duration-200"
+                  class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-bilibili-primary dark:bg-gray-700 dark:text-white"
                   :disabled="!danmakuEnabled"
                 >
                 <select
                   v-model="danmakuSpeed"
-                  class="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-2 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-bilibili-pink transition-all duration-200"
-                  :disabled="!danmakuEnabled"
+                  class="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-2 bg-white dark:bg-gray-700"
                 >
-                  <option value="slow">慢</option>
                   <option value="normal">正常</option>
                   <option value="fast">快</option>
+                  <option value="slow">慢</option>
                 </select>
                 <button
                   @click="sendDanmaku"
                   :disabled="!danmakuEnabled || !newDanmakuText.trim()"
-                  class="bg-bilibili-pink hover:bg-bilibili-pink-dark text-white px-4 py-2 rounded-md font-medium transition-all duration-200 disabled:bg-gray-300 dark:disabled:bg-gray-600 hover:shadow-md active:scale-95"
+                  class="bg-bilibili-primary hover:bg-bilibili-secondary text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:bg-gray-300 dark:disabled:bg-gray-600"
                 >
                   发送
                 </button>
@@ -235,22 +223,20 @@
             </div>
             
             <!-- 视频简介 -->
-            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-              <div class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
+            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md">
+              <div class="text-sm text-gray-700 dark:text-gray-300">
                 {{ video.note }}
               </div>
               <div class="mt-4 flex flex-wrap items-center">
                 <span 
                   v-for="(tag, index) in video.tags" 
                   :key="index" 
-                  class="mr-3 mb-2 px-3 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-bilibili-pink hover:text-white transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md active:scale-95"
+                  class="tag-bubble mr-3 mb-2 px-3 py-1 rounded-full text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-bilibili-primary hover:text-white transition-colors cursor-pointer"
                 >
                   {{ tag }}
                 </span>
-                <div class="flex items-center ml-auto text-xs text-gray-500 dark:text-gray-400 space-x-4">
-                  <span>{{ video.author }}</span>
-                  <span>{{ video.category }}</span>
-                </div>
+                <span class="mr-4 text-xs text-gray-500 dark:text-gray-400">{{ video.author }}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ video.category }}</span>
               </div>
             </div>
 
@@ -261,9 +247,9 @@
           <!-- 右侧: 视频信息展示区域 -->
           <div class="lg:col-span-4">
             <!-- UP主信息卡片 -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600 shadow hover:shadow-md transition-shadow duration-300">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600">
               <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-bilibili-pink to-bilibili-pink-dark rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:opacity-90 transition-opacity" @click="goToUserHome">
+                <div class="w-12 h-12 bg-gradient-to-br from-bilibili-primary to-bilibili-secondary rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:opacity-90 transition-opacity" @click="goToUserHome">
                   {{ video.author.charAt(0) }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -271,10 +257,10 @@
                   <p class="text-sm text-gray-500 dark:text-gray-400">{{ video.authorStats.followerCount }}粉丝</p>
                 </div>
                 <div class="flex space-x-2">
-                  <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow active:scale-95">
+                  <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-envelope"></i>
                   </button>
-                  <button class="bg-bilibili-pink hover:bg-bilibili-pink-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md active:scale-95">
+                  <button class="bg-bilibili-primary hover:bg-bilibili-secondary text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                     + 关注
                   </button>
                 </div>
@@ -282,22 +268,22 @@
             </div>
             
             <!-- 相关视频 -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600 shadow hover:shadow-md transition-shadow duration-300">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
               <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">相关视频</h3>
               <div class="space-y-4">
-                <div v-for="relatedVideo in relatedVideos" :key="relatedVideo.id" class="flex space-x-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-all duration-200 hover:-translate-y-1 hover:shadow-sm">
-                  <div class="relative flex-shrink-0 w-32 h-20 rounded-md overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                    <img :src="relatedVideo.poster" alt="{{ relatedVideo.title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
-                    <span class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 rounded-md">
+                <div v-for="relatedVideo in relatedVideos" :key="relatedVideo.id" class="flex space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+                  <div class="relative flex-shrink-0 w-32 h-20 rounded overflow-hidden">
+                    <img :src="relatedVideo.poster" alt="{{ relatedVideo.title }}" class="w-full h-full object-cover">
+                    <span class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 rounded">
                       {{ relatedVideo.duration }}
                     </span>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 hover:text-bilibili-pink transition-colors">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
                       {{ relatedVideo.title }}
                     </h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 hover:text-bilibili-pink transition-colors">{{ relatedVideo.author }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 hover:text-bilibili-pink transition-colors">{{ relatedVideo.viewCount }} 播放</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ relatedVideo.author }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ relatedVideo.viewCount }} 播放</p>
                   </div>
                 </div>
               </div>
@@ -311,14 +297,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 import CommentSection from '@/components/CommentSection.vue'
-import { danmakuAPI } from '@/api/danmaku'
-import { useUserStore } from '@/stores/userStore'
 
 // 使用store
-const userStore = useUserStore()
+const userStore = {
+  isLoggedIn: false,
+  username: ''
+}
 
 // 响应式数据
 const video = ref<any>(null)
@@ -331,9 +318,8 @@ const playbackRate = ref(1)
 
 // 路由
 const route = useRoute()
+const router = useRouter()
 const videoId = route.params.id as string
-
-
 
 // 弹幕相关状态
 // 弹幕池 - 存储所有预生成的弹幕
@@ -394,6 +380,12 @@ const relatedVideos = ref([
   { id: 4, title: '【凡人逛天商】险中求荣！韩立遇...', author: '测试作者', viewCount: '2.1万', duration: '00:33', poster: 'https://picsum.photos/320/180?random=4' },
   { id: 5, title: '【凡人动画】2025-2026国创发布会PV', author: '测试作者', viewCount: '9.8千', duration: '01:10', poster: 'https://picsum.photos/320/180?random=5' },
 ])
+
+// 方法
+const handleLogin = () => {
+  // 登录处理逻辑
+  console.log('登录处理')
+}
 
 // 播放器初始化
 const initPlayer = () => {
@@ -601,60 +593,33 @@ const toggleDanmaku = () => {
 }
 
 // 发送弹幕
-const sendDanmaku = async () => {
+const sendDanmaku = () => {
   if (!newDanmakuText.value.trim() || !danmakuEnabled.value) return
 
-  // 检查用户是否已登录
-  if (!userStore.isAuthenticated) {
-    // 未登录，触发登录弹窗
-    window.dispatchEvent(new CustomEvent('show-login-modal'))
-    return
-  }
-
+  // 使用轨道系统避免重叠
+  const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
+  let currentTrackIndex = 0
+  const track = danmakuTracks[currentTrackIndex]
+  currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
+  
   // 用户发送的弹幕，时间戳为当前视频时间
   const currentVideoTime = videoPlayer.value?.currentTime || 0
 
-  try {
-    // 调用API发送弹幕
-    const response = await danmakuAPI.sendDanmaku({
-      video_id: parseInt(videoId),
-      text: newDanmakuText.value,
-      color: danmakuColor.value,
-      video_timestamp: currentVideoTime,
-      speed: danmakuSpeed.value
-    })
-
-    if (response.success) {
-      // 使用轨道系统避免重叠
-      const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
-      let currentTrackIndex = 0
-      const track = danmakuTracks[currentTrackIndex]
-      currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
-
-      // 创建本地弹幕对象
-      const newDanmaku = {
-        text: response.danmaku.text,
-        color: response.danmaku.color,
-        top: track,
-        speed: response.danmaku.speed === 'normal' ? 10 : response.danmaku.speed === 'fast' ? 8 : 12,
-        timestamp: response.danmaku.video_timestamp,
-        visible: true,
-        translateX: 0
-      }
-
-      // 添加到当前显示的弹幕列表
-      danmakus.value.push(newDanmaku)
-      // 也添加到弹幕池，以便进度条跳转时能找到
-      danmakuPool.value.push(newDanmaku)
-
-      // 清空输入框
-      newDanmakuText.value = ''
-    } else {
-      console.error('发送弹幕失败:', response.message)
-    }
-  } catch (error) {
-    console.error('发送弹幕出错:', error)
+  const newDanmaku = {
+    text: newDanmakuText.value,
+    color: danmakuColor.value,
+    top: track,
+    speed: danmakuSpeed.value === 'normal' ? 10 : danmakuSpeed.value === 'fast' ? 8 : 12,
+    timestamp: currentVideoTime,
+    visible: true,
+    translateX: 0
   }
+  
+  danmakus.value.push(newDanmaku)
+  // 也添加到弹幕池，以便进度条跳转时能找到
+  danmakuPool.value.push(newDanmaku)
+
+  newDanmakuText.value = ''
 }
 
 // 模拟弹幕
@@ -768,8 +733,9 @@ const onMouseLeave = () => {
 
 // 跳转到用户主页
 const goToUserHome = () => {
-  console.log('跳转到用户主页')
-  // 实际应用中应该使用router.push或window.location.href
+  if (video.value && video.value.authorId) {
+    router.push(`/user/${video.value.authorId}`)
+  }
 }
 
 // 点赞功能
@@ -854,44 +820,12 @@ const fetchVideoData = async () => {
       likeCount: '856',
       duration: '00:30',
       author: '测试下作者',
+      authorId: '1', // 添加authorId属性
       authorStats: {
         followerCount: '10.5万'
       },
       tags: ['动画', '测试', '视频'],
       category: '动画'
-    }
-
-    // 加载弹幕数据
-    try {
-      const response = await danmakuAPI.getDanmakus(parseInt(videoId))
-      if (response.danmakus) {
-        // 清空现有的弹幕池
-        danmakuPool.value = []
-        
-        // 初始化弹幕池
-        const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
-        let currentTrackIndex = 0
-
-        response.danmakus.forEach(danmaku => {
-          const track = danmakuTracks[currentTrackIndex]
-          currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
-
-          danmakuPool.value.push({
-            text: danmaku.text,
-            color: danmaku.color,
-            top: track,
-            speed: danmaku.speed === 'normal' ? 10 : danmaku.speed === 'fast' ? 8 : 12,
-            timestamp: danmaku.video_timestamp,
-            visible: false,
-            translateX: 0
-          })
-        })
-
-        // 按时间戳排序
-        danmakuPool.value.sort((a, b) => a.timestamp - b.timestamp)
-      }
-    } catch (error) {
-      console.error('加载弹幕失败:', error)
     }
   } catch (error) {
     videoError.value = true
@@ -1095,47 +1029,32 @@ onMounted(() => {
 <style scoped>
 /* B站品牌色彩变量 */
 :root {
-  /* 主色调 */
   --bilibili-pink: #FB7299;
   --bilibili-pink-light: #FF85A2;
-  --bilibili-pink-dark: #F25D8E;
-  /* 辅助色 */
   --bilibili-blue: #00A1D6;
   --bilibili-blue-light: #26B8E9;
-  --bilibili-blue-dark: #0084B7;
-  /* 灰色系统 */
   --bilibili-gray: #9499A0;
   --bilibili-gray-light: #C9CCD0;
-  --bilibili-gray-dark: #61666D;
-  --bilibili-gray-extra-light: #E0E0E0;
-  --bilibili-gray-extra-dark: #2C2D30;
-  /* 背景色 */
   --bilibili-bg-primary: #FFFFFF;
   --bilibili-bg-secondary: #F6F7F8;
   --bilibili-bg-tertiary: #F1F2F3;
-  --bilibili-bg-dark: #18191C;
-  /* 文字颜色 */
   --bilibili-text-primary: #18191C;
   --bilibili-text-secondary: #61666D;
   --bilibili-text-tertiary: #9499A0;
-  --bilibili-text-dark: #F5F5F5;
-  --bilibili-text-dark-secondary: #C9CCD0;
-  --bilibili-text-dark-tertiary: #9499A0;
-  /* 边框颜色 */
-  --bilibili-border: #E0E0E0;
-  --bilibili-border-dark: #2C2D30;
-  /* 阴影 */
-  --bilibili-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --bilibili-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
-  /* 圆角 */
-  --bilibili-radius: 8px;
-  --bilibili-radius-sm: 4px;
-  --bilibili-radius-lg: 12px;
-  /* 过渡 */
-  --bilibili-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 弹幕样式 */
+.danmaku-item {
+  font-size: 20px;
+  line-height: 1.2;
+  white-space: nowrap;
+  position: absolute;
+  z-index: 10;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  will-change: transform;
+}
+
 .danmaku-container {
   position: absolute;
   inset: 0;
@@ -1157,58 +1076,10 @@ onMounted(() => {
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
 }
 
-/* 点赞投币收藏按钮动画 */
-@keyframes btnClick {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes likePop {
-  0% {
-    transform: scale(1);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0;
-  }
-}
-
-/* 平滑滚动效果 */
-html {
-  scroll-behavior: smooth;
-}
-
 /* 响应式调整 */
 @media (max-width: 1024px) {
-  /* 调整网格布局 */
-  #video-container + .grid {
+  .grid-cols-12 {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  /* 调整视频播放器高度 */
-  #video-container {
-    aspect-ratio: 16 / 9;
-  }
-  
-  /* 调整互动按钮布局 */
-  .space-x-8 {
-    flex-wrap: wrap;
-    justify-content: space-around;
-    gap: 1rem;
   }
 }
 
@@ -1225,65 +1096,5 @@ html {
 
 ::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.1);
-}
-
-/* 页面加载动画 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 为所有卡片添加进入动画 */
-.bg-white.rounded-lg {
-  animation: fadeIn 0.3s ease-out;
-}
-
-/* 点赞投币收藏按钮点击动画 */
-button:active {
-  animation: btnClick 0.2s ease-out;
-}
-
-/* 弹幕发送成功反馈 */
-@keyframes danmakuSendSuccess {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.1);
-    opacity: 0;
-  }
-}
-
-/* 视频卡片悬停效果增强 */
-.cursor-pointer:hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* 按钮点击效果 */
-button:active {
-  transform: scale(0.95);
-  transition: transform 0.1s ease-out;
-}
-
-/* 控制栏进度条悬停效果 */
-.group\/seek:hover .absolute.h-full.bg-gray-500 {
-  height: 100%;
-}
-
-/* 弹幕动画 */
-@keyframes danmakuSlide {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(-100%);
-  }
 }
 </style>
