@@ -80,11 +80,23 @@
 
               <!-- 用户头像和关注按钮 -->
               <div class="absolute top-4 left-4 flex items-center space-x-2">
-                <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {{ video?.author?.charAt(0) || 'U' }}
+                <div 
+                  class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold overflow-hidden shadow-md" 
+                  :class="{'bg-bilibili-pink bg-gradient-to-br from-bilibili-pink to-bilibili-pink-dark': !video.authorAvatar}"
+                >
+                  <img 
+                    v-if="video.authorAvatar" 
+                    :src="video.authorAvatar" 
+                    alt="作者头像" 
+                    class="w-full h-full object-cover"
+                  >
+                  <span v-else>{{ video.author?.charAt(0) || 'U' }}</span>
                 </div>
-                <button class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 py-1 rounded-md text-sm font-medium transition-all duration-200">
-                  + 关注
+                <button 
+                  class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 py-1 rounded-md text-sm font-medium transition-all duration-200"
+                  @click="toggleFollow"
+                >
+                  {{ video.isFollowed ? '已关注' : '+ 关注' }}
                 </button>
               </div>
 
@@ -300,8 +312,18 @@
             <!-- UP主信息卡片 -->
             <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600 shadow hover:shadow-md transition-shadow duration-300">
               <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-bilibili-pink to-bilibili-pink-dark rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:opacity-90 transition-opacity" @click="goToUserHome">
-                  {{ video.author.charAt(0) }}
+                <div 
+                  class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold overflow-hidden shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                  :class="{'bg-bilibili-pink bg-gradient-to-br from-bilibili-pink to-bilibili-pink-dark': !video.authorAvatar}"
+                  @click="goToUserHome"
+                >
+                  <img 
+                    v-if="video.authorAvatar" 
+                    :src="video.authorAvatar" 
+                    alt="作者头像" 
+                    class="w-full h-full object-cover"
+                  >
+                  <span v-else>{{ video.author.charAt(0) }}</span>
                 </div>
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-gray-900 dark:text-white truncate">{{ video.author }}</h3>
@@ -311,8 +333,11 @@
                   <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow active:scale-95">
                     <i class="fas fa-envelope"></i>
                   </button>
-                  <button class="bg-bilibili-pink hover:bg-bilibili-pink-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md active:scale-95">
-                    + 关注
+                  <button 
+                    class="bg-bilibili-pink hover:bg-bilibili-pink-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md active:scale-95"
+                    @click="toggleFollow"
+                  >
+                    {{ video.isFollowed ? '已关注' : '+ 关注' }}
                   </button>
                 </div>
               </div>
@@ -353,6 +378,7 @@ import NavHeader from '@/components/NavHeader.vue'
 import CommentSection from '@/components/CommentSection.vue'
 import { danmakuAPI } from '@/api/danmaku'
 import { useUserStore } from '@/stores/userStore'
+import { videoAPI } from '@/api/video'
 
 // 使用store
 const userStore = useUserStore()
@@ -453,6 +479,54 @@ const formatTime = (timeInSeconds: number) => {
   const minutes = Math.floor(timeInSeconds / 60)
   const seconds = Math.floor(timeInSeconds % 60)
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+}
+
+// 格式化视频时长（秒转换为 HH:MM:SS 或 MM:SS）
+const formatDuration = (seconds: number) => {
+  if (!seconds || isNaN(seconds)) {
+    return '00:00'
+  }
+  
+  const hours = Math.floor(seconds / 3600)
+  const mins = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+  
+  if (hours > 0) {
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+  
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+}
+
+// 切换关注状态
+const toggleFollow = async () => {
+  if (!video.value || !videoAuthor.value.id) return
+  
+  try {
+    if (video.value.isFollowed) {
+      // 取消关注
+      await videoAPI.unfollowUser(videoAuthor.value.id)
+    } else {
+      // 关注
+      await videoAPI.followUser(videoAuthor.value.id)
+    }
+    
+    // 更新本地状态
+  video.value.isFollowed = !video.value.isFollowed
+  
+  // 更新关注数
+  if (video.value.isFollowed) {
+    // 增加关注数
+    videoAuthor.value.followerCount++
+    video.value.authorStats.followerCount++
+  } else {
+    // 减少关注数
+    videoAuthor.value.followerCount--
+    video.value.authorStats.followerCount--
+  }
+  } catch (error) {
+    console.error('关注操作失败:', error)
+  }
 }
 
 // 切换静音状态
@@ -876,26 +950,38 @@ const fetchVideoData = async () => {
   currentVideoSourceIndex.value = 0 // 重置视频源索引
   
   try {
-    // 模拟API调用
-    // 实际应用中应该调用真实的API获取视频数据
+    // 调用真实的视频详情API
     console.log(`获取视频ID: ${videoId}的数据`)
     
-    // 使用真实的视频文件
+    const response = await videoAPI.getVideoDetail(videoId)
+    const videoData = response.data.data.video
+    
+    // 转换API数据为本地组件使用的格式
     video.value = {
-      id: videoId,
-      title: '这里是测试下视频标题',
-      src: '/videos/sample.mp4', // 使用真实的视频文件
-      poster: 'https://picsum.photos/seed/video123/800/450.jpg',
-      note: '这里是测试下视频的简介简介简介',
-      viewCount: '1.2万',
-      likeCount: '856',
-      duration: '00:30',
-      author: '测试下作者',
+      id: videoData.video_id,
+      title: videoData.title,
+      src: videoData.quality_options?.[0]?.url || videoData.video_url,
+      poster: videoData.cover_url,
+      note: videoData.description,
+      viewCount: videoData.view_count.toString(),
+      likeCount: videoData.like_count.toString(),
+      duration: formatDuration(videoData.duration),
+      author: videoData.author?.username || '未知作者',
+      authorAvatar: videoData.author?.avatar || '',
       authorStats: {
-        followerCount: '10.5万'
+        followerCount: videoData.author?.follower_count || 0
       },
-      tags: ['动画', '测试', '视频'],
-      category: '动画'
+      tags: videoData.tags || [],
+      category: videoData.category || '',
+      isFollowed: videoData.is_followed || false
+    }
+    
+    // 更新视频作者信息
+    videoAuthor.value = {
+      id: videoData.author?.user_id || '1',
+      name: videoData.author?.username || '未知作者',
+      avatar: videoData.author?.avatar || '',
+      followerCount: videoData.author?.follower_count || 0
     }
 
     // 加载弹幕数据

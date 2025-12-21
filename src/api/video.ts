@@ -125,7 +125,7 @@ export const videoAPI = {
     }
     
     const queryString = params.toString()
-    const url = queryString ? `/videos/${videoId}?${queryString}` : `/videos/${videoId}`
+    const url = queryString ? `/video/${videoId}?${queryString}` : `/video/${videoId}`
     
     return http.get<{ data: { video: VideoDetail; related_videos?: ApiVideo[] } }>(`/api${url}`)
   },
