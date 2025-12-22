@@ -462,7 +462,7 @@ export const useVideoStore = defineStore('video', () => {
 
   // 获取视频评论
   async function getVideoComments(params: { 
-    videoId: number; 
+    videoId: string; 
     page?: number; 
     pageSize?: number; 
     sortOrder?: string;
@@ -481,8 +481,7 @@ export const useVideoStore = defineStore('video', () => {
         video_id: videoId,
         page,
         page_size: pageSize,
-        sort_order: sortOrder,
-        token: userStore.accessToken
+        sort_order: sortOrder
       })
       return result
     } catch (error: any) {
@@ -493,7 +492,7 @@ export const useVideoStore = defineStore('video', () => {
 
   // 发布评论
   async function commentVideo(params: { 
-    videoId: number; 
+    videoId: string; 
     content: string; 
     parent_id?: number;
     reply_to_user_id?: number;
@@ -510,8 +509,7 @@ export const useVideoStore = defineStore('video', () => {
         video_id: videoId,
         content,
         parent_id,
-        reply_to_user_id,
-        token: userStore.accessToken
+        reply_to_user_id
       })
       return result
     } catch (error: any) {

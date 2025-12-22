@@ -47,6 +47,7 @@ export interface VideoDetail extends ApiVideo {
     url: string
     size: number
   }>
+  total_size?: number // 视频总大小（字节）
 }
 
 // 分页信息接口
@@ -128,6 +129,22 @@ export const videoAPI = {
     const url = queryString ? `/video/${videoId}?${queryString}` : `/video/${videoId}`
     
     return http.get<{ data: { video: VideoDetail; related_videos?: ApiVideo[] } }>(`/api${url}`)
+  },
+
+  /**
+   * 获取视频分片
+   * @param videoId 视频ID
+   * @param start 起始字节
+   * @param end 结束字节
+   * @returns 视频分片数据
+   */
+  getVideoChunk(videoId: string, start: number, end: number) {
+    return http.get(`/api/video/${videoId}/chunk`, {
+      headers: {
+        Range: `bytes=${start}-${end}`
+      },
+      responseType: 'arraybuffer'
+    })
   },
 
   /**
@@ -256,17 +273,13 @@ export const videoAPI = {
    * @returns 评论列表
    */
   getVideoComments(params: { 
-    video_id: number; 
+    video_id: string; 
     page?: number; 
     page_size?: number; 
     sort_order?: string;
-    token?: string;
   }) {
-    const { video_id, page = 1, page_size = 10, sort_order = 'hot', token } = params
-    let url = `/api/video/comments?video_id=${video_id}&page=${page}&page_size=${page_size}&sort_order=${sort_order}`
-    if (token) {
-      url += `&token=${token}`
-    }
+    const { video_id, page = 1, page_size = 10, sort_order = 'hot' } = params
+    const url = `/api/video/comments?video_id=${video_id}&page=${page}&page_size=${page_size}&sort_order=${sort_order}`
     return http.get<{ 
       status_code: number; 
       status_msg: string; 
@@ -282,11 +295,10 @@ export const videoAPI = {
    * @returns 评论结果
    */
   commentVideo(params: { 
-    video_id: number; 
+    video_id: string; 
     content: string; 
     parent_id?: number;
     reply_to_user_id?: number;
-    token?: string;
   }) {
     return http.post<{ 
       status_code: number; 
@@ -303,7 +315,6 @@ export const videoAPI = {
   likeComment(params: { 
     comment_id: number; 
     action_type: boolean; // true为点赞，false为取消点赞
-    token?: string;
   }) {
     return http.post<{ 
       status_code: number; 

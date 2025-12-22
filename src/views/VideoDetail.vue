@@ -410,6 +410,26 @@ const danmakuColor = ref('#FFFFFF')
 const danmakuSpeed = ref('normal')
 const danmakuDensity = ref('normal') // low, normal, high
 
+// 修复视频URL中的重复路径问题
+const cleanVideoUrl = (url: string): string => {
+  if (!url) return url
+  
+  console.log('原始URL:', url)
+  
+  try {
+    // 只修复重复的 /videos/videos/ 路径，不进行其他修改
+    // 注意：不能修改URL的其他部分，特别是查询参数中的签名
+    const cleanedUrl = url.replace(/\/videos\/videos\//g, '/videos/')
+    console.log('修复重复路径后:', cleanedUrl)
+    
+    return cleanedUrl
+  } catch (error) {
+    console.error('URL处理错误:', error)
+    // 如果处理失败，返回原始URL
+    return url
+  }
+}
+
 // 视频控制状态
 const isPlaying = ref(false)
 const isMuted = ref(false) // 默认不静音
@@ -728,7 +748,7 @@ const sendDanmaku = async () => {
   try {
     // 调用API发送弹幕
     const response = await danmakuAPI.sendDanmaku({
-      video_id: parseInt(videoId),
+      video_id: videoId,
       text: newDanmakuText.value,
       color: danmakuColor.value,
       video_timestamp: currentVideoTime,
@@ -957,10 +977,16 @@ const fetchVideoData = async () => {
     const videoData = response.data.data.video
     
     // 转换API数据为本地组件使用的格式
+    const rawVideoUrl = videoData.quality_options?.[0]?.url || videoData.video_url
+    console.log('原始视频URL:', rawVideoUrl)
+    
+    const cleanedVideoUrl = cleanVideoUrl(rawVideoUrl)
+    console.log('修复后的视频URL:', cleanedVideoUrl)
+    
     video.value = {
       id: videoData.video_id,
       title: videoData.title,
-      src: videoData.quality_options?.[0]?.url || videoData.video_url,
+      src: cleanedVideoUrl,
       poster: videoData.cover_url,
       note: videoData.description,
       viewCount: videoData.view_count.toString(),
@@ -986,7 +1012,7 @@ const fetchVideoData = async () => {
 
     // 加载弹幕数据
     try {
-      const response = await danmakuAPI.getDanmakus(parseInt(videoId))
+      const response = await danmakuAPI.getDanmakus(videoId)
       if (response.danmakus) {
         // 清空现有的弹幕池
         danmakuPool.value = []
@@ -1015,10 +1041,11 @@ const fetchVideoData = async () => {
       }
     } catch (error) {
       console.error('加载弹幕失败:', error)
+      // 弹幕加载失败不影响视频播放，继续执行
     }
-  } catch (error) {
+  } catch (error: any) {
     videoError.value = true
-    errorMessage.value = '视频加载失败，请稍后重试'
+    errorMessage.value = error.message || '视频加载失败，请稍后重试'
     console.error('视频加载错误:', error)
   } finally {
     loading.value = false

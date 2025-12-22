@@ -4,7 +4,7 @@
     <NavHeader 
       :isLoggedIn="userStore.isLoggedIn" 
       :username="userStore.username" 
-      @login="window.dispatchEvent(new CustomEvent('show-login-modal'))"
+      @login="handleLogin"
       @toggleDarkMode="toggleDarkMode"
     />
 
@@ -423,6 +423,12 @@ const handleUserIconClick = () => {
 // 从事件显示登录弹窗
 const showLoginModalFromEvent = () => {
   // 触发全局登录弹窗显示事件
+  window.dispatchEvent(new CustomEvent('show-login-modal'))
+}
+
+// 处理登录事件
+const handleLogin = () => {
+  // 直接触发全局登录弹窗显示事件
   window.dispatchEvent(new CustomEvent('show-login-modal'))
 }
 

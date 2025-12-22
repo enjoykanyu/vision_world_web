@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import { authAPI } from '@/api/auth'
+import { useUserStore } from '@/stores/userStore'
 
 // API基础配置
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://visionworld.com/v1'
@@ -53,8 +54,9 @@ request.interceptors.request.use(
     config.headers = config.headers || {}
     config.headers['X-Request-ID'] = generateRequestId()
     
-    // 添加认证token - 优先从localStorage获取，确保与userStore的同步
-    const token = localStorage.getItem('access_token')
+    // 添加认证token - 从userStore获取，确保与应用状态同步
+    const userStore = useUserStore()
+    const token = userStore.accessToken || localStorage.getItem('access_token')
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
     }
@@ -333,7 +335,7 @@ export const verifyToken = async (token: string) => {
 // 导出token刷新方法，供其他组件使用
 export const refreshToken = async (refreshToken: string) => {
   try {
-    return await authAPI.directRefreshToken(refreshToken)
+    return await authAPI.refreshToken(refreshToken)
   } catch (error) {
     console.error('Token刷新失败:', error)
     throw error

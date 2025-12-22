@@ -185,7 +185,7 @@
           </router-link>
           
           <!-- 登录按钮或用户头像 -->
-          <template v-if="userStore.isLoggedIn">
+          <template v-if="isLoggedIn">
             <!-- 已登录：显示用户头像 -->
             <div class="relative">
               <div 
@@ -194,7 +194,7 @@
                 @mouseenter="showUserDropdown = true"
                 @mouseleave="handleUserDropdownLeave"
               >
-                <span class="text-white text-sm font-semibold">{{ (userStore.username || 'U').charAt(0).toUpperCase() }}</span>
+                <span class="text-white text-sm font-semibold">{{ (username || 'U').charAt(0).toUpperCase() }}</span>
               </div>
               
               <!-- B站风格用户信息悬浮弹窗 -->
@@ -216,15 +216,8 @@
                     </div>
                     <div class="flex items-center space-x-3">
                       <div class="relative w-14 h-14 overflow-hidden rounded-full border-2 border-white/30 shadow-lg">
-                          <img 
-                            v-if="userStore.avatar" 
-                            :src="userStore.avatar" 
-                            alt="用户头像"
-                            class="w-full h-full object-cover"
-                            @error="handleDropdownAvatarError"
-                          >
-                          <div v-else class="w-full h-full bg-white/20 flex items-center justify-center text-lg font-bold">
-                            {{ (userStore.username || 'U').charAt(0).toUpperCase() }}
+                          <div class="w-full h-full bg-white/20 flex items-center justify-center text-lg font-bold">
+                            {{ (username || 'U').charAt(0).toUpperCase() }}
                           </div>
                         <!-- 官方认证标识 -->
                         <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
@@ -238,10 +231,10 @@
                       </div>
                       <div class="flex-1">
                         <div class="font-semibold text-base flex items-center gap-2">
-                          {{ userStore.username || '用户' }}
-                          <span class="px-2 py-0.5 bg-yellow-400/20 text-yellow-300 text-xs rounded-full border border-yellow-400/30">Lv.{{ userStore.user?.level || 1 }}</span>
+                          {{ username || '用户' }}
+                          <span class="px-2 py-0.5 bg-yellow-400/20 text-yellow-300 text-xs rounded-full border border-yellow-400/30">Lv.1</span>
                         </div>
-                        <p class="text-blue-100 text-sm font-mono">#{{ (userStore.userId || '12345678').toString().padStart(8,'0') }}</p>
+                        <p class="text-blue-100 text-sm font-mono">#12345678</p>
                       </div>
                     </div>
                     
@@ -265,7 +258,7 @@
                   <!-- 功能菜单 -->
                   <div class="py-2">
                     <router-link 
-                      :to="`/user/${userStore.userId || '12345678'}`"
+                      to="/user/12345678"
                       class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 border-l-3 border-transparent hover:border-purple-500 transition-all duration-300 group"
                       @click="closeDropdown"
                     >
@@ -352,7 +345,7 @@
             <!-- 未登录：显示登录按钮 -->
             <button 
               class="bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-purple-600 dark:text-purple-400 px-4 py-2 rounded-full text-sm font-medium border border-purple-200 dark:border-purple-800 shadow-sm hover:shadow-md transition-all duration-300"
-              @click="handleUserIconClick"
+              @click="emit('login')"
             >
               登录
             </button>
@@ -457,22 +450,25 @@ const closeDropdown = () => {
 
 // 退出登录
 const handleLogout = async () => {
-  try {
-    // 调用退出登录API
-    await userStore.logout()
-    
-    // 隐藏弹窗
-    showUserDropdown.value = false
-    
-    // 跳转到首页
-    router.push('/')
-    
-  } catch (error) {
-    console.error('退出登录失败:', error)
-    
-    // 即使API调用失败，也清除前端状态
-    showUserDropdown.value = false
-    router.push('/')
+  // 显示确认退出弹窗
+  if (confirm('确定要退出登录吗？')) {
+    try {
+      // 调用退出登录API
+      await userStore.logout()
+      
+      // 隐藏弹窗
+      showUserDropdown.value = false
+      
+      // 跳转到首页
+      router.push('/')
+      
+    } catch (error) {
+      console.error('退出登录失败:', error)
+      
+      // 即使API调用失败，也清除前端状态
+      showUserDropdown.value = false
+      router.push('/')
+    }
   }
 }
 
