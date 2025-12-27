@@ -16,7 +16,8 @@ export interface LoginRequest {
 // 用户登录响应数据接口
 export interface LoginResponse {
   user: UserInfo
-  token: ""
+  token: string
+  refresh_token?: string
 }
 
 // 用户信息接口
