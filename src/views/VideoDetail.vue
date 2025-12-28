@@ -391,6 +391,7 @@ const errorMessage = ref('')
 const videoPlayer = ref<HTMLVideoElement | null>(null)
 const currentVideoSourceIndex = ref(0)
 const playbackRate = ref(1)
+const videoQuality = ref('720p')
 
 // 路由
 const route = useRoute()
@@ -426,6 +427,17 @@ const cleanVideoUrl = (url: string): string => {
         const hlsPath = url.split('/hls/')[1] || 'index.m3u8'
         const cleanedUrl = `/api/video/${videoId}/stream/${hlsPath}`
         console.log('HLS流URL转换为:', cleanedUrl)
+        return cleanedUrl
+      }
+    }
+    
+    // 检查是否包含 /play/stream/ 路径，转换为正确的API网关格式
+    if (url.includes('/play/stream/')) {
+      const match = url.match(/\/play\/stream\/(\d+)/)
+      if (match) {
+        const videoId = match[1]
+        const cleanedUrl = `/api/video/${videoId}/stream/index.m3u8`
+        console.log('转换play/stream URL为:', cleanedUrl)
         return cleanedUrl
       }
     }
@@ -593,6 +605,44 @@ const setPlaybackRate = (rate: number) => {
   }
   playbackRate.value = rate
   console.log('播放速度设置为:', rate)
+}
+
+// 设置视频质量
+const setVideoQuality = (quality: string) => {
+  console.log('设置视频质量:', quality)
+  videoQuality.value = quality
+  
+  // 如果视频有多个质量选项，切换到对应的质量
+  if (video.value && video.value.quality_options && video.value.quality_options.length > 0) {
+    const qualityOption = video.value.quality_options.find((opt: any) => 
+      opt.quality === quality || opt.label === quality
+    )
+    
+    if (qualityOption && qualityOption.url) {
+      const currentTime = videoPlayer.value?.currentTime || 0
+      const wasPlaying = !videoPlayer.value?.paused
+      
+      // 更新视频源
+      video.value.src = cleanVideoUrl(qualityOption.url)
+      
+      // 重新加载视频
+      if (videoPlayer.value) {
+        videoPlayer.value.load()
+        
+        // 恢复播放位置
+        videoPlayer.value.currentTime = currentTime
+        
+        // 如果之前在播放，恢复播放
+        if (wasPlaying) {
+          videoPlayer.value.play().catch(err => {
+            console.error('切换画质后播放失败:', err)
+          })
+        }
+      }
+      
+      console.log('已切换到画质:', quality)
+    }
+  }
 }
 
 // 跳转播放位置
@@ -1000,7 +1050,7 @@ const fetchVideoData = async () => {
         id: videoId,
         title: '视频加载中...',
         src: cleanedFallbackUrl,
-        poster: 'https://via.placeholder.com/640x360/4F46E5/FFFFFF?text=Loading...',
+        poster: 'https://picsum.photos/640/360?random=' + videoId,
         note: response.data.message || '正在使用备用视频源播放',
         viewCount: '0',
         likeCount: '0',
@@ -1176,8 +1226,14 @@ const handleVideoError = (event: Event) => {
       if (videoPlayer.value) {
         // 尝试重新加载视频
         videoPlayer.value.load()
+        // 尝试静音播放以避免浏览器阻止自动播放
+        videoPlayer.value.muted = true
+        isMuted.value = true
         videoPlayer.value.play().catch(err => {
           console.error('自动播放失败:', err)
+          // 如果静音播放也失败，尝试普通播放
+          videoPlayer.value.muted = false
+          isMuted.value = false
         })
       }
     }, 1000)
