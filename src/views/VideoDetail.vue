@@ -417,6 +417,19 @@ const cleanVideoUrl = (url: string): string => {
   console.log('原始URL:', url)
   
   try {
+    // 检查是否为HLS流URL，如果是则转换为API网关格式
+    if (url.includes('.m3u8') || url.includes('hls/')) {
+      // 提取视频ID并构建正确的HLS流URL
+      const videoIdMatch = url.match(/(\d+)\/hls\//)
+      if (videoIdMatch) {
+        const videoId = videoIdMatch[1]
+        const hlsPath = url.split('/hls/')[1] || 'index.m3u8'
+        const cleanedUrl = `/api/video/${videoId}/stream/${hlsPath}`
+        console.log('HLS流URL转换为:', cleanedUrl)
+        return cleanedUrl
+      }
+    }
+    
     // 只修复重复的 /videos/videos/ 路径，不进行其他修改
     // 注意：不能修改URL的其他部分，特别是查询参数中的签名
     const cleanedUrl = url.replace(/\/videos\/videos\//g, '/videos/')
@@ -974,6 +987,50 @@ const fetchVideoData = async () => {
     console.log(`获取视频ID: ${videoId}的数据`)
     
     const response = await videoAPI.getVideoDetail(videoId)
+    
+    // 检查是否有降级响应
+    if (response.data.fallback_url) {
+      console.log('API返回降级URL:', response.data.fallback_url)
+      // 使用降级URL作为视频源
+      const cleanedFallbackUrl = cleanVideoUrl(response.data.fallback_url)
+      console.log('使用降级视频URL:', cleanedFallbackUrl)
+      
+      // 创建简化的视频数据
+      video.value = {
+        id: videoId,
+        title: '视频加载中...',
+        src: cleanedFallbackUrl,
+        poster: 'https://via.placeholder.com/640x360/4F46E5/FFFFFF?text=Loading...',
+        note: response.data.message || '正在使用备用视频源播放',
+        viewCount: '0',
+        likeCount: '0',
+        duration: '00:00',
+        author: '系统',
+        authorAvatar: '',
+        authorStats: { followerCount: 0 },
+        tags: [],
+        category: '',
+        isFollowed: false
+      }
+      
+      // 加载基础视频信息
+      try {
+        const basicInfoResponse = await videoAPI.getVideoDetail(videoId)
+        if (basicInfoResponse.data.data.video) {
+          const basicVideo = basicInfoResponse.data.data.video
+          video.value.title = basicVideo.title || '未知标题'
+          video.value.poster = basicVideo.cover_url || video.value.poster
+          video.value.note = basicVideo.description || video.value.note
+          video.value.author = basicVideo.author?.username || '未知作者'
+          video.value.authorAvatar = basicVideo.author?.avatar || ''
+        }
+      } catch (infoError) {
+        console.warn('获取基础视频信息失败:', infoError)
+      }
+      
+      return
+    }
+    
     const videoData = response.data.data.video
     
     // 转换API数据为本地组件使用的格式
@@ -982,6 +1039,15 @@ const fetchVideoData = async () => {
     
     const cleanedVideoUrl = cleanVideoUrl(rawVideoUrl)
     console.log('修复后的视频URL:', cleanedVideoUrl)
+    
+    // 清理所有质量选项的URL
+    if (videoData.quality_options && videoData.quality_options.length > 0) {
+      videoData.quality_options.forEach((option: any, index: number) => {
+        if (option.url) {
+          videoData.quality_options[index].url = cleanVideoUrl(option.url)
+        }
+      })
+    }
     
     video.value = {
       id: videoData.video_id,
@@ -1047,6 +1113,13 @@ const fetchVideoData = async () => {
     videoError.value = true
     errorMessage.value = error.message || '视频加载失败，请稍后重试'
     console.error('视频加载错误:', error)
+    
+    // 检查是否有降级选项
+    if (error.response?.data?.fallback_url) {
+      console.log('检测到降级URL:', error.response.data.fallback_url)
+      // 可以尝试使用降级URL
+      errorMessage.value = error.response.data.message || '正在使用备用视频源...'
+    }
   } finally {
     loading.value = false
   }
@@ -1088,21 +1161,81 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
-// 处理视频加载错误（现在为模拟播放，错误处理简化）
+// 处理视频加载错误
 const handleVideoError = (event: Event) => {
-  console.log('视频元素错误（模拟播放模式）:', event)
-  // 在模拟播放模式下，不需要处理视频加载错误
+  console.log('视频元素错误:', event)
+  videoLoadError.value = true
+  
+  // 尝试切换到备用视频源
+  if (currentVideoSourceIndex.value < 2) { // 最多尝试3个源
+    currentVideoSourceIndex.value++
+    console.log(`尝试切换到备用视频源 ${currentVideoSourceIndex.value}`)
+    
+    // 延迟重试，给浏览器时间处理错误
+    setTimeout(() => {
+      if (videoPlayer.value) {
+        // 尝试重新加载视频
+        videoPlayer.value.load()
+        videoPlayer.value.play().catch(err => {
+          console.error('自动播放失败:', err)
+        })
+      }
+    }, 1000)
+  } else {
+    errorMessage.value = '视频加载失败，请稍后重试'
+  }
 }
 
-// 重试加载视频（模拟播放模式下简化处理）
+// 重试加载视频
 const retryLoadVideo = () => {
   videoLoadError.value = false
-  console.log('模拟播放模式下，重试功能已简化')
+  errorMessage.value = ''
+  
+  if (videoPlayer.value) {
+    // 重置视频源索引
+    currentVideoSourceIndex.value = 0
+    
+    // 重新加载视频
+    videoPlayer.value.load()
+    
+    // 尝试播放
+    videoPlayer.value.play().catch(err => {
+      console.error('重试播放失败:', err)
+      videoLoadError.value = true
+      errorMessage.value = '视频加载失败，请检查网络连接'
+    })
+  }
 }
 
-// 尝试下一个视频源（模拟播放模式下简化处理）
+// 尝试下一个视频源
 const tryNextVideoSource = () => {
-  console.log('模拟播放模式下，无需切换视频源')
+  if (video.value && video.value.quality_options && currentVideoSourceIndex.value < video.value.quality_options.length - 1) {
+    currentVideoSourceIndex.value++
+    const nextSource = video.value.quality_options[currentVideoSourceIndex.value]
+    
+    if (nextSource && nextSource.url) {
+      console.log(`切换到视频源 ${currentVideoSourceIndex.value}:`, nextSource.quality)
+      
+      // 更新视频源
+      const cleanedUrl = cleanVideoUrl(nextSource.url)
+      video.value.src = cleanedUrl
+      
+      // 重置错误状态
+      videoLoadError.value = false
+      errorMessage.value = ''
+      
+      // 重新加载视频
+      if (videoPlayer.value) {
+        videoPlayer.value.load()
+        videoPlayer.value.play().catch(err => {
+          console.error('切换视频源后播放失败:', err)
+        })
+      }
+    }
+  } else {
+    console.log('没有更多可用的视频源')
+    errorMessage.value = '所有视频源都不可用，请稍后重试'
+  }
 }
 
 // 视频加载状态处理
