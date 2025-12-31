@@ -102,23 +102,26 @@ export const useUserStore = defineStore('user', () => {
       // 调用登录API
       const response = await authAPI.login(deviceInfo)
       console.log('登录API响应:', response)
+      console.log('响应数据结构:', JSON.stringify(response, null, 2))
       
-      // 检查响应数据结构
+      // 检查响应数据结构 - 处理不同的响应格式
       if (!response || !response.data) {
         throw new Error('登录响应数据格式错误')
       }
       
-      const loginDataRes = response.data.data
+      // 尝试不同的响应结构
+      let loginDataRes = response.data.data || response.data
+      
       if (!loginDataRes) {
-        throw new Error('登录响应数据缺少data字段')
+        throw new Error('登录响应数据缺少data字段。实际结构: ' + JSON.stringify(response.data))
       }
       
       if (!loginDataRes.user) {
-        throw new Error('登录响应数据缺少用户信息')
+        throw new Error('登录响应数据缺少用户信息。实际结构: ' + JSON.stringify(loginDataRes))
       }
       
       if (!loginDataRes.token) {
-        throw new Error('登录响应数据缺少token信息')
+        throw new Error('登录响应数据缺少token信息。实际结构: ' + JSON.stringify(loginDataRes))
       }
       
       // 保存用户信息
@@ -227,7 +230,8 @@ export const useUserStore = defineStore('user', () => {
     
     try {
       const response = await authAPI.verifyToken(accessToken.value)
-      if (response.data.status_code === 0) {
+      const verifyData = response.data.data
+      if (verifyData.status_code === 0) {
         // Token有效，获取用户信息
         return await fetchUserInfo()
       } else {
