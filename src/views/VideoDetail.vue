@@ -41,9 +41,8 @@
               </div>
 
               <!-- 视频元素 -->
-              <video 
+              <video
                 ref="videoPlayer"
-                :src="video.src"
                 :poster="video.poster"
                 class="w-full h-full object-cover"
                 @timeupdate="onTimeUpdate"
@@ -131,7 +130,7 @@
                     <div class="flex items-center space-x-2">
                       <select
                         v-model="videoQuality"
-                        @change="setVideoQuality"
+                        @change="(e: Event) => setVideoQuality((e.target as HTMLSelectElement).value)"
                         class="bg-black/40 backdrop-blur-sm text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
                       >
                         <option value="1080p">1080P 高清</option>
@@ -158,7 +157,7 @@
                       </select>
                     </div>
                     <!-- 字幕 -->
-                    <button @click="toggleSubtitle" class="hover:text-red-500 transition-colors duration-200 text-xl">
+                    <button @click="() => {}" class="hover:text-red-500 transition-colors duration-200 text-xl">
                       <i class="fas fa-closed-captioning"></i>
                     </button>
                     <!-- 音量 -->
@@ -168,11 +167,11 @@
                       </button>
                     </div>
                     <!-- 设置 -->
-                    <button @click="toggleSettings" class="hover:text-red-500 transition-colors duration-200 text-xl">
+                    <button @click="() => {}" class="hover:text-red-500 transition-colors duration-200 text-xl">
                       <i class="fas fa-cog"></i>
                     </button>
                     <!-- 网页全屏 -->
-                    <button @click="toggleWebFullscreen" class="hover:text-red-500 transition-colors duration-200 text-xl">
+                    <button @click="toggleFullscreen" class="hover:text-red-500 transition-colors duration-200 text-xl">
                       <i class="fas fa-expand"></i>
                     </button>
                     <!-- 全屏 -->
@@ -180,7 +179,7 @@
                       <i class="fas fa-expand"></i>
                     </button>
                     <!-- 核按钮 -->
-                    <button @click="toggleNuclearMode" class="hover:text-red-500 transition-colors duration-200 text-xl">
+                    <button @click="() => {}" class="hover:text-red-500 transition-colors duration-200 text-xl">
                       <i class="fas fa-radiation-alt text-red-500"></i>
                     </button>
                   </div>
@@ -372,13 +371,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 import CommentSection from '@/components/CommentSection.vue'
 import { danmakuAPI } from '@/api/danmaku'
 import { useUserStore } from '@/stores/userStore'
 import { videoAPI } from '@/api/video'
+import Hls from 'hls.js'
 
 // 使用store
 const userStore = useUserStore()
@@ -392,6 +392,7 @@ const videoPlayer = ref<HTMLVideoElement | null>(null)
 const currentVideoSourceIndex = ref(0)
 const playbackRate = ref(1)
 const videoQuality = ref('720p')
+const hlsInstance = ref<Hls | null>(null)
 
 // 路由
 const route = useRoute()
@@ -503,6 +504,98 @@ const relatedVideos = ref([
   { id: 5, title: '【凡人动画】2025-2026国创发布会PV', author: '测试作者', viewCount: '9.8千', duration: '01:10', poster: 'https://picsum.photos/320/180?random=5' },
 ])
 
+// 初始化HLS播放器
+const initHLSPlayer = (videoUrl: string) => {
+  if (!videoPlayer.value) {
+    console.error('Video player element not found')
+    return
+  }
+
+  // 清理旧的HLS实例
+  if (hlsInstance.value) {
+    hlsInstance.value.destroy()
+    hlsInstance.value = null
+  }
+
+  // 检查是否是HLS流
+  if (Hls.isSupported() && (videoUrl.includes('.m3u8') || videoUrl.includes('stream/'))) {
+    console.log('Initializing HLS player for URL:', videoUrl)
+
+    // 创建HLS实例
+    const hls = new Hls({
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 90,
+      maxBufferLength: 30,
+      maxMaxBufferLength: 60,
+      manifestLoadingTimeOut: 10000,
+      manifestLoadingMaxRetry: 3,
+      levelLoadingTimeOut: 10000,
+      levelLoadingMaxRetry: 3,
+      fragLoadingTimeOut: 20000,
+      fragLoadingMaxRetry: 6,
+    })
+
+    // 加载视频源
+    hls.loadSource(videoUrl)
+    hls.attachMedia(videoPlayer.value)
+
+    // 错误处理
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      console.error('HLS error:', event, data)
+      if (data.fatal) {
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            console.error('Network error, trying to recover...')
+            hls.startLoad()
+            break
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            console.error('Media error, trying to recover...')
+            hls.recoverMediaError()
+            break
+          default:
+            console.error('Fatal error, cannot recover')
+            hls.destroy()
+            break
+        }
+      }
+    })
+
+    // 监听HLS事件
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      console.log('HLS manifest parsed, levels available:', hls.levels)
+      // 自动选择最佳质量
+      if (hls.levels.length > 0) {
+        const currentLevel = hls.currentLevel
+        console.log('Current HLS level:', currentLevel, 'Available levels:', hls.levels.length)
+      }
+    })
+
+    hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+      console.log('HLS level switched:', data)
+      const level = hls.levels[data.level]
+      if (level) {
+        console.log('New quality:', level.height, 'p', 'Bitrate:', level.bitrate)
+      }
+    })
+
+    hlsInstance.value = hls
+  } else {
+    // 浏览器原生支持HLS或不使用HLS
+    console.log('Using native video player for URL:', videoUrl)
+    videoPlayer.value.src = videoUrl
+  }
+}
+
+// 清理HLS实例
+const cleanupHLS = () => {
+  if (hlsInstance.value) {
+    console.log('Cleaning up HLS instance')
+    hlsInstance.value.destroy()
+    hlsInstance.value = null
+  }
+}
+
 // 播放器初始化
 const initPlayer = () => {
   if (videoPlayer.value) {
@@ -558,16 +651,24 @@ const toggleFollow = async () => {
     
     // 更新本地状态
   video.value.isFollowed = !video.value.isFollowed
-  
+
   // 更新关注数
   if (video.value.isFollowed) {
     // 增加关注数
-    videoAuthor.value.followerCount++
-    video.value.authorStats.followerCount++
+    videoAuthor.value.followerCount = (typeof videoAuthor.value.followerCount === 'string'
+      ? parseInt(videoAuthor.value.followerCount)
+      : videoAuthor.value.followerCount) + 1
+    video.value.authorStats.followerCount = (typeof video.value.authorStats.followerCount === 'string'
+      ? parseInt(video.value.authorStats.followerCount)
+      : video.value.authorStats.followerCount) + 1
   } else {
     // 减少关注数
-    videoAuthor.value.followerCount--
-    video.value.authorStats.followerCount--
+    videoAuthor.value.followerCount = (typeof videoAuthor.value.followerCount === 'string'
+      ? parseInt(videoAuthor.value.followerCount)
+      : videoAuthor.value.followerCount) - 1
+    video.value.authorStats.followerCount = (typeof video.value.authorStats.followerCount === 'string'
+      ? parseInt(video.value.authorStats.followerCount)
+      : video.value.authorStats.followerCount) - 1
   }
   } catch (error) {
     console.error('关注操作失败:', error)
@@ -611,36 +712,81 @@ const setPlaybackRate = (rate: number) => {
 const setVideoQuality = (quality: string) => {
   console.log('设置视频质量:', quality)
   videoQuality.value = quality
-  
-  // 如果视频有多个质量选项，切换到对应的质量
-  if (video.value && video.value.quality_options && video.value.quality_options.length > 0) {
-    const qualityOption = video.value.quality_options.find((opt: any) => 
-      opt.quality === quality || opt.label === quality
-    )
-    
-    if (qualityOption && qualityOption.url) {
+
+  // 如果使用HLS播放器,切换HLS质量级别
+  if (hlsInstance.value) {
+    const levels = hlsInstance.value.levels
+    if (!levels || levels.length === 0) {
+      console.warn('No HLS levels available')
+      return
+    }
+
+    // 根据质量名称查找对应的HLS级别
+    let targetLevel = -1 // -1表示自动选择
+    for (let i = 0; i < levels.length; i++) {
+      const level = levels[i]
+      const levelHeight = level.height
+      const qualityHeight = parseInt(quality.replace('p', ''))
+
+      if (levelHeight === qualityHeight) {
+        targetLevel = i
+        console.log(`Found matching level: ${i}, height: ${levelHeight}p, bitrate: ${level.bitrate}`)
+        break
+      }
+    }
+
+    if (targetLevel !== -1) {
+      // 切换到指定质量
       const currentTime = videoPlayer.value?.currentTime || 0
       const wasPlaying = !videoPlayer.value?.paused
-      
-      // 更新视频源
-      video.value.src = cleanVideoUrl(qualityOption.url)
-      
-      // 重新加载视频
+
+      hlsInstance.value.currentLevel = targetLevel
+      console.log(`Switched to HLS level ${targetLevel} (${quality})`)
+
+      // 恢复播放位置和状态
       if (videoPlayer.value) {
-        videoPlayer.value.load()
-        
-        // 恢复播放位置
         videoPlayer.value.currentTime = currentTime
-        
-        // 如果之前在播放，恢复播放
         if (wasPlaying) {
           videoPlayer.value.play().catch(err => {
-            console.error('切换画质后播放失败:', err)
+            console.error('Failed to resume playback after quality switch:', err)
           })
         }
       }
-      
-      console.log('已切换到画质:', quality)
+    } else {
+      console.warn(`Quality ${quality} not found in HLS levels, using auto`)
+      hlsInstance.value.currentLevel = -1 // 自动选择
+    }
+  } else {
+    // 如果视频有多个质量选项，切换到对应的质量
+    if (video.value && video.value.quality_options && video.value.quality_options.length > 0) {
+      const qualityOption = video.value.quality_options.find((opt: any) =>
+        opt.quality === quality || opt.label === quality
+      )
+
+      if (qualityOption && qualityOption.url) {
+        const currentTime = videoPlayer.value?.currentTime || 0
+        const wasPlaying = !videoPlayer.value?.paused
+
+        // 更新视频源
+        video.value.src = cleanVideoUrl(qualityOption.url)
+
+        // 重新加载视频
+        if (videoPlayer.value) {
+          videoPlayer.value.load()
+
+          // 恢复播放位置
+          videoPlayer.value.currentTime = currentTime
+
+          // 如果之前在播放，恢复播放
+          if (wasPlaying) {
+            videoPlayer.value.play().catch(err => {
+              console.error('切换画质后播放失败:', err)
+            })
+          }
+        }
+
+        console.log('已切换到画质:', quality)
+      }
     }
   }
 }
@@ -1039,10 +1185,10 @@ const fetchVideoData = async () => {
     const response = await videoAPI.getVideoDetail(videoId)
     
     // 检查是否有降级响应
-    if (response.data.fallback_url) {
-      console.log('API返回降级URL:', response.data.fallback_url)
+    if (response.data && 'fallback_url' in response.data) {
+      console.log('API返回降级URL:', (response.data as any).fallback_url)
       // 使用降级URL作为视频源
-      const cleanedFallbackUrl = cleanVideoUrl(response.data.fallback_url)
+      const cleanedFallbackUrl = cleanVideoUrl((response.data as any).fallback_url)
       console.log('使用降级视频URL:', cleanedFallbackUrl)
       
       // 创建简化的视频数据
@@ -1066,8 +1212,8 @@ const fetchVideoData = async () => {
       // 加载基础视频信息
       try {
         const basicInfoResponse = await videoAPI.getVideoDetail(videoId)
-        if (basicInfoResponse.data.data.video) {
-          const basicVideo = basicInfoResponse.data.data.video
+        if (basicInfoResponse.data && basicInfoResponse.data.data && (basicInfoResponse.data.data as any).video) {
+          const basicVideo = (basicInfoResponse.data.data as any).video
           video.value.title = basicVideo.title || '未知标题'
           video.value.poster = basicVideo.cover_url || video.value.poster
           video.value.note = basicVideo.description || video.value.note
@@ -1117,6 +1263,10 @@ const fetchVideoData = async () => {
       category: videoData.category || '',
       isFollowed: videoData.is_followed || false
     }
+
+    // 使用nextTick确保video元素已渲染,然后初始化HLS播放器
+    await nextTick()
+    initHLSPlayer(cleanedVideoUrl)
     
     // 更新视频作者信息
     videoAuthor.value = {
@@ -1433,6 +1583,8 @@ onMounted(() => {
     if (controlsTimeout) {
       clearTimeout(controlsTimeout)
     }
+    // 清理HLS实例
+    cleanupHLS()
   })
 })
 </script>
