@@ -77,6 +77,47 @@
                 </div>
               </div>
 
+              <!-- 加载进度指示器 -->
+              <div v-if="loading && !videoLoadError" class="absolute inset-0 flex items-center justify-center bg-black/50">
+                <div class="text-center text-white">
+                  <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
+                  <p class="text-sm">视频加载中... {{ loadingProgress.toFixed(0) }}%</p>
+                  <div class="w-64 h-2 bg-gray-700 rounded-full mt-2 overflow-hidden">
+                    <div 
+                      class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+                      :style="{ width: `${loadingProgress}%` }"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 缓冲区健康度指示器 -->
+              <div v-if="!loading && !videoLoadError && isPlaying" class="absolute top-4 right-4 flex items-center space-x-2 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2">
+                <div class="flex items-center space-x-1">
+                  <i 
+                    class="fas fa-signal text-xs"
+                    :class="{
+                      'text-green-400': bufferHealth > 70,
+                      'text-yellow-400': bufferHealth > 30 && bufferHealth <= 70,
+                      'text-red-400': bufferHealth <= 30
+                    }"
+                  ></i>
+                  <span class="text-xs text-white">{{ bufferHealth.toFixed(0) }}%</span>
+                </div>
+                <div class="w-px h-4 bg-gray-600"></div>
+                <div class="flex items-center space-x-1">
+                  <i 
+                    class="fas fa-tachometer-alt text-xs"
+                    :class="{
+                      'text-green-400': networkQuality === 'good',
+                      'text-yellow-400': networkQuality === 'fair',
+                      'text-red-400': networkQuality === 'poor'
+                    }"
+                  ></i>
+                  <span class="text-xs text-white">{{ (currentBandwidth / 1000).toFixed(0) }}kbps</span>
+                </div>
+              </div>
+
               <!-- 用户头像和关注按钮 -->
               <div class="absolute top-4 left-4 flex items-center space-x-2">
                 <div 
@@ -133,11 +174,31 @@
                         @change="(e: Event) => setVideoQuality((e.target as HTMLSelectElement).value)"
                         class="bg-black/40 backdrop-blur-sm text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
                       >
+                        <option value="auto">自动</option>
                         <option value="1080p">1080P 高清</option>
                         <option value="720p">720P 高清</option>
                         <option value="480p">480P 清晰</option>
                         <option value="360p">360P 流畅</option>
                       </select>
+                      <!-- 网络质量指示器 -->
+                      <div 
+                        class="flex items-center space-x-1 text-xs"
+                        :class="{
+                          'text-green-400': networkQuality === 'good',
+                          'text-yellow-400': networkQuality === 'fair',
+                          'text-red-400': networkQuality === 'poor'
+                        }"
+                      >
+                        <i 
+                          class="fas fa-signal"
+                          :class="{
+                            'text-green-400': networkQuality === 'good',
+                            'text-yellow-400': networkQuality === 'fair',
+                            'text-red-400': networkQuality === 'poor'
+                          }"
+                        ></i>
+                        <span>{{ networkQuality === 'good' ? '良好' : networkQuality === 'fair' ? '一般' : '较差' }}</span>
+                      </div>
                     </div>
                     <!-- 播放速度 -->
                     <div class="playback-speed flex items-center space-x-2">
@@ -186,8 +247,8 @@
                 </div>
               </div>
 
-              <!-- 播放按钮覆盖层 - 只在未播放且鼠标未悬停时显示 -->
-              <div v-if="!isPlaying" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <!-- 播放按钮覆盖层 - 只在未播放且视频已就绪时显示 -->
+              <div v-if="!isPlaying && videoReady" class="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <button @click="togglePlay" class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-all duration-300 transform hover:scale-105 pointer-events-auto">
                   <i class="fas fa-play text-4xl text-white pl-1"></i>
                 </button>
@@ -389,10 +450,18 @@ const loading = ref(true)
 const videoError = ref(false)
 const errorMessage = ref('')
 const videoPlayer = ref<HTMLVideoElement | null>(null)
+const videoReady = ref(false) // 视频元素是否就绪
 const currentVideoSourceIndex = ref(0)
+const fallbackVideoUrl = ref('') // 降级视频URL
 const playbackRate = ref(1)
 const videoQuality = ref('720p')
 const hlsInstance = ref<Hls | null>(null)
+const isPlayLocked = ref(false)
+const networkQuality = ref<'good' | 'fair' | 'poor'>('good')
+const currentBandwidth = ref(0)
+const bufferHealth = ref(100)
+const loadingProgress = ref(0)
+const autoQuality = ref(true) // 播放锁，防止 rapid play/pause
 
 // 路由
 const route = useRoute()
@@ -456,6 +525,27 @@ const cleanVideoUrl = (url: string): string => {
   }
 }
 
+// 验证封面URL是否有效
+const isValidCoverUrl = (url: string): boolean => {
+  if (!url || url.trim() === '') return false
+  
+  // 检查是否是无效的默认封面URL
+  if (url.includes('default-cover-url.com')) return false
+  
+  // 检查是否是有效的HTTP/HTTPS URL
+  try {
+    const urlObj = new URL(url)
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+// 获取默认封面URL
+const getDefaultCoverUrl = (videoId: string): string => {
+  return `https://picsum.photos/640/360?random=${videoId}`
+}
+
 // 视频控制状态
 const isPlaying = ref(false)
 const isMuted = ref(false) // 默认不静音
@@ -504,10 +594,21 @@ const relatedVideos = ref([
   { id: 5, title: '【凡人动画】2025-2026国创发布会PV', author: '测试作者', viewCount: '9.8千', duration: '01:10', poster: 'https://picsum.photos/320/180?random=5' },
 ])
 
-// 初始化HLS播放器
-const initHLSPlayer = (videoUrl: string) => {
+// 初始化HLS播放器（优化版）
+const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
+  const maxRetries = 5
+  const retryDelay = 100
+
   if (!videoPlayer.value) {
-    console.error('Video player element not found')
+    console.error(`Video player element not found (attempt ${retryCount + 1}/${maxRetries})`)
+    if (retryCount < maxRetries) {
+      console.log(`Retrying in ${retryDelay}ms...`)
+      await new Promise(resolve => setTimeout(resolve, retryDelay))
+      return initHLSPlayer(videoUrl, retryCount + 1)
+    }
+    console.error('Max retries reached, giving up')
+    videoLoadError.value = true
+    errorMessage.value = '视频播放器初始化失败，请刷新页面重试'
     return
   }
 
@@ -517,74 +618,106 @@ const initHLSPlayer = (videoUrl: string) => {
     hlsInstance.value = null
   }
 
-  // 检查是否是HLS流
-  if (Hls.isSupported() && (videoUrl.includes('.m3u8') || videoUrl.includes('stream/'))) {
-    console.log('Initializing HLS player for URL:', videoUrl)
+  // 强制使用HLS播放器
+  console.log('Initializing HLS player for URL:', videoUrl)
 
-    // 创建HLS实例
-    const hls = new Hls({
-      enableWorker: true,
-      lowLatencyMode: true,
-      backBufferLength: 90,
-      maxBufferLength: 30,
-      maxMaxBufferLength: 60,
-      manifestLoadingTimeOut: 10000,
-      manifestLoadingMaxRetry: 3,
-      levelLoadingTimeOut: 10000,
-      levelLoadingMaxRetry: 3,
-      fragLoadingTimeOut: 20000,
-      fragLoadingMaxRetry: 6,
-    })
-
-    // 加载视频源
-    hls.loadSource(videoUrl)
-    hls.attachMedia(videoPlayer.value)
-
-    // 错误处理
-    hls.on(Hls.Events.ERROR, (event, data) => {
-      console.error('HLS error:', event, data)
-      if (data.fatal) {
-        switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            console.error('Network error, trying to recover...')
-            hls.startLoad()
-            break
-          case Hls.ErrorTypes.MEDIA_ERROR:
-            console.error('Media error, trying to recover...')
-            hls.recoverMediaError()
-            break
-          default:
-            console.error('Fatal error, cannot recover')
-            hls.destroy()
-            break
-        }
-      }
-    })
-
-    // 监听HLS事件
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      console.log('HLS manifest parsed, levels available:', hls.levels)
-      // 自动选择最佳质量
-      if (hls.levels.length > 0) {
-        const currentLevel = hls.currentLevel
-        console.log('Current HLS level:', currentLevel, 'Available levels:', hls.levels.length)
-      }
-    })
-
-    hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-      console.log('HLS level switched:', data)
-      const level = hls.levels[data.level]
-      if (level) {
-        console.log('New quality:', level.height, 'p', 'Bitrate:', level.bitrate)
-      }
-    })
-
-    hlsInstance.value = hls
-  } else {
-    // 浏览器原生支持HLS或不使用HLS
-    console.log('Using native video player for URL:', videoUrl)
-    videoPlayer.value.src = videoUrl
+  // 创建优化的HLS配置
+  const hlsConfig: Hls.Config = {
+    // 启用Worker提升性能
+    enableWorker: true,
+    workerPath: 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.worker.js',
+    
+    // 低延迟模式配置
+    lowLatencyMode: true,
+    backBufferLength: 90, // 后缓冲区长度（秒）
+    maxBufferLength: 30, // 最大缓冲区长度（秒）
+    maxMaxBufferLength: 60, // 最大缓冲区长度限制（秒）
+    
+    // 加载超时配置
+    manifestLoadingTimeOut: 10000, // 播放列表加载超时（毫秒）
+    manifestLoadingMaxRetry: 3, // 播放列表最大重试次数
+    levelLoadingTimeOut: 10000, // 质量级别加载超时
+    levelLoadingMaxRetry: 3, // 质量级别最大重试次数
+    fragLoadingTimeOut: 20000, // 分片加载超时
+    fragLoadingMaxRetry: 6, // 分片最大重试次数
+    
+    // 自适应比特率配置
+    abrEwmaFastLive: 3.0, // 快速移动平均窗口
+    abrEwmaSlowLive: 9.0, // 慢速移动平均窗口
+    abrEwmaFastVoD: 3.0, // VOD快速移动平均窗口
+    abrEwmaSlowVoD: 9.0, // VOD慢速移动平均窗口
+    abrEwmaDefaultEstimate: 500000, // 默认带宽估算（bps）
+    abrBandWidthFactor: 0.95, // 带宽安全系数
+    abrBandWidthUpFactor: 0.7, // 带宽上升因子
+    abrMaxWithRealBitrate: false, // 不使用实际比特率限制
+    
+    // 缓冲区配置
+    maxBufferHole: 0.5, // 最大缓冲区空洞（秒）
+    maxFragLookUpTolerance: 0.25, // 分片查找容差
+    
+    // 其他优化
+    maxAudioBufferSize: 60, // 最大音频缓冲区大小
+    
+    // 调试日志
+    debug: false,
   }
+
+  // 创建HLS实例
+  const hls = new Hls(hlsConfig)
+
+  // 加载视频源
+  hls.loadSource(videoUrl)
+  hls.attachMedia(videoPlayer.value)
+
+  // 错误处理
+  hls.on(Hls.Events.ERROR, (event, data) => {
+    console.error('HLS error:', event, data)
+    handleHLSError(hls, data)
+  })
+
+  // 监听HLS事件
+  hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+    console.log('HLS manifest parsed, levels available:', hls.levels.length)
+    // 自动选择最佳质量
+    if (autoQuality.value) {
+      hls.currentLevel = -1 // -1表示自动选择
+    } else {
+      // 如果手动选择质量，尝试匹配用户选择
+      setInitialQuality(hls)
+    }
+  })
+
+  // 质量切换事件
+  hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+    const level = hls.levels[data.level]
+    if (level) {
+      console.log('HLS level switched:', level.height, 'p', 'Bitrate:', level.bitrate)
+      videoQuality.value = `${level.height}p`
+      currentBandwidth.value = level.bitrate
+    }
+  })
+
+  // 分片加载完成事件
+  hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
+    console.log('Fragment loaded:', data.frag.url)
+    updateBufferHealth()
+  })
+
+  // 缓冲区追加事件
+  hls.on(Hls.Events.BUFFER_APPENDED, (event, data) => {
+    updateBufferHealth()
+  })
+
+  // 带宽估算更新
+  hls.on(Hls.Events.FRAG_LOADING, (event: any, data: any) => {
+    if (data && data.frag && data.frag.bitrate) {
+      currentBandwidth.value = data.frag.bitrate
+      updateNetworkQuality(data.frag.bitrate)
+      console.log('Fragment bitrate:', Math.round(data.frag.bitrate / 1000), 'kbps')
+    }
+  })
+
+  hlsInstance.value = hls
 }
 
 // 清理HLS实例
@@ -594,6 +727,182 @@ const cleanupHLS = () => {
     hlsInstance.value.destroy()
     hlsInstance.value = null
   }
+}
+
+// 处理HLS错误
+const handleHLSError = (hls: Hls, data: any) => {
+  if (data.fatal) {
+    switch (data.type) {
+      case Hls.ErrorTypes.NETWORK_ERROR:
+        console.error('Network error, trying to recover...')
+        if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+          // 播放列表加载失败，尝试降级到原始视频
+          if (fallbackVideoUrl.value && fallbackVideoUrl.value.trim() !== '') {
+            console.log('HLS manifest load failed, falling back to original video')
+            hls.destroy()
+            hlsInstance.value = null
+            // 直接使用原生video元素播放原始视频
+            if (videoPlayer.value) {
+              videoPlayer.value.src = fallbackVideoUrl.value
+              videoPlayer.value.load()
+              console.log('Loaded fallback video URL:', fallbackVideoUrl.value)
+            }
+            return
+          }
+          // 没有降级URL，尝试重试
+          setTimeout(() => {
+            hls.startLoad()
+          }, 1000)
+        } else if (data.details === Hls.ErrorDetails.FRAG_LOAD_ERROR) {
+          // 分片加载失败，尝试重新加载
+          setTimeout(() => {
+            hls.recoverMediaError()
+          }, 1000)
+        } else {
+          // 其他网络错误，尝试降级
+          if (fallbackVideoUrl.value && fallbackVideoUrl.value.trim() !== '') {
+            console.log('HLS network error, falling back to original video')
+            hls.destroy()
+            hlsInstance.value = null
+            if (videoPlayer.value) {
+              videoPlayer.value.src = fallbackVideoUrl.value
+              videoPlayer.value.load()
+              console.log('Loaded fallback video URL:', fallbackVideoUrl.value)
+            }
+            return
+          }
+          hls.startLoad()
+        }
+        break
+        
+      case Hls.ErrorTypes.MEDIA_ERROR:
+        console.error('Media error, trying to recover...')
+        if (data.details === Hls.ErrorDetails.BUFFER_APPEND_ERROR) {
+          // 缓冲区追加错误，尝试恢复
+          hls.recoverMediaError()
+        } else {
+          // 其他媒体错误，尝试降级
+          if (fallbackVideoUrl.value && fallbackVideoUrl.value.trim() !== '') {
+            console.log('HLS media error, falling back to original video')
+            hls.destroy()
+            hlsInstance.value = null
+            if (videoPlayer.value) {
+              videoPlayer.value.src = fallbackVideoUrl.value
+              videoPlayer.value.load()
+              console.log('Loaded fallback video URL:', fallbackVideoUrl.value)
+            }
+            return
+          }
+          setTimeout(() => {
+            hls.recoverMediaError()
+          }, 1000)
+        }
+        break
+        
+      default:
+        console.error('Fatal error, cannot recover:', data)
+        // 尝试降级到原始视频
+        if (fallbackVideoUrl.value && fallbackVideoUrl.value.trim() !== '') {
+          console.log('Fatal HLS error, falling back to original video')
+          hls.destroy()
+          hlsInstance.value = null
+          if (videoPlayer.value) {
+            videoPlayer.value.src = fallbackVideoUrl.value
+            videoPlayer.value.load()
+            console.log('Loaded fallback video URL:', fallbackVideoUrl.value)
+          }
+        } else {
+          hls.destroy()
+          videoLoadError.value = true
+          errorMessage.value = '视频播放失败，请稍后重试'
+        }
+        break
+    }
+  } else {
+    // 非致命错误，记录日志
+    console.warn('Non-fatal HLS error:', data)
+  }
+}
+
+// 处理原生视频错误
+const handleNativeVideoError = () => {
+  console.error('Native video error occurred')
+  videoLoadError.value = true
+  errorMessage.value = '视频加载失败，请检查网络连接'
+  
+  // 尝试使用HLS降级方案
+  if (video.value && video.value.src && !video.value.src.includes('.m3u8')) {
+    console.log('Attempting to fallback to HLS stream')
+    // 这里可以尝试获取HLS播放列表
+  }
+}
+
+// 更新网络质量
+const updateNetworkQuality = (bandwidth: number) => {
+  // 带宽单位是bps
+  const kbps = bandwidth / 1000
+  
+  if (kbps > 3000) {
+    networkQuality.value = 'good'
+  } else if (kbps > 1000) {
+    networkQuality.value = 'fair'
+  } else {
+    networkQuality.value = 'poor'
+  }
+}
+
+// 更新缓冲区健康度
+const updateBufferHealth = () => {
+  if (!videoPlayer.value || !hlsInstance.value) return
+  
+  try {
+    const bufferedRanges = videoPlayer.value.buffered
+    if (bufferedRanges.length > 0) {
+      const currentTime = videoPlayer.value.currentTime
+      const bufferedEnd = bufferedRanges.end(bufferedRanges.length - 1)
+      const bufferedDuration = bufferedEnd - currentTime
+      
+      // 计算缓冲区健康度（0-100）
+      const targetBuffer = 30 // 目标缓冲30秒
+      bufferHealth.value = Math.min(100, (bufferedDuration / targetBuffer) * 100)
+      
+      console.log('Buffer health:', bufferHealth.value.toFixed(1), '%, buffered:', bufferedDuration.toFixed(1), 's')
+    }
+  } catch (error) {
+    console.error('Error updating buffer health:', error)
+  }
+}
+
+// 设置初始质量
+const setInitialQuality = (hls: Hls) => {
+  if (!hls.levels || hls.levels.length === 0) return
+  
+  const targetHeight = parseInt(videoQuality.value.replace('p', ''))
+  
+  // 查找匹配的质量级别
+  for (let i = 0; i < hls.levels.length; i++) {
+    const level = hls.levels[i]
+    if (level.height === targetHeight) {
+      hls.currentLevel = i
+      console.log('Set initial quality:', level.height, 'p')
+      return
+    }
+  }
+  
+  // 如果没有精确匹配，选择最接近的
+  let closestLevel = 0
+  let minDiff = Infinity
+  
+  for (let i = 0; i < hls.levels.length; i++) {
+    const diff = Math.abs(hls.levels[i].height - targetHeight)
+    if (diff < minDiff) {
+      minDiff = diff
+      closestLevel = i
+    }
+  }
+  
+  hls.currentLevel = closestLevel
+  console.log('Set closest quality:', hls.levels[closestLevel].height, 'p')
 }
 
 // 播放器初始化
@@ -655,20 +964,26 @@ const toggleFollow = async () => {
   // 更新关注数
   if (video.value.isFollowed) {
     // 增加关注数
-    videoAuthor.value.followerCount = (typeof videoAuthor.value.followerCount === 'string'
+    const currentFollowers = typeof videoAuthor.value.followerCount === 'string'
       ? parseInt(videoAuthor.value.followerCount)
-      : videoAuthor.value.followerCount) + 1
-    video.value.authorStats.followerCount = (typeof video.value.authorStats.followerCount === 'string'
+      : videoAuthor.value.followerCount
+    videoAuthor.value.followerCount = currentFollowers + 1
+    
+    const currentVideoFollowers = typeof video.value.authorStats.followerCount === 'string'
       ? parseInt(video.value.authorStats.followerCount)
-      : video.value.authorStats.followerCount) + 1
+      : video.value.authorStats.followerCount
+    video.value.authorStats.followerCount = currentVideoFollowers + 1
   } else {
     // 减少关注数
-    videoAuthor.value.followerCount = (typeof videoAuthor.value.followerCount === 'string'
+    const currentFollowers = typeof videoAuthor.value.followerCount === 'string'
       ? parseInt(videoAuthor.value.followerCount)
-      : videoAuthor.value.followerCount) - 1
-    video.value.authorStats.followerCount = (typeof video.value.authorStats.followerCount === 'string'
+      : videoAuthor.value.followerCount
+    videoAuthor.value.followerCount = currentFollowers - 1
+    
+    const currentVideoFollowers = typeof video.value.authorStats.followerCount === 'string'
       ? parseInt(video.value.authorStats.followerCount)
-      : video.value.authorStats.followerCount) - 1
+      : video.value.authorStats.followerCount
+    video.value.authorStats.followerCount = currentVideoFollowers - 1
   }
   } catch (error) {
     console.error('关注操作失败:', error)
@@ -708,9 +1023,22 @@ const setPlaybackRate = (rate: number) => {
   console.log('播放速度设置为:', rate)
 }
 
-// 设置视频质量
+// 设置视频质量（优化版）
 const setVideoQuality = (quality: string) => {
   console.log('设置视频质量:', quality)
+  
+  // 如果选择"自动"，启用自适应
+  if (quality === 'auto') {
+    autoQuality.value = true
+    if (hlsInstance.value) {
+      hlsInstance.value.currentLevel = -1 // -1表示自动选择
+      console.log('启用自动质量选择')
+    }
+    return
+  }
+  
+  // 手动选择质量
+  autoQuality.value = false
   videoQuality.value = quality
 
   // 如果使用HLS播放器,切换HLS质量级别
@@ -722,11 +1050,12 @@ const setVideoQuality = (quality: string) => {
     }
 
     // 根据质量名称查找对应的HLS级别
-    let targetLevel = -1 // -1表示自动选择
+    let targetLevel = -1
+    const qualityHeight = parseInt(quality.replace('p', ''))
+
     for (let i = 0; i < levels.length; i++) {
       const level = levels[i]
       const levelHeight = level.height
-      const qualityHeight = parseInt(quality.replace('p', ''))
 
       if (levelHeight === qualityHeight) {
         targetLevel = i
@@ -736,25 +1065,12 @@ const setVideoQuality = (quality: string) => {
     }
 
     if (targetLevel !== -1) {
-      // 切换到指定质量
-      const currentTime = videoPlayer.value?.currentTime || 0
-      const wasPlaying = !videoPlayer.value?.paused
-
-      hlsInstance.value.currentLevel = targetLevel
-      console.log(`Switched to HLS level ${targetLevel} (${quality})`)
-
-      // 恢复播放位置和状态
-      if (videoPlayer.value) {
-        videoPlayer.value.currentTime = currentTime
-        if (wasPlaying) {
-          videoPlayer.value.play().catch(err => {
-            console.error('Failed to resume playback after quality switch:', err)
-          })
-        }
-      }
+      // 平滑切换到指定质量
+      smoothQualitySwitch(targetLevel)
     } else {
       console.warn(`Quality ${quality} not found in HLS levels, using auto`)
-      hlsInstance.value.currentLevel = -1 // 自动选择
+      autoQuality.value = true
+      hlsInstance.value.currentLevel = -1
     }
   } else {
     // 如果视频有多个质量选项，切换到对应的质量
@@ -789,6 +1105,56 @@ const setVideoQuality = (quality: string) => {
       }
     }
   }
+}
+
+// 平滑质量切换
+const smoothQualitySwitch = (targetLevel: number) => {
+  if (!hlsInstance.value || !videoPlayer.value) return
+  
+  const hls = hlsInstance.value
+  const currentLevel = hls.currentLevel
+  
+  // 如果已经是目标质量，不需要切换
+  if (currentLevel === targetLevel) {
+    console.log('Already at target quality level')
+    return
+  }
+  
+  // 保存当前播放状态
+  const currentTime = videoPlayer.value.currentTime
+  const wasPlaying = !videoPlayer.value.paused
+  
+  console.log(`Switching from level ${currentLevel} to ${targetLevel}`)
+  
+  // 切换质量级别
+  hls.currentLevel = targetLevel
+  
+  // 等待质量切换完成
+  const checkSwitchComplete = setInterval(() => {
+    if (hls.currentLevel === targetLevel) {
+      clearInterval(checkSwitchComplete)
+      
+      // 恢复播放位置
+      if (videoPlayer.value) {
+        videoPlayer.value.currentTime = currentTime
+        
+        // 如果之前在播放，恢复播放
+        if (wasPlaying) {
+          videoPlayer.value.play().catch(err => {
+            console.error('Failed to resume playback after quality switch:', err)
+          })
+        }
+      }
+      
+      console.log('Quality switch completed successfully')
+    }
+  }, 100)
+  
+  // 超时保护
+  setTimeout(() => {
+    clearInterval(checkSwitchComplete)
+    console.warn('Quality switch timeout')
+  }, 5000)
 }
 
 // 跳转播放位置
@@ -1150,22 +1516,36 @@ const shareVideo = () => {
 }
 
 // 切换播放状态
-const togglePlay = () => {
+const togglePlay = async () => {
   if (!videoPlayer.value) return
   
   if (videoPlayer.value.paused) {
-    videoPlayer.value.play()
-    isPlaying.value = true
-    // 暂停后播放，不重新生成弹幕，继续之前的弹幕移动
-    if (danmakuEnabled.value && danmakuPool.value.length === 0) {
-      // 只有当弹幕池为空时，才重新生成弹幕
-      simulateDanmakus()
+    // 使用播放锁防止 rapid play/pause
+    if (isPlayLocked.value) {
+      console.log('播放操作被锁定，忽略')
+      return
+    }
+    isPlayLocked.value = true
+    
+    try {
+      await videoPlayer.value.play()
+      isPlaying.value = true
+      if (danmakuEnabled.value && danmakuPool.value.length === 0) {
+        simulateDanmakus()
+      }
+    } catch (err) {
+      console.error('播放失败:', err)
+      isPlaying.value = false
+    } finally {
+      // 100ms 后解锁，防止 AbortError
+      setTimeout(() => {
+        isPlayLocked.value = false
+      }, 100)
     }
   } else {
     videoPlayer.value.pause()
     isPlaying.value = false
     
-    // 暂停时停止生成新弹幕
     if (danmakuInterval) {
       clearInterval(danmakuInterval)
       danmakuInterval = null
@@ -1196,7 +1576,7 @@ const fetchVideoData = async () => {
         id: videoId,
         title: '视频加载中...',
         src: cleanedFallbackUrl,
-        poster: 'https://picsum.photos/640/360?random=' + videoId,
+        poster: getDefaultCoverUrl(videoId),
         note: response.data.message || '正在使用备用视频源播放',
         viewCount: '0',
         likeCount: '0',
@@ -1215,7 +1595,7 @@ const fetchVideoData = async () => {
         if (basicInfoResponse.data && basicInfoResponse.data.data && (basicInfoResponse.data.data as any).video) {
           const basicVideo = (basicInfoResponse.data.data as any).video
           video.value.title = basicVideo.title || '未知标题'
-          video.value.poster = basicVideo.cover_url || video.value.poster
+          video.value.poster = isValidCoverUrl(basicVideo.cover_url) ? basicVideo.cover_url : getDefaultCoverUrl(videoId)
           video.value.note = basicVideo.description || video.value.note
           video.value.author = basicVideo.author?.username || '未知作者'
           video.value.authorAvatar = basicVideo.author?.avatar || ''
@@ -1229,11 +1609,42 @@ const fetchVideoData = async () => {
     
     const videoData = response.data.data.video
     
-    // 转换API数据为本地组件使用的格式
-    const rawVideoUrl = videoData.quality_options?.[0]?.url || videoData.video_url
-    console.log('原始视频URL:', rawVideoUrl)
+    // 生成HLS播放URL - 优先使用API Gateway代理
+    let finalVideoUrl = ''
+    const playlistUrl = videoData.playlist_url
+    const originalVideoUrl = videoData.video_url
     
-    const cleanedVideoUrl = cleanVideoUrl(rawVideoUrl)
+    console.log('HLS播放列表URL:', playlistUrl)
+    console.log('原始视频URL:', originalVideoUrl)
+    
+    // 如果有HLS播放列表URL，使用API Gateway代理
+    if (playlistUrl && playlistUrl.trim() !== '') {
+      // 从playlist_url中提取视频ID
+      const videoIdMatch = playlistUrl.match(/(\d+)\/hls\//)
+      if (videoIdMatch) {
+        const extractedVideoId = videoIdMatch[1]
+        finalVideoUrl = `http://localhost:8080/api/video/${extractedVideoId}/stream/index.m3u8`
+        console.log('使用HLS代理URL:', finalVideoUrl)
+      } else {
+        // 如果无法提取视频ID，尝试直接使用playlist_url
+        finalVideoUrl = cleanVideoUrl(playlistUrl)
+        console.log('使用清理后的HLS URL:', finalVideoUrl)
+      }
+    } else {
+      // 没有HLS播放列表，尝试使用API Gateway代理生成HLS URL
+      finalVideoUrl = `http://localhost:8080/api/video/${videoId}/stream/index.m3u8`
+      console.log('生成HLS代理URL:', finalVideoUrl)
+      
+      // 保存原始视频URL作为降级选项
+      if (originalVideoUrl && originalVideoUrl.trim() !== '') {
+        fallbackVideoUrl.value = cleanVideoUrl(originalVideoUrl)
+        console.log('设置降级URL:', fallbackVideoUrl.value)
+      }
+    }
+    
+    console.log('最终使用的视频URL:', finalVideoUrl)
+    
+    const cleanedVideoUrl = cleanVideoUrl(finalVideoUrl)
     console.log('修复后的视频URL:', cleanedVideoUrl)
     
     // 清理所有质量选项的URL
@@ -1249,7 +1660,7 @@ const fetchVideoData = async () => {
       id: videoData.video_id,
       title: videoData.title,
       src: cleanedVideoUrl,
-      poster: videoData.cover_url,
+      poster: isValidCoverUrl(videoData.cover_url) ? videoData.cover_url : getDefaultCoverUrl(videoId),
       note: videoData.description,
       viewCount: videoData.view_count.toString(),
       likeCount: videoData.like_count.toString(),
@@ -1382,8 +1793,10 @@ const handleVideoError = (event: Event) => {
         videoPlayer.value.play().catch(err => {
           console.error('自动播放失败:', err)
           // 如果静音播放也失败，尝试普通播放
-          videoPlayer.value.muted = false
-          isMuted.value = false
+          if (videoPlayer.value) {
+            videoPlayer.value.muted = false
+            isMuted.value = false
+          }
         })
       }
     }, 1000)
@@ -1452,6 +1865,7 @@ const onVideoLoadStart = () => {
 const onVideoLoaded = () => {
   console.log('视频数据加载完成')
   videoLoadError.value = false
+  videoReady.value = true // 标记视频已就绪
 }
 
 const onVideoWaiting = () => {
