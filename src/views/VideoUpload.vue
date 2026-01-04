@@ -843,7 +843,7 @@ const startUpload = async () => {
     
     // 调用真实的上传API
     const response = await videoAPI.uploadVideo(formData, {
-      onUploadProgress: (progressEvent) => {
+      onUploadProgress: (progressEvent: any) => {
         if (progressEvent.total) {
           // 计算真实进度
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -880,8 +880,8 @@ const startUpload = async () => {
     // 处理上传成功后的逻辑
     if (response && response.data) {
       // 使用真实的视频ID和URL
-      uploadedVideoId.value = response.data.video_id || Math.floor(Math.random() * 1000000000).toString()
-      videoPreviewUrl.value = response.data.video_url || URL.createObjectURL(selectedFile.value as File)
+      uploadedVideoId.value = (response.data as any).video_id || Math.floor(Math.random() * 1000000000).toString()
+      videoPreviewUrl.value = (response.data as any).video_url || URL.createObjectURL(selectedFile.value as File)
     } else {
       // 降级处理
       uploadedVideoId.value = Math.floor(Math.random() * 1000000000).toString()
@@ -1057,7 +1057,7 @@ const handleLogin = async () => {
     await new Promise(resolve => setTimeout(resolve, 1500))
     
     // 模拟登录成功
-    userStore.login('mock-token', { username: 'testuser', avatar: '', id: '123' })
+    userStore.login({ phone: '13800138000', verificationCode: '123456' })
     closeLoginModal()
     
   } catch (error) {

@@ -226,12 +226,12 @@ const fetchUserVideos = async () => {
       page_size: pageSize.value
     })
     
-    if (response.status_code === 0) {
-      videos.value = response.videos
-      total.value = response.total
-      hasMore.value = response.has_more
+    if (response.data.data.status_code === 0) {
+      videos.value = response.data.data.videos
+      total.value = response.data.data.total
+      hasMore.value = response.data.data.has_more
     } else {
-      console.error('获取视频列表失败:', response.status_msg)
+      console.error('获取视频列表失败:', response.data.data.status_msg)
     }
   } catch (error) {
     console.error('获取视频列表失败:', error)

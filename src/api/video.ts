@@ -279,7 +279,7 @@ export const videoAPI = {
     sort_order?: string;
   }) {
     const { video_id, page = 1, page_size = 10, sort_order = 'hot' } = params
-    const url = `/api/video/comments?video_id=${video_id}&page=${page}&page_size=${page_size}&sort_order=${sort_order}`
+    const url = `/api/video/comments?video_id=${Number(video_id)}&page=${page}&page_size=${page_size}&sort_order=${sort_order}`
     return http.get<{ 
       status_code: number; 
       status_msg: string; 

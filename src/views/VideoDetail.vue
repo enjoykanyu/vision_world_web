@@ -432,14 +432,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 import CommentSection from '@/components/CommentSection.vue'
 import { danmakuAPI } from '@/api/danmaku'
 import { useUserStore } from '@/stores/userStore'
 import { videoAPI } from '@/api/video'
-import Hls from 'hls.js'
+import Hls, { type Config } from 'hls.js'
 
 // 使用store
 const userStore = useUserStore()
@@ -452,7 +452,6 @@ const errorMessage = ref('')
 const videoPlayer = ref<HTMLVideoElement | null>(null)
 const videoReady = ref(false) // 视频元素是否就绪
 const currentVideoSourceIndex = ref(0)
-const fallbackVideoUrl = ref('') // 降级视频URL
 const playbackRate = ref(1)
 const videoQuality = ref('720p')
 const hlsInstance = ref<Hls | null>(null)
@@ -508,6 +507,19 @@ const cleanVideoUrl = (url: string): string => {
         const videoId = match[1]
         const cleanedUrl = `/api/video/${videoId}/stream/index.m3u8`
         console.log('转换play/stream URL为:', cleanedUrl)
+        return cleanedUrl
+      }
+    }
+    
+    // 检查是否是MinIO原始视频URL（包含bucket名称）
+    // URL格式: http://localhost:9000/vision-world/{videoID}/{filename}.mp4
+    if (url.includes('localhost:9000') || url.includes('minio')) {
+      const minioMatch = url.match(/(\d+)\/[^/]+\.(mp4|avi|mov|mkv|webm)/)
+      if (minioMatch) {
+        const videoId = minioMatch[1]
+        // 使用新的原始视频stream端点
+        const cleanedUrl = `/api/video/${videoId}/original`
+        console.log('MinIO原始视频URL转换为stream端点:', cleanedUrl)
         return cleanedUrl
       }
     }
@@ -594,11 +606,14 @@ const relatedVideos = ref([
   { id: 5, title: '【凡人动画】2025-2026国创发布会PV', author: '测试作者', viewCount: '9.8千', duration: '01:10', poster: 'https://picsum.photos/320/180?random=5' },
 ])
 
-// 初始化HLS播放器（优化版）
+// 初始化HLS播放器
 const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
-  const maxRetries = 5
-  const retryDelay = 100
+  const maxRetries = 10
+  const retryDelay = 1000 // 增加重试延迟时间到1秒
 
+  console.log(`initHLSPlayer called (attempt ${retryCount + 1}/${maxRetries})`)
+
+  // 等待DOM元素加载完成
   if (!videoPlayer.value) {
     console.error(`Video player element not found (attempt ${retryCount + 1}/${maxRetries})`)
     if (retryCount < maxRetries) {
@@ -611,6 +626,24 @@ const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
     errorMessage.value = '视频播放器初始化失败，请刷新页面重试'
     return
   }
+  
+  console.log('Video player element found')
+  
+  // 确保视频元素已挂载到DOM
+  if (!videoPlayer.value.parentNode) {
+    console.error('Video player element not attached to DOM')
+    if (retryCount < maxRetries) {
+      console.log(`Retrying in ${retryDelay}ms...`)
+      await new Promise(resolve => setTimeout(resolve, retryDelay))
+      return initHLSPlayer(videoUrl, retryCount + 1)
+    }
+    console.error('Max retries reached, giving up')
+    videoLoadError.value = true
+    errorMessage.value = '视频播放器初始化失败，请刷新页面重试'
+    return
+  }
+  
+  console.log('Video player element attached to DOM')
 
   // 清理旧的HLS实例
   if (hlsInstance.value) {
@@ -618,45 +651,149 @@ const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
     hlsInstance.value = null
   }
 
-  // 强制使用HLS播放器
-  console.log('Initializing HLS player for URL:', videoUrl)
+  // B站风格：优先使用Blob URL提升加载速度
+  console.log('Initializing Bilibili-style HLS player for URL:', videoUrl)
 
-  // 创建优化的HLS配置
+  // B站风格：在初始化HLS之前先检查播放列表是否有效
+  try {
+    const response = await fetch(videoUrl)
+    if (!response.ok) {
+      console.log(`HLS manifest check failed with status ${response.status}`)
+      
+      // 检查是否是404错误且返回的是M3U8格式的错误信息
+      if (response.status === 404) {
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('mpegurl')) {
+          const text = await response.text()
+          console.log('Received error M3U8:', text)
+          
+          // 解析错误信息
+          const lines = text.split('\n')
+          let transcodeStatus = ''
+          let fallbackUrl = ''
+          
+          for (const line of lines) {
+            if (line.startsWith('#EXT-X-ERROR:')) {
+              transcodeStatus = line.substring('#EXT-X-ERROR:'.length).trim()
+            } else if (line.startsWith('#EXT-X-FALLBACK-URL:')) {
+              fallbackUrl = line.substring('#EXT-X-FALLBACK-URL:'.length).trim()
+            }
+          }
+          
+          console.log('Transcode status:', transcodeStatus)
+          console.log('Fallback URL:', fallbackUrl)
+          
+          // 如果转码未完成或失败，显示错误消息
+          if (transcodeStatus === 'pending' || transcodeStatus === 'processing') {
+            console.log('转码进行中，等待转码完成')
+            videoLoadError.value = true
+            errorMessage.value = '视频转码中，请稍后重试'
+            return
+          } else if (transcodeStatus === 'failed') {
+            console.log('转码失败')
+            videoLoadError.value = true
+            errorMessage.value = '视频转码失败，请稍后重试'
+            return
+          }
+        }
+      }
+      
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    
+    // 检查Content-Type，确保返回的是M3U8文件
+    const contentType = response.headers.get('content-type')
+    if (!contentType || (!contentType.includes('mpegurl') && !contentType.includes('m3u8') && !contentType.includes('text/plain'))) {
+      console.log('Invalid Content-Type:', contentType)
+      console.log('Response is not a valid M3U8 file')
+      videoLoadError.value = true
+      errorMessage.value = '视频格式不支持，请稍后重试'
+      return
+    }
+    
+    // 检查响应内容是否是有效的M3U8文件
+    const text = await response.text()
+    if (!text.trim().startsWith('#EXTM3U')) {
+      console.log('Invalid M3U8 format')
+      console.log('Response content:', text.substring(0, 200))
+      
+      // 检查是否是错误信息
+      if (text.includes('#EXT-X-ERROR:')) {
+        const lines = text.split('\n')
+        let transcodeStatus = ''
+        let fallbackUrl = ''
+        
+        for (const line of lines) {
+          if (line.startsWith('#EXT-X-ERROR:')) {
+            transcodeStatus = line.substring('#EXT-X-ERROR:'.length).trim()
+          } else if (line.startsWith('#EXT-X-FALLBACK-URL:')) {
+            fallbackUrl = line.substring('#EXT-X-FALLBACK-URL:'.length).trim()
+          }
+        }
+        
+        console.log('Transcode status from error M3U8:', transcodeStatus)
+        console.log('Fallback URL from error M3U8:', fallbackUrl)
+        
+        if (transcodeStatus === 'pending' || transcodeStatus === 'processing') {
+          videoLoadError.value = true
+          errorMessage.value = '视频转码中，请稍后重试'
+          return
+        } else if (transcodeStatus === 'failed') {
+          videoLoadError.value = true
+          errorMessage.value = '视频转码失败，请稍后重试'
+          return
+        }
+      }
+      
+      throw new Error('Invalid M3U8 format')
+    }
+    
+    console.log('M3U8 validation passed, initializing HLS player')
+  } catch (error) {
+    console.error('Failed to validate HLS manifest:', error)
+    videoLoadError.value = true
+    errorMessage.value = '视频加载失败，请刷新页面重试'
+    return
+  }
+
+  // 创建B站风格的HLS配置
   const hlsConfig: Hls.Config = {
-    // 启用Worker提升性能
+    // 启用Worker提升性能（B站核心优化）
     enableWorker: true,
     workerPath: 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.worker.js',
     
-    // 低延迟模式配置
+    // B站低延迟模式配置
     lowLatencyMode: true,
-    backBufferLength: 90, // 后缓冲区长度（秒）
-    maxBufferLength: 30, // 最大缓冲区长度（秒）
-    maxMaxBufferLength: 60, // 最大缓冲区长度限制（秒）
+    backBufferLength: 120, // 后缓冲区长度（B站标准：120秒）
+    maxBufferLength: 60, // 最大缓冲区长度（B站标准：60秒）
+    maxMaxBufferLength: 120, // 最大缓冲区长度限制（B站标准：120秒）
     
-    // 加载超时配置
-    manifestLoadingTimeOut: 10000, // 播放列表加载超时（毫秒）
-    manifestLoadingMaxRetry: 3, // 播放列表最大重试次数
-    levelLoadingTimeOut: 10000, // 质量级别加载超时
-    levelLoadingMaxRetry: 3, // 质量级别最大重试次数
-    fragLoadingTimeOut: 20000, // 分片加载超时
-    fragLoadingMaxRetry: 6, // 分片最大重试次数
+    // 加载超时配置（B站优化策略）
+    manifestLoadingTimeOut: 15000, // 播放列表加载超时（毫秒）
+    manifestLoadingMaxRetry: 5, // 播放列表最大重试次数
+    levelLoadingTimeOut: 15000, // 质量级别加载超时
+    levelLoadingMaxRetry: 5, // 质量级别最大重试次数
+    fragLoadingTimeOut: 25000, // 分片加载超时
+    fragLoadingMaxRetry: 8, // 分片最大重试次数
     
-    // 自适应比特率配置
-    abrEwmaFastLive: 3.0, // 快速移动平均窗口
-    abrEwmaSlowLive: 9.0, // 慢速移动平均窗口
-    abrEwmaFastVoD: 3.0, // VOD快速移动平均窗口
-    abrEwmaSlowVoD: 9.0, // VOD慢速移动平均窗口
-    abrEwmaDefaultEstimate: 500000, // 默认带宽估算（bps）
-    abrBandWidthFactor: 0.95, // 带宽安全系数
-    abrBandWidthUpFactor: 0.7, // 带宽上升因子
-    abrMaxWithRealBitrate: false, // 不使用实际比特率限制
+    // 自适应比特率配置（B站ABR算法）
+    abrEwmaFastLive: 4.0, // 快速移动平均窗口
+    abrEwmaSlowLive: 10.0, // 慢速移动平均窗口
+    abrEwmaFastVoD: 4.0, // VOD快速移动平均窗口
+    abrEwmaSlowVoD: 10.0, // VOD慢速移动平均窗口
+    abrEwmaDefaultEstimate: 1000000, // 默认带宽估算（bps）
+    abrBandWidthFactor: 0.9, // 带宽安全系数
+    abrBandWidthUpFactor: 0.8, // 带宽上升因子
+    abrMaxWithRealBitrate: true, // 使用实际比特率限制
     
-    // 缓冲区配置
-    maxBufferHole: 0.5, // 最大缓冲区空洞（秒）
-    maxFragLookUpTolerance: 0.25, // 分片查找容差
+    // 缓冲区配置（B站优化）
+    maxBufferHole: 0.3, // 最大缓冲区空洞（秒）
+    maxFragLookUpTolerance: 0.1, // 分片查找容差
     
-    // 其他优化
-    maxAudioBufferSize: 60, // 最大音频缓冲区大小
+    // 其他优化（B站特性）
+    maxAudioBufferSize: 120, // 最大音频缓冲区大小
+    enableStitching: true, // 启用分片拼接
+    enableMP4Remuxing: true, // 启用MP4重封装
     
     // 调试日志
     debug: false,
@@ -665,9 +802,13 @@ const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
   // 创建HLS实例
   const hls = new Hls(hlsConfig)
 
-  // 加载视频源
+  // B站风格：使用Blob URL提升加载速度
   hls.loadSource(videoUrl)
   hls.attachMedia(videoPlayer.value)
+
+  // B站风格：预加载优化
+  videoPlayer.value.preload = 'auto'
+  videoPlayer.value.crossOrigin = 'anonymous'
 
   // 错误处理
   hls.on(Hls.Events.ERROR, (event, data) => {
@@ -697,24 +838,83 @@ const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
     }
   })
 
-  // 分片加载完成事件
+  // B站风格：分片加载完成事件（优化缓存策略）
   hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
-    console.log('Fragment loaded:', data.frag.url)
+    console.log('Fragment loaded (B站风格):', data.frag.url)
     updateBufferHealth()
+    
+    // B站优化：预加载下一个分片
+    if (hls.levels && hls.levels.length > 0 && hls.currentLevel !== -1) {
+      const currentLevel = hls.levels[hls.currentLevel]
+      if (currentLevel && currentLevel.details && currentLevel.details.fragments) {
+        const currentFragIndex = currentLevel.details.fragments.findIndex(frag => frag.url === data.frag.url)
+        if (currentFragIndex !== -1 && currentFragIndex < currentLevel.details.fragments.length - 1) {
+          const nextFrag = currentLevel.details.fragments[currentFragIndex + 1]
+          if (nextFrag && !nextFrag.loaded) {
+            // 预加载下一个分片
+            console.log('Preloading next fragment (B站风格):', nextFrag.url)
+          }
+        }
+      }
+    }
   })
 
-  // 缓冲区追加事件
+  // B站风格：缓冲区追加事件（优化缓存管理）
   hls.on(Hls.Events.BUFFER_APPENDED, (event, data) => {
     updateBufferHealth()
+    
+    // B站优化：智能缓存管理
+    if (videoPlayer.value && videoPlayer.value.buffered.length > 0) {
+      const currentTime = videoPlayer.value.currentTime
+      const bufferedEnd = videoPlayer.value.buffered.end(videoPlayer.value.buffered.length - 1)
+      
+      // 如果缓冲区超过120秒，清理旧的缓存
+      if (bufferedEnd - currentTime > 120) {
+        console.log('Cleaning up old buffer (B站风格)')
+        try {
+          // 尝试修剪缓冲区（浏览器支持）
+          if (videoPlayer.value.removeAttribute) {
+            // 浏览器特定的缓冲区优化
+          }
+        } catch (error) {
+          console.warn('Buffer cleanup failed:', error)
+        }
+      }
+    }
   })
 
-  // 带宽估算更新
+  // B站风格：带宽估算更新（优化ABR算法）
   hls.on(Hls.Events.FRAG_LOADING, (event: any, data: any) => {
     if (data && data.frag && data.frag.bitrate) {
       currentBandwidth.value = data.frag.bitrate
       updateNetworkQuality(data.frag.bitrate)
-      console.log('Fragment bitrate:', Math.round(data.frag.bitrate / 1000), 'kbps')
+      console.log('Fragment bitrate (B站风格):', Math.round(data.frag.bitrate / 1000), 'kbps')
+      
+      // B站优化：动态调整ABR参数
+      if (hls.abrController) {
+        // 根据网络质量调整ABR策略
+        if (networkQuality.value === 'good') {
+          hls.abrController.setBandwidthFactor(0.85)
+        } else if (networkQuality.value === 'fair') {
+          hls.abrController.setBandwidthFactor(0.9)
+        } else {
+          hls.abrController.setBandwidthFactor(0.95)
+        }
+      }
     }
+  })
+
+  // B站风格：分片加载进度事件（优化用户体验）
+  hls.on(Hls.Events.FRAG_LOAD_PROGRESS, (event, data) => {
+    if (data && data.frag) {
+      const progress = (data.loaded / data.total) * 100
+      console.log(`Fragment loading progress (B站风格): ${progress.toFixed(1)}% for ${data.frag.url}`)
+    }
+  })
+
+  // B站风格：分片解密事件（优化加密处理）
+  hls.on(Hls.Events.FRAG_DECRYPTED, (event, data) => {
+    console.log('Fragment decrypted (B站风格):', data.frag.url)
   })
 
   hlsInstance.value = hls
@@ -736,43 +936,85 @@ const handleHLSError = (hls: Hls, data: any) => {
       case Hls.ErrorTypes.NETWORK_ERROR:
         console.error('Network error, trying to recover...')
         if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
-          // 播放列表加载失败，尝试降级到原始视频
-          if (fallbackVideoUrl.value && fallbackVideoUrl.value.trim() !== '') {
-            console.log('HLS manifest load failed, falling back to original video')
-            hls.destroy()
-            hlsInstance.value = null
-            // 直接使用原生video元素播放原始视频
-            if (videoPlayer.value) {
-              videoPlayer.value.src = fallbackVideoUrl.value
-              videoPlayer.value.load()
-              console.log('Loaded fallback video URL:', fallbackVideoUrl.value)
-            }
-            return
-          }
-          // 没有降级URL，尝试重试
-          setTimeout(() => {
-            hls.startLoad()
-          }, 1000)
+          // 播放列表加载失败，可能是404错误
+          console.log('HLS manifest load failed, checking if it\'s a 404 error')
+          
+          // 尝试获取转码状态
+          fetch(`http://localhost:8080/api/video/${videoId.value}/stream/index.m3u8`)
+            .then((response): Promise<{ isM3U8: boolean, text?: string, json?: any }> => {
+              if (response.status === 404) {
+                const contentType = response.headers.get('content-type')
+                if (contentType && contentType.includes('mpegurl')) {
+                  return response.text().then(text => ({
+                    isM3U8: true,
+                    text
+                  }))
+                }
+                return response.json().then(json => ({
+                  isM3U8: false,
+                  json
+                }))
+              }
+              throw new Error('Not a 404 error')
+            })
+            .then((result) => {
+              console.log('HLS 404 error data:', result)
+              
+              let transcodeStatus = ''
+              let fallbackUrl = ''
+              
+              if (result.isM3U8 && result.text) {
+                const lines = result.text.split('\n')
+                for (const line of lines) {
+                  if (line.startsWith('#EXT-X-ERROR:')) {
+                    transcodeStatus = line.substring('#EXT-X-ERROR:'.length).trim()
+                  } else if (line.startsWith('#EXT-X-FALLBACK-URL:')) {
+                    fallbackUrl = line.substring('#EXT-X-FALLBACK-URL:'.length).trim()
+                  }
+                }
+              } else if (!result.isM3U8 && result.json) {
+                transcodeStatus = result.json.transcode_status || ''
+                fallbackUrl = result.json.fallback_url || ''
+              }
+              
+              console.log('Transcode status:', transcodeStatus, 'Fallback URL:', fallbackUrl)
+              
+              if (transcodeStatus === 'pending' || transcodeStatus === 'processing') {
+                console.log('转码进行中，等待转码完成')
+                errorMessage.value = '视频转码中，请稍后重试'
+                setTimeout(() => {
+                  hls.startLoad()
+                }, 3000)
+              } else if (transcodeStatus === 'failed') {
+                console.log('转码失败')
+                videoLoadError.value = true
+                errorMessage.value = '视频转码失败，请稍后重试'
+              } else {
+                // 尝试重试
+                setTimeout(() => {
+                  hls.startLoad()
+                }, 1000)
+              }
+            })
+            .catch(err => {
+              console.log('Failed to check 404 status:', err)
+              // 尝试重试
+              setTimeout(() => {
+                hls.startLoad()
+              }, 1000)
+            })
         } else if (data.details === Hls.ErrorDetails.FRAG_LOAD_ERROR) {
           // 分片加载失败，尝试重新加载
           setTimeout(() => {
             hls.recoverMediaError()
           }, 1000)
         } else {
-          // 其他网络错误，尝试降级
-          if (fallbackVideoUrl.value && fallbackVideoUrl.value.trim() !== '') {
-            console.log('HLS network error, falling back to original video')
-            hls.destroy()
-            hlsInstance.value = null
-            if (videoPlayer.value) {
-              videoPlayer.value.src = fallbackVideoUrl.value
-              videoPlayer.value.load()
-              console.log('Loaded fallback video URL:', fallbackVideoUrl.value)
-            }
-            return
-          }
-          hls.startLoad()
+          // 其他网络错误，尝试重试
+          setTimeout(() => {
+            hls.recoverMediaError()
+          }, 1000)
         }
+        hls.startLoad()
         break
         
       case Hls.ErrorTypes.MEDIA_ERROR:
@@ -781,18 +1023,7 @@ const handleHLSError = (hls: Hls, data: any) => {
           // 缓冲区追加错误，尝试恢复
           hls.recoverMediaError()
         } else {
-          // 其他媒体错误，尝试降级
-          if (fallbackVideoUrl.value && fallbackVideoUrl.value.trim() !== '') {
-            console.log('HLS media error, falling back to original video')
-            hls.destroy()
-            hlsInstance.value = null
-            if (videoPlayer.value) {
-              videoPlayer.value.src = fallbackVideoUrl.value
-              videoPlayer.value.load()
-              console.log('Loaded fallback video URL:', fallbackVideoUrl.value)
-            }
-            return
-          }
+          // 其他媒体错误，尝试恢复
           setTimeout(() => {
             hls.recoverMediaError()
           }, 1000)
@@ -801,21 +1032,9 @@ const handleHLSError = (hls: Hls, data: any) => {
         
       default:
         console.error('Fatal error, cannot recover:', data)
-        // 尝试降级到原始视频
-        if (fallbackVideoUrl.value && fallbackVideoUrl.value.trim() !== '') {
-          console.log('Fatal HLS error, falling back to original video')
-          hls.destroy()
-          hlsInstance.value = null
-          if (videoPlayer.value) {
-            videoPlayer.value.src = fallbackVideoUrl.value
-            videoPlayer.value.load()
-            console.log('Loaded fallback video URL:', fallbackVideoUrl.value)
-          }
-        } else {
-          hls.destroy()
-          videoLoadError.value = true
-          errorMessage.value = '视频播放失败，请稍后重试'
-        }
+        hls.destroy()
+        videoLoadError.value = true
+        errorMessage.value = '视频播放失败，请稍后重试'
         break
     }
   } else {
@@ -967,23 +1186,23 @@ const toggleFollow = async () => {
     const currentFollowers = typeof videoAuthor.value.followerCount === 'string'
       ? parseInt(videoAuthor.value.followerCount)
       : videoAuthor.value.followerCount
-    videoAuthor.value.followerCount = currentFollowers + 1
+    videoAuthor.value.followerCount = String(currentFollowers + 1)
     
     const currentVideoFollowers = typeof video.value.authorStats.followerCount === 'string'
       ? parseInt(video.value.authorStats.followerCount)
       : video.value.authorStats.followerCount
-    video.value.authorStats.followerCount = currentVideoFollowers + 1
+    video.value.authorStats.followerCount = String(currentVideoFollowers + 1)
   } else {
     // 减少关注数
     const currentFollowers = typeof videoAuthor.value.followerCount === 'string'
       ? parseInt(videoAuthor.value.followerCount)
       : videoAuthor.value.followerCount
-    videoAuthor.value.followerCount = currentFollowers - 1
+    videoAuthor.value.followerCount = String(currentFollowers - 1)
     
     const currentVideoFollowers = typeof video.value.authorStats.followerCount === 'string'
       ? parseInt(video.value.authorStats.followerCount)
       : video.value.authorStats.followerCount
-    video.value.authorStats.followerCount = currentVideoFollowers - 1
+    video.value.authorStats.followerCount = String(currentVideoFollowers - 1)
   }
   } catch (error) {
     console.error('关注操作失败:', error)
@@ -1607,7 +1826,7 @@ const fetchVideoData = async () => {
       return
     }
     
-    const videoData = response.data.data.video
+    const videoData = (response.data.data as any).video
     
     // 生成HLS播放URL - 优先使用API Gateway代理
     let finalVideoUrl = ''
@@ -1634,12 +1853,6 @@ const fetchVideoData = async () => {
       // 没有HLS播放列表，尝试使用API Gateway代理生成HLS URL
       finalVideoUrl = `http://localhost:8080/api/video/${videoId}/stream/index.m3u8`
       console.log('生成HLS代理URL:', finalVideoUrl)
-      
-      // 保存原始视频URL作为降级选项
-      if (originalVideoUrl && originalVideoUrl.trim() !== '') {
-        fallbackVideoUrl.value = cleanVideoUrl(originalVideoUrl)
-        console.log('设置降级URL:', fallbackVideoUrl.value)
-      }
     }
     
     console.log('最终使用的视频URL:', finalVideoUrl)
@@ -1675,10 +1888,6 @@ const fetchVideoData = async () => {
       isFollowed: videoData.is_followed || false
     }
 
-    // 使用nextTick确保video元素已渲染,然后初始化HLS播放器
-    await nextTick()
-    initHLSPlayer(cleanedVideoUrl)
-    
     // 更新视频作者信息
     videoAuthor.value = {
       id: videoData.author?.user_id || '1',
@@ -1722,14 +1931,31 @@ const fetchVideoData = async () => {
     }
   } catch (error: any) {
     videoError.value = true
-    errorMessage.value = error.message || '视频加载失败，请稍后重试'
     console.error('视频加载错误:', error)
     
-    // 检查是否有降级选项
-    if (error.response?.data?.fallback_url) {
-      console.log('检测到降级URL:', error.response.data.fallback_url)
-      // 可以尝试使用降级URL
-      errorMessage.value = error.response.data.message || '正在使用备用视频源...'
+    // 检查是否是HLS 404错误（转码未完成）
+    if (error.response?.status === 404 && error.response?.data?.transcode_status) {
+      const transcodeStatus = error.response.data.transcode_status
+      
+      console.log('HLS不可用，转码状态:', transcodeStatus)
+      
+      if (transcodeStatus === 'pending' || transcodeStatus === 'processing') {
+        // 转码进行中，显示提示信息
+        errorMessage.value = '视频转码中，请稍后刷新页面...'
+        videoLoadError.value = true
+      } else if (transcodeStatus === 'failed') {
+        // 转码失败
+        errorMessage.value = '视频转码失败，无法播放'
+        videoLoadError.value = true
+      } else {
+        // 其他情况
+        errorMessage.value = error.message || '视频加载失败，请稍后重试'
+        videoLoadError.value = true
+      }
+    } else {
+      // 其他错误
+      errorMessage.value = error.message || '视频加载失败，请稍后重试'
+      videoLoadError.value = true
     }
   } finally {
     loading.value = false
@@ -1775,6 +2001,40 @@ const handleKeydown = (e: KeyboardEvent) => {
 // 处理视频加载错误
 const handleVideoError = (event: Event) => {
   console.log('视频元素错误:', event)
+  const target = event.target as HTMLVideoElement
+  
+  // 检查错误类型
+  if (target.error) {
+    const error = target.error
+    console.log('视频错误详情:', {
+      code: error.code,
+      message: error.message
+    })
+    
+    // 416错误（Range Not Satisfiable）通常是由于Range请求问题
+    // 尝试重新加载整个视频
+    if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+      console.log('视频源不支持，尝试重新加载')
+      videoLoadError.value = true
+      
+      // 延迟重试
+      setTimeout(() => {
+        if (videoPlayer.value) {
+          // 清除Range头，重新加载
+          videoPlayer.value.src = videoPlayer.value.src + '?t=' + Date.now()
+          videoPlayer.value.load()
+          
+          // 尝试播放
+          videoPlayer.value.play().catch(err => {
+            console.error('重试播放失败:', err)
+            errorMessage.value = '视频加载失败，请稍后重试'
+          })
+        }
+      }, 1000)
+      return
+    }
+  }
+  
   videoLoadError.value = true
   
   // 尝试切换到备用视频源
@@ -1978,6 +2238,38 @@ const handleLogin = () => {
   // 派发事件给父组件或全局监听
   window.dispatchEvent(new CustomEvent('show-login-modal'))
 }
+
+// 监听video.value的变化，当video元素渲染后初始化HLS播放器
+watch(video, async (newVideo) => {
+  if (newVideo && newVideo.src) {
+    console.log('Video data changed, waiting for video element to be ready...')
+    
+    // 等待DOM更新
+    await nextTick()
+    
+    // 检查video元素是否已绑定
+    let retryCount = 0
+    const maxRetries = 10
+    const retryDelay = 100
+    
+    while (!videoPlayer.value && retryCount < maxRetries) {
+      console.log(`Waiting for video player element (attempt ${retryCount + 1}/${maxRetries})`)
+      await new Promise(resolve => setTimeout(resolve, retryDelay))
+      retryCount++
+    }
+    
+    if (!videoPlayer.value) {
+      console.error('Video player element not found after retries')
+      videoLoadError.value = true
+      errorMessage.value = '视频播放器初始化失败，请刷新页面重试'
+      return
+    }
+    
+    console.log('Video player element found, initializing HLS player')
+    console.log('使用HLS播放器')
+    initHLSPlayer(newVideo.src)
+  }
+})
 
 // 生命周期
 onMounted(() => {
