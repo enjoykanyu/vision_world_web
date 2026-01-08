@@ -878,14 +878,36 @@ const startUpload = async () => {
     remainingTime.value = 0
     
     // 处理上传成功后的逻辑
+    console.log('Upload response:', response)
+    
     if (response && response.data) {
-      // 使用真实的视频ID和URL
-      uploadedVideoId.value = (response.data as any).video_id || Math.floor(Math.random() * 1000000000).toString()
-      videoPreviewUrl.value = (response.data as any).video_url || URL.createObjectURL(selectedFile.value as File)
+      const responseData = response.data
+      
+      if (responseData.video_id) {
+        uploadedVideoId.value = responseData.video_id.toString()
+        console.log('Using video_id from response:', uploadedVideoId.value)
+      } else if (responseData.data && responseData.data.video_id) {
+        uploadedVideoId.value = responseData.data.video_id.toString()
+        console.log('Using video_id from response.data:', uploadedVideoId.value)
+      } else {
+        console.error('No video_id found in response:', responseData)
+        alert('上传成功但未获取到视频ID，请重试')
+        uploadProgress.value = 0
+        return
+      }
+      
+      if (responseData.video_url) {
+        videoPreviewUrl.value = responseData.video_url
+      } else if (responseData.data && responseData.data.video_url) {
+        videoPreviewUrl.value = responseData.data.video_url
+      } else {
+        videoPreviewUrl.value = URL.createObjectURL(selectedFile.value as File)
+      }
     } else {
-      // 降级处理
-      uploadedVideoId.value = Math.floor(Math.random() * 1000000000).toString()
-      videoPreviewUrl.value = URL.createObjectURL(selectedFile.value as File)
+      console.error('Invalid upload response:', response)
+      alert('上传响应格式错误，请重试')
+      uploadProgress.value = 0
+      return
     }
   } catch (error) {
     console.error('上传失败:', error)
