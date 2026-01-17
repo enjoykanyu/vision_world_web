@@ -525,10 +525,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import axios from 'axios';
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { videoAPI } from '@/api/video'
 import SuccessAnimation from '@/components/SuccessAnimation.vue'
+import request from '@/utils/request'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -819,113 +821,111 @@ const formatUploadSpeed = (speed: number): string => {
 }
 
 // 开始上传
-const startUpload = async () => {
-  if (!selectedFile.value) return
-  
-  // 重置进度
-  uploadProgress.value = 0
-  uploadSpeed.value = 0
-  remainingTime.value = 0
-  uploadStartTime.value = Date.now()
-  lastProgressTime.value = Date.now()
-  lastProgressValue.value = 0
-  
+const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB分片大小
+
+const checkUploadProgress = async (fileId: string): Promise<number[]> => {
   try {
-    // 创建FormData对象，仅包含视频文件和文件名（根据需求：上传仅需文件）
-    const formData = new FormData()
-    formData.append('video', selectedFile.value as File)
-    formData.append('file_name', selectedFile.value.name)
-    
-    // 为兼容后端接口，添加默认值（根据需求：只有发布才需title等）
-    formData.append('title', selectedFile.value.name.replace(/\.[^/.]+$/, "")) // 使用文件名作为默认标题
-    formData.append('description', '') // 默认空描述
-    formData.append('category', '') // 默认空分类
-    
-    // 调用真实的上传API
-    const response = await videoAPI.uploadVideo(formData, {
-      onUploadProgress: (progressEvent: any) => {
-        if (progressEvent.total) {
-          // 计算真实进度
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          uploadProgress.value = progress
-          
-          // 计算上传速度
-          const now = Date.now()
-          const elapsed = now - lastProgressTime.value
-          if (elapsed > 0) {
-            const bytesUploaded = progressEvent.loaded - (lastProgressValue.value / 100) * progressEvent.total
-            uploadSpeed.value = (bytesUploaded / elapsed) * 1000 / 1024 / 1024 // MB/s
-            
-            // 计算剩余时间
-            if (progress < 100 && uploadSpeed.value > 0) {
-              const remainingBytes = progressEvent.total - progressEvent.loaded
-              remainingTime.value = Math.round((remainingBytes / (uploadSpeed.value * 1024 * 1024)) * 1000 / 1000) // 秒
-            } else {
-              remainingTime.value = 0
-            }
-          }
-          
-          // 更新上次进度时间和值
-          lastProgressTime.value = now
-          lastProgressValue.value = progress
-        }
+    const res = await request.get(`/api/upload/check?fileId=${fileId}`);
+    return res.data.uploadedChunks || [];
+  } catch (error) {
+    console.error('检查上传进度失败:', error);
+    return [];
+  }
+};
+
+const uploadChunk = async (chunk: Blob, index: number, totalChunks: number, fileId: string) => {
+  const formData = new FormData();
+  formData.append('file', chunk);
+  formData.append('fileId', fileId);
+  formData.append('chunkIndex', index.toString());
+  formData.append('totalChunks', totalChunks.toString());
+
+  // 获取token
+  const userStore = useUserStore();
+  const token = userStore.accessToken || localStorage.getItem('access_token');
+
+  try {
+    await axios.post('/api/upload/chunk', formData, {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: (event: any) => {
+        const chunkProgress = (event.loaded / event.total) * 100;
+        uploadProgress.value = ((index + chunkProgress / 100) / totalChunks) * 100;
       }
-    })
-    
-    // 上传成功
-    uploadProgress.value = 100
-    uploadSpeed.value = 0
-    remainingTime.value = 0
-    
-    // 处理上传成功后的逻辑
-    console.log('Upload response:', response)
-    
-    if (response && response.data) {
-      const responseData = response.data
-      
-      if (responseData.video_id) {
-        uploadedVideoId.value = responseData.video_id.toString()
-        console.log('Using video_id from response:', uploadedVideoId.value)
-      } else if (responseData.data && responseData.data.video_id) {
-        uploadedVideoId.value = responseData.data.video_id.toString()
-        console.log('Using video_id from response.data:', uploadedVideoId.value)
-      } else {
-        console.error('No video_id found in response:', responseData)
-        alert('上传成功但未获取到视频ID，请重试')
-        uploadProgress.value = 0
-        return
+    });
+    return true;
+  } catch (error) {
+    console.error(`上传分片${index}失败:`, error);
+    return false;
+  }
+};
+
+const startUpload = async () => {
+  if (!selectedFile.value) return;
+
+  const file = selectedFile.value;
+  // 使用UUID生成唯一文件ID，避免文件名编码问题
+  const fileId = crypto.randomUUID();
+  const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+  const uploadedChunks = await checkUploadProgress(fileId);
+
+  console.log(`开始上传: fileId=${fileId}, totalChunks=${totalChunks}, 已上传=${uploadedChunks.join(',')}`);
+
+  // 串行上传每个分片
+  for (let i = 0; i < totalChunks; i++) {
+    // 检查是否已上传
+    if (uploadedChunks.includes(i)) {
+      console.log(`分片${i}已存在，跳过`);
+      uploadProgress.value = ((i + 1) / totalChunks) * 100;
+      continue;
+    }
+
+    const start = i * CHUNK_SIZE;
+    const end = Math.min(start + CHUNK_SIZE, file.size);
+    const chunk = file.slice(start, end);
+
+    console.log(`上传分片${i}: size=${chunk.size}, start=${start}, end=${end}`);
+
+    let success = false;
+    for (let retry = 0; retry < 3; retry++) {
+      success = await uploadChunk(chunk, i, totalChunks, fileId);
+      if (success) {
+        console.log(`分片${i}上传成功`);
+        break;
       }
-      
-      if (responseData.video_url) {
-        videoPreviewUrl.value = responseData.video_url
-      } else if (responseData.data && responseData.data.video_url) {
-        videoPreviewUrl.value = responseData.data.video_url
-      } else {
-        videoPreviewUrl.value = URL.createObjectURL(selectedFile.value as File)
-      }
+      console.log(`分片${i}重试${retry + 1}/3`);
+    }
+
+    if (!success) {
+      console.error(`分片${i}上传失败`);
+      alert(`分片${i}上传失败，请重试`);
+      return;
+    }
+
+    // 更新进度
+    uploadProgress.value = ((i + 1) / totalChunks) * 100;
+  }
+
+  console.log('所有分片上传完成，调用CompleteUpload');
+
+  // 完成上传
+  try {
+    const response = await request.post('/api/upload/complete', { fileId: fileId });
+    uploadProgress.value = 100;
+    
+    // 使用后端返回的video_id
+    if (response.data.video_id) {
+      uploadedVideoId.value = response.data.video_id.toString();
+      videoPreviewUrl.value = `/api/play/${response.data.video_id}`;
+      console.log('视频上传完成，video_id:', response.data.video_id);
     } else {
-      console.error('Invalid upload response:', response)
-      alert('上传响应格式错误，请重试')
-      uploadProgress.value = 0
-      return
+      uploadedVideoId.value = fileId;
+      videoPreviewUrl.value = `/api/play/${fileId}`;
     }
   } catch (error) {
-    console.error('上传失败:', error)
-    alert('视频上传失败，请重试')
-    // 重置进度
-    uploadProgress.value = 0
-    uploadSpeed.value = 0
-    remainingTime.value = 0
-  } finally {
-    // 清除所有定时器
-    if (progressInterval) {
-      clearInterval(progressInterval)
-      progressInterval = null
-    }
-    if (finalProgress) {
-      clearTimeout(finalProgress)
-      finalProgress = null
-    }
+    console.error('完成上传失败:', error);
   }
 }
 
