@@ -107,7 +107,7 @@
             <template v-else>
               <tr 
                 v-for="video in videos" 
-                :key="video.video_id" 
+                :key="video.id" 
                 class="border-b border-bilibili-gray-100 hover:bg-bilibili-gray-50 transition-colors"
               >
                 <td class="py-4 px-4">
@@ -118,7 +118,7 @@
                     <div class="w-24 h-14 bg-bilibili-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                       <img 
                         v-if="video.cover_url" 
-                        :src="video.cover_url" 
+                        :src="video.cover_url.replace(/`/g, '')" 
                         :alt="video.title" 
                         class="w-full h-full object-cover"
                       >
@@ -133,20 +133,20 @@
                     </div>
                     <div>
                       <div class="font-medium text-bilibili-gray-900 text-sm line-clamp-2">{{ video.title }}</div>
-                      <div class="text-xs text-bilibili-gray-600 mt-1">视频ID: {{ video.video_id }}</div>
+                      <div class="text-xs text-bilibili-gray-600 mt-1">视频ID: {{ video.id }}</div>
                     </div>
                   </div>
                 </td>
-                <td class="py-4 px-4 text-sm text-bilibili-gray-600">{{ video.view_count }}</td>
+                <td class="py-4 px-4 text-sm text-bilibili-gray-600">{{ video.play_count }}</td>
                 <td class="py-4 px-4 text-sm text-bilibili-gray-600">{{ video.like_count || 0 }}</td>
                 <td class="py-4 px-4">
                   <span class="px-2 py-0.5 text-xs bg-bilibili-success/10 text-bilibili-success rounded-full">已发布</span>
                 </td>
-                <td class="py-4 px-4 text-sm text-bilibili-gray-600">{{ new Date(video.published_at).toLocaleString() }}</td>
+                <td class="py-4 px-4 text-sm text-bilibili-gray-600">{{ new Date(video.create_time * 1000).toLocaleString() }}</td>
                 <td class="py-4 px-4">
                   <div class="flex space-x-2">
                     <button class="text-bilibili-primary text-xs hover:underline">编辑</button>
-                    <button class="text-bilibili-primary text-xs hover:underline">查看</button>
+                    <button class="text-bilibili-primary text-xs hover:underline" @click="viewVideo(video.id)">查看</button>
                     <button class="text-bilibili-gray-600 text-xs hover:underline">更多</button>
                   </div>
                 </td>
@@ -201,10 +201,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/userStore'
+import { useRouter } from 'vue-router'
 import { videoAPI } from '@/api/video'
 
 // 初始化用户store
 const userStore = useUserStore()
+const router = useRouter()
 
 // 视频列表数据
 const videos = ref<any[]>([])
@@ -226,12 +228,12 @@ const fetchUserVideos = async () => {
       page_size: pageSize.value
     })
     
-    if (response.data.data.status_code === 0) {
-      videos.value = response.data.data.videos
-      total.value = response.data.data.total
-      hasMore.value = response.data.data.has_more
+    if (response.data.status_code === 0) {
+      videos.value = response.data.videos
+      total.value = response.data.total
+      hasMore.value = response.data.has_more
     } else {
-      console.error('获取视频列表失败:', response.data.data.status_msg)
+      console.error('获取视频列表失败:', response.data.status_msg)
     }
   } catch (error) {
     console.error('获取视频列表失败:', error)
@@ -260,6 +262,11 @@ const nextPage = () => {
     currentPage.value++
     fetchUserVideos()
   }
+}
+
+// 查看视频详情
+const viewVideo = (videoId: number) => {
+  router.push(`/video/${videoId}`)
 }
 
 // 组件挂载时获取视频列表

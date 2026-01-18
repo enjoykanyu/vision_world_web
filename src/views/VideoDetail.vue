@@ -142,18 +142,30 @@
 
               <!-- 自定义视频控制栏 -->
               <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 opacity-0 transition-opacity duration-300 ease-in-out" :class="{ 'opacity-100': !isPlaying || showControls }" id="video-controls">
-                <!-- 进度条 -->
-                <div class="relative h-1.5 bg-gray-700 rounded-full mb-3 cursor-pointer group/seek" 
-                     @click="seek" 
+                <!-- 进度条 - B站风格三层进度条 -->
+                <div class="relative h-1.5 bg-gray-700 rounded-full mb-3 cursor-pointer group/seek"
+                     @click="seek"
+                     @mousemove="handleProgressHover"
+                     @mouseleave="handleProgressLeave"
                      @mousedown="startSeeking"
                      @touchstart="startSeeking">
-                  <div class="absolute h-full bg-gray-500 rounded-full" :style="{ width: `${progress}%` }">
-                    <div class="absolute h-full bg-red-500 rounded-full transition-all duration-100 ease-out" :style="{ width: `${progress}%` }"></div>
-                  </div>
-                  <div class="absolute h-4 w-4 bg-white rounded-full -mt-1.25 cursor-grab active:cursor-grabbing shadow-lg opacity-0 group-hover/seek:opacity-100 transition-opacity duration-100 ease-out" 
+                  <!-- 未缓存区域（底层） -->
+                  <div class="absolute h-full bg-gray-700 rounded-full w-full"></div>
+                  <!-- 已缓存进度（中间层） -->
+                  <div class="absolute h-full bg-blue-500 rounded-full transition-all duration-300 ease-out" :style="{ width: `${bufferProgress}%` }"></div>
+                  <!-- 已播放进度（顶层） -->
+                  <div class="absolute h-full bg-pink-500 rounded-full transition-all duration-100 ease-out" :style="{ width: `${progress}%` }"></div>
+                  <!-- 拖动手柄 -->
+                  <div class="absolute h-4 w-4 bg-white rounded-full -mt-1.25 cursor-grab active:cursor-grabbing shadow-lg opacity-0 group-hover/seek:opacity-100 transition-opacity duration-100 ease-out"
                        :style="{ left: `${progress}%` }"
                        @mousedown="startSeeking"
                        @touchstart="startSeeking"></div>
+                  <!-- 悬停时间提示 -->
+                  <div v-if="hoverTime !== null"
+                       class="absolute -top-8 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none transition-opacity duration-200"
+                       :style="{ left: `${hoverProgress}%`, transform: 'translateX(-50%)' }">
+                    {{ formatTime(hoverTime) }}
+                  </div>
                 </div>
 
                 <!-- 控制按钮和时间 -->
@@ -274,8 +286,8 @@
             <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
               <div class="flex items-center space-x-8">
                 <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="toggleLike">
-                  <i class="fas fa-thumbs-up text-xl group-hover:scale-110 transition-transform" :class="isLiked ? 'text-bilibili-pink' : ''"></i>
-                  <span class="font-medium">{{ videoStats.likeCount }}</span>
+                  <i class="fas text-xl group-hover:scale-110 transition-transform" :class="isLiked ? 'fa-thumbs-up text-bilibili-pink' : 'fa-thumbs-up'" :style="isLiked ? { color: '#FB7299' } : {}"></i>
+                  <span class="font-medium" :style="isLiked ? { color: '#FB7299' } : {}">{{ videoStats.likeCount }}</span>
                 </button>
                 <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="toggleCoin">
                   <i class="fas fa-coins text-xl group-hover:scale-110 transition-transform" :class="isCoined ? 'text-bilibili-pink' : ''"></i>
@@ -462,6 +474,12 @@ const bufferHealth = ref(100)
 const loadingProgress = ref(0)
 const autoQuality = ref(true) // 播放锁，防止 rapid play/pause
 
+// 网络质量检测相关
+const networkSpeedHistory = ref<number[]>([])
+const lastNetworkCheckTime = ref(0)
+const NETWORK_CHECK_INTERVAL = 5000 // 每5秒检测一次网络质量
+const NETWORK_SPEED_SAMPLES = 5 // 保留最近5次网络速度样本
+
 // 路由
 const route = useRoute()
 const videoId = route.params.id as string
@@ -567,9 +585,12 @@ const currentTime = ref(0)
 const duration = ref(0)
 const isFullscreen = ref(false)
 const progress = ref(0)
+const bufferProgress = ref(0) // 缓存进度
 const isHovered = ref(false)
 const videoLoadError = ref(false)
 const showControls = ref(false) // 控制栏显示状态
+const hoverTime = ref<number | null>(null) // 悬停时间
+const hoverProgress = ref(0) // 悬停进度位置
 let controlsTimeout: number | null = null
 
 // 模拟数据
@@ -584,7 +605,7 @@ const videoStats = ref({
   watchingCount: '268'
 })
 
-// 点赞收藏转发状态
+// 点赞、投币、收藏转发状态
 const isLiked = ref(false)
 const isFavorited = ref(false)
 const isCoined = ref(false)
@@ -761,13 +782,13 @@ const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
     // 启用Worker提升性能（B站核心优化）
     enableWorker: true,
     workerPath: 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.worker.js',
-    
+
     // B站低延迟模式配置
     lowLatencyMode: true,
     backBufferLength: 120, // 后缓冲区长度（B站标准：120秒）
     maxBufferLength: 60, // 最大缓冲区长度（B站标准：60秒）
     maxMaxBufferLength: 120, // 最大缓冲区长度限制（B站标准：120秒）
-    
+
     // 加载超时配置（B站优化策略）
     manifestLoadingTimeOut: 15000, // 播放列表加载超时（毫秒）
     manifestLoadingMaxRetry: 5, // 播放列表最大重试次数
@@ -775,7 +796,7 @@ const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
     levelLoadingMaxRetry: 5, // 质量级别最大重试次数
     fragLoadingTimeOut: 25000, // 分片加载超时
     fragLoadingMaxRetry: 8, // 分片最大重试次数
-    
+
     // 自适应比特率配置（B站ABR算法）
     abrEwmaFastLive: 4.0, // 快速移动平均窗口
     abrEwmaSlowLive: 10.0, // 慢速移动平均窗口
@@ -785,16 +806,16 @@ const initHLSPlayer = async (videoUrl: string, retryCount = 0) => {
     abrBandWidthFactor: 0.9, // 带宽安全系数
     abrBandWidthUpFactor: 0.8, // 带宽上升因子
     abrMaxWithRealBitrate: true, // 使用实际比特率限制
-    
+
     // 缓冲区配置（B站优化）
     maxBufferHole: 0.3, // 最大缓冲区空洞（秒）
     maxFragLookUpTolerance: 0.1, // 分片查找容差
-    
+
     // 其他优化（B站特性）
     maxAudioBufferSize: 120, // 最大音频缓冲区大小
     enableStitching: true, // 启用分片拼接
     enableMP4Remuxing: true, // 启用MP4重封装
-    
+
     // 调试日志
     debug: false,
   }
@@ -1060,14 +1081,73 @@ const handleNativeVideoError = () => {
 const updateNetworkQuality = (bandwidth: number) => {
   // 带宽单位是bps
   const kbps = bandwidth / 1000
-  
-  if (kbps > 3000) {
+
+  // 更新网络速度历史
+  networkSpeedHistory.value.push(kbps)
+  if (networkSpeedHistory.value.length > NETWORK_SPEED_SAMPLES) {
+    networkSpeedHistory.value.shift()
+  }
+
+  // 计算平均网络速度
+  const avgSpeed = networkSpeedHistory.value.reduce((sum, speed) => sum + speed, 0) / networkSpeedHistory.value.length
+
+  // 根据平均速度判断网络质量
+  if (avgSpeed > 3000) {
     networkQuality.value = 'good'
-  } else if (kbps > 1000) {
+  } else if (avgSpeed > 1000) {
     networkQuality.value = 'fair'
   } else {
     networkQuality.value = 'poor'
   }
+
+  // 更新当前带宽
+  currentBandwidth.value = bandwidth
+
+  console.log(`网络质量更新: ${networkQuality.value}, 平均速度: ${avgSpeed.toFixed(0)}kbps, 当前速度: ${kbps.toFixed(0)}kbps`)
+}
+
+// 定期检测网络质量
+const startNetworkQualityCheck = () => {
+  const checkNetwork = () => {
+    if (!hlsInstance.value || !videoPlayer.value) return
+
+    // 获取当前播放速度
+    const now = Date.now()
+    if (now - lastNetworkCheckTime.value < NETWORK_CHECK_INTERVAL) return
+
+    lastNetworkCheckTime.value = now
+
+    // 从HLS实例获取带宽信息
+    if (hlsInstance.value.levels && hlsInstance.value.currentLevel !== -1) {
+      const currentLevel = hlsInstance.value.levels[hlsInstance.value.currentLevel]
+      if (currentLevel && currentLevel.bitrate) {
+        updateNetworkQuality(currentLevel.bitrate)
+      }
+    } else {
+      // 如果没有HLS级别信息，使用默认估算
+      const bufferedRanges = videoPlayer.value.buffered
+      if (bufferedRanges.length > 0) {
+        const currentTime = videoPlayer.value.currentTime
+        const bufferedEnd = bufferedRanges.end(bufferedRanges.length - 1)
+        const bufferedDuration = bufferedEnd - currentTime
+
+        // 根据缓冲区大小估算网络质量
+        if (bufferedDuration > 60) {
+          networkQuality.value = 'good'
+          currentBandwidth.value = 5000000 // 5Mbps
+        } else if (bufferedDuration > 30) {
+          networkQuality.value = 'fair'
+          currentBandwidth.value = 2000000 // 2Mbps
+        } else {
+          networkQuality.value = 'poor'
+          currentBandwidth.value = 500000 // 500kbps
+        }
+      }
+    }
+  }
+
+  // 每5秒检测一次
+  setInterval(checkNetwork, NETWORK_CHECK_INTERVAL)
 }
 
 // 更新缓冲区健康度
@@ -1379,19 +1459,36 @@ const smoothQualitySwitch = (targetLevel: number) => {
 // 跳转播放位置
 const seek = (e: MouseEvent) => {
   if (!videoPlayer.value || !e.currentTarget) return
-  
+
   const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
   const pos = (e.clientX - rect.left) / rect.width
   const newTime = pos * duration.value
-  
+
   videoPlayer.value.currentTime = newTime
   currentTime.value = newTime
   progress.value = pos * 100
-  
+
   // 跳转时，根据新的视频时间更新弹幕
   if (danmakuEnabled.value) {
     updateDanmakusOnSeek(newTime)
   }
+}
+
+// 处理进度条悬停，显示时间提示
+const handleProgressHover = (e: MouseEvent) => {
+  if (!e.currentTarget || duration.value === 0) return
+
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+  const newTime = pos * duration.value
+
+  hoverProgress.value = pos * 100
+  hoverTime.value = newTime
+}
+
+// 处理进度条离开，隐藏时间提示
+const handleProgressLeave = () => {
+  hoverTime.value = null
 }
 
 // 开始拖动进度条
@@ -1437,18 +1534,24 @@ const handleSeeking = (e: MouseEvent | TouchEvent) => {
 // 停止拖动
 const stopSeeking = () => {
   if (!isSeeking.value || !videoPlayer.value) return
-  
+
   isSeeking.value = false
-  
+
   // 在拖动结束时真正跳转到指定位置
   const targetTime = (progress.value / 100) * duration.value
   videoPlayer.value.currentTime = targetTime
-  
+
   // 跳转时，根据新的视频时间更新弹幕
   if (danmakuEnabled.value) {
     updateDanmakusOnSeek(targetTime)
   }
-  
+
+  // 拖动后立即预加载新位置周围的分片
+  if (video.value && isPlaying.value) {
+    console.log('拖动结束，开始预加载新位置周围的分片')
+    preloadSegments()
+  }
+
   // 移除全局事件监听器
   document.removeEventListener('mousemove', handleSeeking)
   document.removeEventListener('mouseup', stopSeeking)
@@ -1698,32 +1801,59 @@ const goToUserHome = () => {
 }
 
 // 点赞功能
-const toggleLike = () => {
-  isLiked.value = !isLiked.value
-  if (isLiked.value) {
-    videoStats.value.likeCount = (parseInt(videoStats.value.likeCount) + 1).toString()
-  } else {
-    videoStats.value.likeCount = (parseInt(videoStats.value.likeCount) - 1).toString()
+const toggleLike = async () => {
+  try {
+    const response = await videoAPI.likeVideo({ video_id: video.value.id, action_type: !isLiked.value })
+    if (response.data.status_code === 0) {
+      isLiked.value = !isLiked.value
+      if (isLiked.value) {
+        videoStats.value.likeCount = (parseInt(videoStats.value.likeCount) + 1).toString()
+      } else {
+        videoStats.value.likeCount = (parseInt(videoStats.value.likeCount) - 1).toString()
+      }
+    } else {
+      console.error('点赞失败:', response.data.status_msg)
+    }
+  } catch (error) {
+    console.error('点赞请求失败:', error)
   }
 }
 
 // 投币功能
-const toggleCoin = () => {
-  isCoined.value = !isCoined.value
-  if (isCoined.value) {
-    videoStats.value.coinCount = (parseInt(videoStats.value.coinCount) + 1).toString()
-  } else {
-    videoStats.value.coinCount = (parseInt(videoStats.value.coinCount) - 1).toString()
+const toggleCoin = async () => {
+  try {
+    const response = await videoAPI.coinVideo({ video_id: video.value.id, action_type: !isCoined.value })
+    if (response.data.status_code === 0) {
+      isCoined.value = !isCoined.value
+      if (isCoined.value) {
+        videoStats.value.coinCount = (parseInt(videoStats.value.coinCount) + 1).toString()
+      } else {
+        videoStats.value.coinCount = (parseInt(videoStats.value.coinCount) - 1).toString()
+      }
+    } else {
+      console.error('投币失败:', response.data.status_msg)
+    }
+  } catch (error) {
+    console.error('投币请求失败:', error)
   }
 }
 
 // 收藏功能
-const toggleFavorite = () => {
-  isFavorited.value = !isFavorited.value
-  if (isFavorited.value) {
-    videoStats.value.favoriteCount = (parseInt(videoStats.value.favoriteCount) + 1).toString()
-  } else {
-    videoStats.value.favoriteCount = (parseInt(videoStats.value.favoriteCount) - 1).toString()
+const toggleFavorite = async () => {
+  try {
+    const response = await videoAPI.favoriteVideo({ video_id: video.value.id, action_type: !isFavorited.value })
+    if (response.data.status_code === 0) {
+      isFavorited.value = !isFavorited.value
+      if (isFavorited.value) {
+        videoStats.value.favoriteCount = (parseInt(videoStats.value.favoriteCount) + 1).toString()
+      } else {
+        videoStats.value.favoriteCount = (parseInt(videoStats.value.favoriteCount) - 1).toString()
+      }
+    } else {
+      console.error('收藏失败:', response.data.status_msg)
+    }
+  } catch (error) {
+    console.error('收藏请求失败:', error)
   }
 }
 
@@ -2135,12 +2265,21 @@ const onVideoWaiting = () => {
 const onVideoCanPlay = () => {
   console.log('视频可以开始播放')
   videoLoadError.value = false
+  // 更新缓存进度
+  updateBufferProgress()
 }
 
 // 视频播放事件
 const onVideoPlay = () => {
   console.log('视频开始播放')
   isPlaying.value = true
+
+  // 开始网络质量检测
+  startNetworkQualityCheck()
+
+  // 开始预加载分片
+  preloadSegments()
+
   // 开始更新弹幕位置
   if (danmakuEnabled.value && danmakuPool.value.length === 0) {
     // 只有当弹幕池为空时，才重新生成弹幕
@@ -2187,8 +2326,68 @@ const onTimeUpdate = () => {
     currentTime.value = videoPlayer.value.currentTime
     progress.value = (videoPlayer.value.currentTime / duration.value) * 100
     
+    // 更新缓存进度
+    updateBufferProgress()
+    
     // 更新弹幕位置
     updateDanmakusPosition()
+  }
+}
+
+// 更新缓存进度
+const updateBufferProgress = () => {
+  if (videoPlayer.value && videoPlayer.value.buffered.length > 0) {
+    const bufferedEnd = videoPlayer.value.buffered.end(videoPlayer.value.buffered.length - 1)
+    bufferProgress.value = (bufferedEnd / duration.value) * 100
+  }
+}
+
+// 预加载分片
+const preloadSegments = async () => {
+  if (!videoPlayer.value || !isPlaying.value || !video.value) return
+
+  const currentTime = videoPlayer.value.currentTime
+
+  // 根据网络质量确定预加载时间范围
+  let preloadTime: number
+  switch (networkQuality.value) {
+    case 'good':
+      preloadTime = 60 // 良好网络：预加载60秒
+      break
+    case 'fair':
+      preloadTime = 30 // 一般网络：预加载30秒
+      break
+    case 'poor':
+      preloadTime = 15 // 较差网络：预加载15秒
+      break
+    default:
+      preloadTime = 30 // 默认30秒
+  }
+
+  const endTime = Math.min(currentTime + preloadTime, duration.value)
+
+  // 计算需要预加载的分片范围
+  const startSegment = Math.floor(currentTime / 10) // 假设每个分片10秒
+  const endSegment = Math.floor(endTime / 10)
+
+  // 获取当前选择的清晰度
+  const currentResolution = videoQuality.value || 'auto'
+
+  console.log(`预加载策略: 网络质量=${networkQuality.value}, 预加载时间=${preloadTime}秒, 分片范围=${startSegment}-${endSegment}`)
+
+  // 预加载当前清晰度的分片
+  for (let i = startSegment; i <= endSegment; i++) {
+    const segmentUrl = `http://localhost:8080/api/video/${video.value.id}/stream/${currentResolution}/segment_${i.toString().padStart(3, '0')}.ts`
+    try {
+      // 使用 fetch 预加载，不缓存到内存
+      await fetch(segmentUrl, {
+        method: 'HEAD', // 只请求头，不下载内容
+        cache: 'force-cache',
+      })
+      console.log(`预加载 ${currentResolution} 分片 ${i} 完成`)
+    } catch (error) {
+      console.error(`预加载 ${currentResolution} 分片 ${i} 失败:`, error)
+    }
   }
 }
 
@@ -2478,6 +2677,70 @@ button:active {
 /* 控制栏进度条悬停效果 */
 .group\/seek:hover .absolute.h-full.bg-gray-500 {
   height: 100%;
+}
+
+/* B站风格进度条样式 */
+.group\/seek {
+  transition: height 0.2s ease-out;
+}
+
+.group\/seek:hover {
+  height: 6px;
+}
+
+/* 进度条层叠样式 */
+.group\/seek > div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.1s ease-out;
+}
+
+/* 未缓存区域（底层） */
+.group\/seek > div:first-child {
+  background-color: #61666D;
+  width: 100%;
+  z-index: 1;
+}
+
+/* 已缓存进度（中间层） */
+.group\/seek > div:nth-child(2) {
+  background-color: #00A1D6;
+  z-index: 2;
+  opacity: 0.8;
+}
+
+/* 已播放进度（顶层） */
+.group\/seek > div:nth-child(3) {
+  background-color: #FB7299;
+  z-index: 3;
+}
+
+/* 拖动手柄 */
+.group\/seek > div:nth-child(4) {
+  z-index: 4;
+  transition: all 0.1s ease-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.group\/seek:hover > div:nth-child(4) {
+  transform: scale(1.2);
+}
+
+/* 悬停时间提示 */
+.group\/seek > div:last-child {
+  z-index: 5;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* 弹幕动画 */
