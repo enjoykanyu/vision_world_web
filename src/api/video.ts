@@ -149,12 +149,41 @@ export const videoAPI = {
 
   /**
    * 点赞/取消点赞视频
-   * @param videoId 视频ID
-   * @param isLike 是否点赞
+   * @param params 请求参数
    * @returns 操作结果
    */
-  likeVideo(videoId: string, isLike = true) {
-    return http.post(`/api/videos/${videoId}/like`, { action_type: isLike })
+  likeVideo(params: { video_id: string; action_type: boolean }) {
+    return http.post<{ 
+      status_code: number; 
+      status_msg: string; 
+      like_count?: number 
+    }>(`/api/video/${params.video_id}/like`, { action_type: params.action_type })
+  },
+
+  /**
+   * 收藏/取消收藏视频
+   * @param params 请求参数
+   * @returns 操作结果
+   */
+  favoriteVideo(params: { video_id: string; action_type: boolean }) {
+    return http.post<{ 
+      status_code: number; 
+      status_msg: string; 
+      favorite_count?: number 
+    }>(`/api/video/${params.video_id}/favorite`, { action_type: params.action_type })
+  },
+
+  /**
+   * 分享视频
+   * @param params 请求参数
+   * @returns 操作结果
+   */
+  shareVideo(params: { video_id: string; share_type: string }) {
+    return http.post<{ 
+      status_code: number; 
+      status_msg: string; 
+      share_count?: number 
+    }>(`/api/video/${params.video_id}/share`, { share_type: params.share_type })
   },
 
   /**
@@ -322,6 +351,24 @@ export const videoAPI = {
       like_count: number; 
       is_liked: boolean 
     }>('/api/video/comment/like', params)
+  },
+
+  /**
+   * 获取视频统计数据
+   * @param videoId 视频ID
+   * @returns 视频统计数据
+   */
+  getVideoStats(videoId: string) {
+    return http.get<{ 
+      status: string; 
+      data: { 
+        like_count: number; 
+        favorite_count: number; 
+        share_count: number; 
+        is_liked: boolean; 
+        is_favorite: boolean 
+      } 
+    }>(`/api/video/${videoId}/stats`)
   }
 }
 

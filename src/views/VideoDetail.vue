@@ -298,7 +298,7 @@
                   <span class="font-medium">{{ videoStats.favoriteCount }}</span>
                 </button>
                 <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="shareVideo">
-                  <i class="fas fa-share text-xl group-hover:scale-110 transition-transform"></i>
+                  <i class="fas fa-share-alt text-xl group-hover:scale-110 transition-transform"></i>
                   <span class="font-medium">{{ videoStats.shareCount }}</span>
                 </button>
               </div>
@@ -595,14 +595,14 @@ let controlsTimeout: number | null = null
 
 // 模拟数据
 const videoStats = ref({
-  viewCount: '9.8万',
-  danmakuCount: '666',
-  likeCount: '1.7万',
-  coinCount: '370',
-  favoriteCount: '3',
-  shareCount: '970',
-  publishTime: '2025-11-28 23:06:47',
-  watchingCount: '268'
+  viewCount: '0',
+  danmakuCount: '0',
+  likeCount: '0',
+  coinCount: '0',
+  favoriteCount: '0',
+  shareCount: '0',
+  publishTime: '',
+  watchingCount: '0'
 })
 
 // 点赞、投币、收藏转发状态
@@ -1803,13 +1803,38 @@ const goToUserHome = () => {
 // 点赞功能
 const toggleLike = async () => {
   try {
+    console.log(video.value.id)
+    console.log(isLiked.value)
     const response = await videoAPI.likeVideo({ video_id: video.value.id, action_type: !isLiked.value })
-    if (response.data.status_code === 0) {
-      isLiked.value = !isLiked.value
-      if (isLiked.value) {
-        videoStats.value.likeCount = (parseInt(videoStats.value.likeCount) + 1).toString()
-      } else {
-        videoStats.value.likeCount = (parseInt(videoStats.value.likeCount) - 1).toString()
+    if (response.data.status_msg === "success") {
+      // 重新获取视频统计数据
+      try {
+        const statsResponse = await videoAPI.getVideoStats(video.value.id)
+        console.log(statsResponse.data)
+        console.log(statsResponse.data.data)
+        console.log(statsResponse.data.data.like_count)
+        if (statsResponse.data) {
+          const likeCount = Math.max(statsResponse.data.data.like_count, 0)
+          const favoriteCount = Math.max(statsResponse.data.data.favorite_count, 0)
+          const shareCount = Math.max(statsResponse.data.data.share_count, 0)
+          
+          videoStats.value.likeCount = likeCount.toString()
+          videoStats.value.favoriteCount = favoriteCount.toString()
+          videoStats.value.shareCount = shareCount.toString()
+          isLiked.value = statsResponse.data.data.is_liked
+          isFavorited.value = statsResponse.data.data.is_favorite
+        }
+      } catch (statsError) {
+        console.warn('重新获取视频统计数据失败:', statsError)
+        // 降级处理：本地更新
+        isLiked.value = !isLiked.value
+        const currentCount = parseInt(videoStats.value.likeCount) || 0
+        if (isLiked.value) {
+          videoStats.value.likeCount = (currentCount + 1).toString()
+        } else {
+          const newCount = Math.max(currentCount - 1, 0)
+          videoStats.value.likeCount = newCount.toString()
+        }
       }
     } else {
       console.error('点赞失败:', response.data.status_msg)
@@ -1841,13 +1866,38 @@ const toggleCoin = async () => {
 // 收藏功能
 const toggleFavorite = async () => {
   try {
+    console.log(video.value.id)
+    console.log(isFavorited.value)
     const response = await videoAPI.favoriteVideo({ video_id: video.value.id, action_type: !isFavorited.value })
-    if (response.data.status_code === 0) {
-      isFavorited.value = !isFavorited.value
-      if (isFavorited.value) {
-        videoStats.value.favoriteCount = (parseInt(videoStats.value.favoriteCount) + 1).toString()
-      } else {
-        videoStats.value.favoriteCount = (parseInt(videoStats.value.favoriteCount) - 1).toString()
+    if (response.data.status_msg === "success") {
+      // 重新获取视频统计数据
+      try {
+        const statsResponse = await videoAPI.getVideoStats(video.value.id)
+        console.log(statsResponse.data)
+        console.log(statsResponse.data.data)
+        console.log(statsResponse.data.data.favorite_count)
+        if (statsResponse.data) {
+          const likeCount = Math.max(statsResponse.data.data.like_count, 0)
+          const favoriteCount = Math.max(statsResponse.data.data.favorite_count, 0)
+          const shareCount = Math.max(statsResponse.data.data.share_count, 0)
+          
+          videoStats.value.likeCount = likeCount.toString()
+          videoStats.value.favoriteCount = favoriteCount.toString()
+          videoStats.value.shareCount = shareCount.toString()
+          isLiked.value = statsResponse.data.data.is_liked
+          isFavorited.value = statsResponse.data.data.is_favorite
+        }
+      } catch (statsError) {
+        console.warn('重新获取视频统计数据失败:', statsError)
+        // 降级处理：本地更新
+        isFavorited.value = !isFavorited.value
+        const currentCount = parseInt(videoStats.value.favoriteCount) || 0
+        if (isFavorited.value) {
+          videoStats.value.favoriteCount = (currentCount + 1).toString()
+        } else {
+          const newCount = Math.max(currentCount - 1, 0)
+          videoStats.value.favoriteCount = newCount.toString()
+        }
       }
     } else {
       console.error('收藏失败:', response.data.status_msg)
@@ -1858,10 +1908,39 @@ const toggleFavorite = async () => {
 }
 
 // 分享功能
-const shareVideo = () => {
-  videoStats.value.shareCount = (parseInt(videoStats.value.shareCount) + 1).toString()
-  // 实际应用中应该调用分享API
-  console.log('分享视频')
+const shareVideo = async () => {
+  try {
+    console.log(video.value.id)
+    const response = await videoAPI.shareVideo({ video_id: video.value.id, share_type: 'web' })
+    if (response.data.status_msg === "success") {
+      // 重新获取视频统计数据
+      try {
+        const statsResponse = await videoAPI.getVideoStats(video.value.id)
+        console.log(statsResponse.data)
+        console.log(statsResponse.data.data)
+        console.log(statsResponse.data.data.share_count)
+        if (statsResponse.data) {
+          const likeCount = Math.max(statsResponse.data.data.like_count, 0)
+          const favoriteCount = Math.max(statsResponse.data.data.favorite_count, 0)
+          const shareCount = Math.max(statsResponse.data.data.share_count, 0)
+          
+          videoStats.value.likeCount = likeCount.toString()
+          videoStats.value.favoriteCount = favoriteCount.toString()
+          videoStats.value.shareCount = shareCount.toString()
+          isLiked.value = statsResponse.data.data.is_liked
+          isFavorited.value = statsResponse.data.data.is_favorite
+        }
+      } catch (statsError) {
+        console.warn('重新获取视频统计数据失败:', statsError)
+        // 降级处理：本地更新
+        videoStats.value.shareCount = (parseInt(videoStats.value.shareCount) + 1).toString()
+      }
+    } else {
+      console.error('分享失败:', response.data.status_msg)
+    }
+  } catch (error) {
+    console.error('分享请求失败:', error)
+  }
 }
 
 // 切换播放状态
@@ -2024,6 +2103,24 @@ const fetchVideoData = async () => {
       name: videoData.author?.username || '未知作者',
       avatar: videoData.author?.avatar || '',
       followerCount: videoData.author?.follower_count || 0
+    }
+
+    // 获取视频统计数据
+    try {
+      const statsResponse = await videoAPI.getVideoStats(videoId)
+      if (statsResponse.data) {
+        videoStats.value.likeCount = statsResponse.data.data.like_count.toString()
+        videoStats.value.favoriteCount = statsResponse.data.data.favorite_count.toString()
+        videoStats.value.shareCount = statsResponse.data.data.share_count.toString()
+        isLiked.value = statsResponse.data.data.is_liked
+        isFavorited.value = statsResponse.data.data.is_favorite
+      }
+    } catch (statsError) {
+      console.warn('获取视频统计数据失败:', statsError)
+      // 使用默认值
+      videoStats.value.likeCount = videoData.like_count?.toString() || '0'
+      videoStats.value.favoriteCount = videoData.favorite_count?.toString() || '0'
+      videoStats.value.shareCount = videoData.share_count?.toString() || '0'
     }
 
     // 加载弹幕数据
