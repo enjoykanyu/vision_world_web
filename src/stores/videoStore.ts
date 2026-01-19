@@ -518,6 +518,82 @@ export const useVideoStore = defineStore('video', () => {
     }
   }
 
+  // 点赞评论
+  async function likeComment(params: {
+    commentId: number;
+    actionType: boolean;
+  }): Promise<{
+    status_code: number;
+    status_msg: string;
+    like_count: number;
+    is_liked: boolean;
+  }> {
+    const { commentId, actionType } = params
+    
+    try {
+      const result = await videoAPI.likeComment({
+        comment_id: commentId,
+        action_type: actionType
+      })
+      return result
+    } catch (error: any) {
+      console.error('点赞评论失败:', error)
+      return { status_code: 500, status_msg: error.message || '点赞评论失败', like_count: 0, is_liked: false }
+    }
+  }
+
+  // 回复评论
+  async function replyComment(params: {
+    commentId: number;
+    content: string;
+    replyToUserId?: number;
+  }): Promise<{
+    status_code: number;
+    status_msg: string;
+    comment?: any;
+  }> {
+    const { commentId, content, replyToUserId } = params
+    
+    try {
+      const result = await videoAPI.replyComment({
+        comment_id: commentId,
+        content,
+        reply_to_user_id: replyToUserId
+      })
+      return result
+    } catch (error: any) {
+      console.error('回复评论失败:', error)
+      return { status_code: 500, status_msg: error.message || '回复评论失败' }
+    }
+  }
+
+  // 获取评论回复
+  async function getCommentReplies(params: {
+    commentId: number;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{
+    status_code: number;
+    status_msg: string;
+    replies: any[];
+    total: number;
+    has_more: boolean;
+  }> {
+    const { commentId, page = 1, pageSize = 10 } = params
+    
+    try {
+      const result = await videoAPI.getCommentReplies({
+        comment_id: commentId,
+        page,
+        page_size: pageSize
+      })
+      return result
+    } catch (error: any) {
+      console.error('获取评论回复失败:', error)
+      return { status_code: 500, status_msg: error.message || '获取评论回复失败', replies: [], total: 0, has_more: false }
+    }
+  }
+
   return {
     // 状态
     currentVideo,
@@ -544,6 +620,9 @@ export const useVideoStore = defineStore('video', () => {
     setTestVideos,
     clearCurrentVideo,
     getVideoComments,
-    commentVideo
+    commentVideo,
+    likeComment,
+    replyComment,
+    getCommentReplies
   }
 })
