@@ -354,6 +354,43 @@ export const videoAPI = {
   },
 
   /**
+   * 回复评论
+   * @param params 请求参数，包含评论ID、回复内容和被回复用户ID
+   * @returns 回复结果
+   */
+  replyComment(params: {
+    comment_id: number;
+    content: string;
+    reply_to_user_id?: number;
+  }) {
+    return http.post<{ 
+      status_code: number; 
+      status_msg: string; 
+      comment?: any 
+    }>('/api/video/comment/reply', params)
+  },
+
+  /**
+   * 获取评论回复列表
+   * @param params 请求参数，包含评论ID和分页信息
+   * @returns 回复列表
+   */
+  getCommentReplies(params: {
+    comment_id: number;
+    page?: number;
+    page_size?: number;
+  }) {
+    const { comment_id, page = 1, page_size = 10 } = params
+    return http.get<{ 
+      status_code: number; 
+      status_msg: string; 
+      replies: any[]; 
+      total: number; 
+      has_more: boolean 
+    }>(`/api/video/comment/${comment_id}/replies?page=${page}&page_size=${page_size}`)
+  },
+
+  /**
    * 获取视频统计数据
    * @param videoId 视频ID
    * @returns 视频统计数据
