@@ -2087,7 +2087,7 @@ const fetchVideoData = async () => {
       viewCount: videoData.view_count.toString(),
       likeCount: videoData.like_count.toString(),
       duration: formatDuration(videoData.duration),
-      author: videoData.author?.username || '未知作者',
+      author: videoData.author?.name || '未知作者',
       authorAvatar: videoData.author?.avatar || '',
       authorStats: {
         followerCount: videoData.author?.follower_count || 0
@@ -2099,8 +2099,8 @@ const fetchVideoData = async () => {
 
     // 更新视频作者信息
     videoAuthor.value = {
-      id: videoData.author?.user_id || '1',
-      name: videoData.author?.username || '未知作者',
+      id: videoData.author?.id || '1',
+      name: videoData.author?.name || '未知作者',
       avatar: videoData.author?.avatar || '',
       followerCount: videoData.author?.follower_count || 0
     }
