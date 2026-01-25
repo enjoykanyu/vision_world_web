@@ -54,18 +54,29 @@ export const useLoginAnimation = () => {
       // const response = await axios.post('/api/auth/login', credentials)
       
       // 暂时使用mock登录
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
+      // 调用后端userinfo接口获取真实用户信息
+      try {
+        const response = await fetch('/api/auth/userinfo', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        const data = await response.json()
+        if (data.code === 0) {
+          return {
             success: true,
             user: {
-              id: '12345678',
-              username: credentials.username,
-              avatar: 'https://i.pravatar.cc/150?img=68'
+              id: data.data.id,
+              username: data.data.name,
+              avatar: data.data.avatar || data.data.avatar_url || 'https://i.pravatar.cc/150?img=68'
             }
-          })
-        }, 1000)
-      })
+          }
+        } else {
+          throw new Error('获取用户信息失败')
+        }
+      } catch (error) {
+        console.error('获取用户信息失败:', error)
+      }
     } catch (error) {
       console.error('登录失败:', error)
       throw error

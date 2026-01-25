@@ -68,6 +68,16 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
               </svg>
             </button>
+            <button 
+              v-if="isOwnProfile"
+              @click="router.push('/edit-profile')"
+              class="edit-profile-button"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+              </svg>
+              编辑资料
+            </button>
           </div>
         </div>
       </div>
@@ -273,6 +283,15 @@ const userAvatar = computed(() => {
   return userStore.avatar || `https://i.pravatar.cc/150?u=${userStore.userId}`
 })
 
+// 是否是当前登录用户的个人主页
+const isOwnProfile = computed(() => {
+  const routeUserId = router.currentRoute.value.params.userId
+  if (!routeUserId || routeUserId === 'me') {
+    return userStore.isAuthenticated
+  }
+  return Number(routeUserId) === userStore.userId
+})
+
 // 深色模式状态
 const isDarkMode = ref(true) // 默认为深色模式
 const toggleDarkMode = () => {
@@ -445,6 +464,10 @@ const userSubscriptions = [
 
 .share-button {
   @apply border border-gray-600 hover:bg-gray-700/50 text-gray-300 hover:text-white w-10 h-10 rounded-full text-sm flex items-center justify-center transition-all duration-300 transform hover:scale-105;
+}
+
+.edit-profile-button {
+  @apply flex items-center bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300;
 }
 
 .glass-tab-container {

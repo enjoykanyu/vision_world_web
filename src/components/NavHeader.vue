@@ -189,12 +189,16 @@
             <!-- 已登录：显示用户头像 -->
             <div class="relative">
               <div 
-                class="w-9 h-9 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-800 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                class="w-9 h-9 rounded-full cursor-pointer border-2 border-white dark:border-gray-800 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 overflow-hidden"
                 @click="toggleUserDropdown"
                 @mouseenter="showUserDropdown = true"
                 @mouseleave="handleUserDropdownLeave"
               >
-                <span class="text-white text-sm font-semibold">{{ (username || 'U').charAt(0).toUpperCase() }}</span>
+                <img 
+                  :src="userAvatar"
+                  alt="User Avatar"
+                  class="w-full h-full object-cover"
+                />
               </div>
               
               <!-- B站风格用户信息悬浮弹窗 -->
@@ -216,9 +220,11 @@
                     </div>
                     <div class="flex items-center space-x-3">
                       <div class="relative w-14 h-14 overflow-hidden rounded-full border-2 border-white/30 shadow-lg">
-                          <div class="w-full h-full bg-white/20 flex items-center justify-center text-lg font-bold">
-                            {{ (username || 'U').charAt(0).toUpperCase() }}
-                          </div>
+                          <img 
+                            :src="userAvatar"
+                            alt="User Avatar"
+                            class="w-full h-full object-cover"
+                          />
                         <!-- 官方认证标识 -->
                         <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
                           <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -358,7 +364,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 import axios from 'axios'
@@ -373,6 +379,9 @@ const showSearchTrending = ref(false)
 // 用户悬浮弹窗相关
 const showUserDropdown = ref(false)
 let dropdownTimer: NodeJS.Timeout | null = null
+
+// 用户头像
+const userAvatar = ref('')
 
 // 用户统计数据
 const userStats = ref({
@@ -487,6 +496,27 @@ const handleAvatarError = (event: Event) => {
   const target = event.target as HTMLImageElement
   target.style.display = 'none'
 }
+
+// 获取用户信息
+const fetchUserInfo = async () => {
+  try {
+    const userInfo = await userStore.fetchUserProfile()
+    console.log(userInfo)
+    if (userInfo) {
+      userAvatar.value = userInfo.avatar
+    
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+  }
+}
+
+// 组件挂载时获取用户信息
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    fetchUserInfo()
+  }
+})
 
 // 处理下拉菜单头像加载错误
 const handleDropdownAvatarError = (event: Event) => {

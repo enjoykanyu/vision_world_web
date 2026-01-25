@@ -23,11 +23,10 @@ export interface LoginResponse {
 // 用户信息接口
 export interface UserInfo {
   id: number
-  username: string
-  nickname: string
+  name: string
   phone: string
   email: string
-  avatar_url: string
+  avatar: string
   background_image: string
   signature: string
   gender: number // 0-未知,1-男,2-女
@@ -64,7 +63,7 @@ export const authAPI = {
    * @returns 登录响应数据
    */
   login(data: LoginRequest) {
-    return http.post<LoginResponse>('/api/auth/login', data)
+    return http.post('/api/auth/login', data)
   },
 
   /**
@@ -73,7 +72,7 @@ export const authAPI = {
    * @returns 发送验证码响应数据
    */
   sendCode(data: SendCodeRequest) {
-    return http.post<SendCodeResponse>('/api/user/sms/send', data)
+    return http.post('/api/user/sms/send', data)
   },
 
   /**
@@ -90,7 +89,7 @@ export const authAPI = {
    * @returns 新的访问令牌
    */
   refreshToken(refreshToken: string) {
-    return http.post<{ access_token: string; expires_in: number }>('/api/auth/refresh', {
+    return http.post('/api/auth/refresh', {
       refresh_token: refreshToken
     })
   },
@@ -100,7 +99,7 @@ export const authAPI = {
    * @returns 用户信息
    */
   getUserInfo() {
-    return http.get<{ user: UserInfo }>('/api/auth/userinfo')
+    return http.get('/api/auth/userinfo')
   },
 
   /**
@@ -135,5 +134,21 @@ export const authAPI = {
     }>('/api/user/token/refresh', {
       refresh_token: refreshToken
     })
+  },
+
+  /**
+   * 更新用户信息
+   * @param data 更新用户信息请求数据
+   * @returns 更新结果
+   */
+  updateUserProfile(data: {
+    name?: string
+    signature?: string
+    avatar?: string
+  }) {
+    return http.post<{
+      status_code: number
+      status_msg: string
+    }>('/api/user/profile/update', data)
   }
 }

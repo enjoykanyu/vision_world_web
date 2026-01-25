@@ -27,6 +27,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+
+import { useDark } from '@vueuse/core'
 import VAssistant from './components/VAssistant.vue'
 import LoginSuccessAnimation from './components/LoginSuccessAnimation.vue'
 import LoginModal from './components/LoginModal.vue'
@@ -35,6 +37,22 @@ import { useUserStore } from '@/stores/userStore'
 
 const { showLoginAnimation, consecutiveLoginDays, closeLoginAnimation, triggerLoginSuccessAnimation } = useLoginAnimation()
 const userStore = useUserStore()
+const isDark = useDark()
+
+// 初始化应用
+const initApp = async () => {
+  // 检查是否有token
+  const token = localStorage.getItem('token')
+  if (token) {
+    userStore.accessToken = token
+    userStore.isLoggedIn = true
+    
+    // 首次登录获取用户信息
+    await userStore.initUserInfo()
+  }
+}
+
+initApp()
 
 // 登录弹窗状态
 const showLoginModal = ref(false)

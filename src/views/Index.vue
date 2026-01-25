@@ -410,13 +410,17 @@ const toggleDarkMode = () => {
 }
 
 // 处理用户头像点击
-const handleUserIconClick = () => {
+const handleUserIconClick = async () => {
   if (!userStore.isLoggedIn) {
     // 触发全局登录弹窗显示事件
     window.dispatchEvent(new CustomEvent('show-login-modal'))
   } else {
+    // 确保用户信息已获取
+    if (!userStore.userInfo) {
+      await userStore.fetchUserProfile()
+    }
     // 已登录状态下跳转到用户主页
-    router.push(`/user/${userStore.userId || '12345678'}`)
+    router.push(`/user/${userStore.userId}`)
   }
 }
 

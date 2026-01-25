@@ -2087,20 +2087,27 @@ const fetchVideoData = async () => {
       viewCount: videoData.view_count.toString(),
       likeCount: videoData.like_count.toString(),
       duration: formatDuration(videoData.duration),
-      author: videoData.author?.name || '未知作者',
+      author: videoData.author?.username || '未知作者',
       authorAvatar: videoData.author?.avatar || '',
       authorStats: {
         followerCount: videoData.author?.follower_count || 0
       },
       tags: videoData.tags || [],
       category: videoData.category || '',
-      isFollowed: videoData.is_followed || false
+      isFollowed: videoData.is_followed || false,
+      createTime: new Date(videoData.create_time * 1000).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     }
 
     // 更新视频作者信息
     videoAuthor.value = {
       id: videoData.author?.id || '1',
-      name: videoData.author?.name || '未知作者',
+      name: videoData.author?.username || '未知作者',
       avatar: videoData.author?.avatar || '',
       followerCount: videoData.author?.follower_count || 0
     }

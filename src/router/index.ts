@@ -5,6 +5,7 @@ import VideoAssistant from '@/views/VideoAssistant.vue'
 import VideoDetail from '@/views/VideoDetail.vue'
 import SmartVideoDetail from '@/components/SmartVideoDetail.vue'
 import UserProfile from '@/views/UserProfile.vue'
+import EditProfile from '@/views/EditProfile.vue'
 import Messages from '@/views/Messages.vue'
 import Live from '@/views/Live.vue'
 import StreamSetup from '@/views/StreamSetup.vue'
@@ -71,6 +72,15 @@ const router = createRouter({
       component: UserProfile,
       meta: {
         title: '用户主页 - Vision World'
+      }
+    },
+    {
+      path: '/edit-profile',
+      name: 'editProfile',
+      component: EditProfile,
+      meta: {
+        title: '编辑资料 - Vision World',
+        requiresAuth: true
       }
     },
     {

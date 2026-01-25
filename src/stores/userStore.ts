@@ -2,6 +2,16 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI, LoginRequest, LoginResponse, UserInfo } from '@/api/auth'
 
+
+
+export interface UserProfileInfo {
+  name: string
+  avatar: string
+  signature: string
+  avatar_url?: string
+  background_image?: string
+}
+
 export const useUserStore = defineStore('user', () => {
   // 状态
   const isLoggedIn = ref(false)
@@ -212,15 +222,73 @@ export const useUserStore = defineStore('user', () => {
     
     try {
       const response = await authAPI.getUserInfo()
-      const userInfo: { user: UserInfo } = response.data.data
-      console.log(userInfo)
+      console.log('User info response:', response)
+      const userInfo: UserInfo = response.data.data
       // 更新用户信息（保持token不变）
-      updateUserInfo(userInfo.user, accessToken.value)
+      updateUserInfo(userInfo, accessToken.value)
       saveUserToLocalStorage()
       return true
     } catch (error) {
-      console.error('获取用户信息失败:', error)
       return false
+    }
+  }
+
+  // 获取用户公开信息（用于编辑页面）
+  async function fetchUserProfile(): Promise<UserProfileInfo | null> {
+    if (!isAuthenticated.value) return null
+    
+    try {
+      const response = await authAPI.getUserInfo()
+      const userInfo: UserInfo = response.data.data
+      console.log('User info:', userInfo)
+      return {
+        name: userInfo.name || '',
+        avatar: userInfo.avatar || '',
+        signature: userInfo.signature || '',
+        avatar_url: userInfo.avatar,
+        background_image: userInfo.background_image
+      }
+    } catch (error) {
+      return null
+    }
+  }
+
+  // 首次登录获取用户信息
+  async function initUserInfo() {
+    if (isAuthenticated.value && !nickname.value) {
+      const profile = await fetchUserProfile()
+      if (profile) {
+        nickname.value = profile.nickname
+        avatarUrl.value = profile.avatar || profile.avatar_url || ''
+      }
+    }
+  }
+
+  // 更新用户信息
+  async function updateUserProfile(data: {
+    name?: string
+    signature?: string
+    avatar?: string
+  }): Promise<{ status_code: number; status_msg: string }> {
+    if (!isAuthenticated.value) {
+      return { status_code: 401, status_msg: '未登录' }
+    }
+    
+    try {
+      const response = await authAPI.updateUserProfile(data)
+      const result = response.data?.data || response.data
+      
+      if (result.status_code === 0) {
+        nickname.value = data.name || nickname.value
+        avatarUrl.value = data.avatar || avatarUrl.value
+        signature.value = data.signature || signature.value
+        saveUserToLocalStorage()
+      }
+      
+      return result
+    } catch (error: any) {
+      console.error('更新用户信息失败:', error)
+      return { status_code: 400, status_msg: error.message || '更新失败' }
     }
   }
 
@@ -230,8 +298,9 @@ export const useUserStore = defineStore('user', () => {
     
     try {
       const response = await authAPI.verifyToken(accessToken.value)
-      const verifyData = response.data.data
-      if (verifyData.status_code === 0) {
+      const verifyData = response.data
+      console.log('Token验证响应:', verifyData)
+      if (verifyData.code === 0) {
         // Token有效，获取用户信息
         return await fetchUserInfo()
       } else {
@@ -675,6 +744,8 @@ export const useUserStore = defineStore('user', () => {
     sendVerificationCode,
     refreshAccessToken,
     fetchUserInfo,
+    fetchUserProfile,
+    updateUserProfile,
     verifyToken,
     init,
     mockLogin,
