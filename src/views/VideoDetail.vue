@@ -452,6 +452,7 @@ import { danmakuAPI } from '@/api/danmaku'
 import { useUserStore } from '@/stores/userStore'
 import { videoAPI } from '@/api/video'
 import Hls, { type Config } from 'hls.js'
+import { useVideoAnalytics } from '@/composables/useVideoAnalytics'
 
 // 使用store
 const userStore = useUserStore()
@@ -484,7 +485,29 @@ const NETWORK_SPEED_SAMPLES = 5 // 保留最近5次网络速度样本
 const route = useRoute()
 const videoId = route.params.id as string
 
-
+// 播放量统计
+const videoIdRef = ref<string | number>(videoId)
+const { 
+  isPlayRecorded, 
+  isCompleteWatch, 
+  currentProgress: watchProgress,
+  recordPlay, 
+  reportProgress, 
+  markComplete,
+  reset: resetAnalytics 
+} = useVideoAnalytics({
+  videoId: videoIdRef,
+  videoElement: videoPlayer,
+  onPlayRecorded: () => {
+    console.log('播放量已记录')
+  },
+  onProgressReported: (progress) => {
+    console.log('观看进度:', (progress * 100).toFixed(1) + '%')
+  },
+  onCompleteWatch: () => {
+    console.log('用户完整观看了视频')
+  }
+})
 
 // 弹幕相关状态
 // 弹幕池 - 存储所有预生成的弹幕
@@ -1468,6 +1491,9 @@ const seek = (e: MouseEvent) => {
   currentTime.value = newTime
   progress.value = pos * 100
 
+  // 上报拖动事件
+  reportProgress('seek')
+
   // 跳转时，根据新的视频时间更新弹幕
   if (danmakuEnabled.value) {
     updateDanmakusOnSeek(newTime)
@@ -1540,6 +1566,9 @@ const stopSeeking = () => {
   // 在拖动结束时真正跳转到指定位置
   const targetTime = (progress.value / 100) * duration.value
   videoPlayer.value.currentTime = targetTime
+
+  // 上报拖动事件
+  reportProgress('seek')
 
   // 跳转时，根据新的视频时间更新弹幕
   if (danmakuEnabled.value) {
@@ -2374,9 +2403,12 @@ const onVideoCanPlay = () => {
 }
 
 // 视频播放事件
-const onVideoPlay = () => {
+const onVideoPlay = async () => {
   console.log('视频开始播放')
   isPlaying.value = true
+
+  // 记录播放量（首次播放时）
+  await recordPlay()
 
   // 开始网络质量检测
   startNetworkQualityCheck()
@@ -2396,6 +2428,9 @@ const onVideoPause = () => {
   console.log('视频暂停')
   isPlaying.value = false
   
+  // 上报暂停事件
+  reportProgress('pause')
+  
   // 暂停时停止生成新弹幕
   if (danmakuInterval) {
     clearInterval(danmakuInterval)
@@ -2409,6 +2444,9 @@ const onVideoEnded = () => {
   isPlaying.value = false
   currentTime.value = 0
   progress.value = 0
+  
+  // 标记完整观看
+  markComplete()
   
   // 视频结束时重置弹幕状态
   danmakus.value = []
@@ -2594,6 +2632,8 @@ onMounted(() => {
     }
     // 清理HLS实例
     cleanupHLS()
+    // 重置播放量统计
+    resetAnalytics()
   })
 })
 </script>
