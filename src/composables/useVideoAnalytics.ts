@@ -77,15 +77,15 @@ export function useVideoAnalytics(options: UseVideoAnalyticsOptions): UseVideoAn
     }
     
     // 检查是否是新会话
-    if (!isNewSession(videoId.value)) {
-      const existingSession = sessionManager.getSession(videoId.value)
-      if (existingSession?.isPlayRecorded) {
-        console.log('[播放量统计] 同一会话内已记录播放，跳过')
-        sessionInfo.value = existingSession
-        isPlayRecorded.value = true
-        return
-      }
-    }
+    // if (!isNewSession(videoId.value)) {
+    //   const existingSession = sessionManager.getSession(videoId.value)
+    //   if (existingSession?.isPlayRecorded) {
+    //     console.log('[播放量统计] 同一会话内已记录播放，跳过')
+    //     sessionInfo.value = existingSession
+    //     isPlayRecorded.value = true
+    //     return
+    //   }
+    // }
     
     isRecording = true
     
