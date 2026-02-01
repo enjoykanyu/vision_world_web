@@ -2194,11 +2194,16 @@ const fetchVideoData = async () => {
     try {
       const statsResponse = await videoAPI.getVideoStats(videoId)
       if (statsResponse.data) {
-        videoStats.value.likeCount = statsResponse.data.data.like_count.toString()
-        videoStats.value.favoriteCount = statsResponse.data.data.favorite_count.toString()
-        videoStats.value.shareCount = statsResponse.data.data.share_count.toString()
-        isLiked.value = statsResponse.data.data.is_liked
-        isFavorited.value = statsResponse.data.data.is_favorite
+        const statsData = statsResponse.data.data
+        videoStats.value.likeCount = statsData.like_count?.toString() || '0'
+        videoStats.value.favoriteCount = statsData.favorite_count?.toString() || '0'
+        videoStats.value.shareCount = statsData.share_count?.toString() || '0'
+        videoStats.value.viewCount = statsData.play_count?.toString() || videoData.view_count?.toString() || '0'
+        videoStats.value.danmakuCount = statsData.danmaku_count?.toString() || '0'
+        videoStats.value.coinCount = statsData.coin_count?.toString() || '0'
+        isLiked.value = statsData.is_liked
+        isFavorited.value = statsData.is_favorite
+        isCoined.value = statsData.is_coined
       }
     } catch (statsError) {
       console.warn('获取视频统计数据失败:', statsError)
@@ -2206,6 +2211,7 @@ const fetchVideoData = async () => {
       videoStats.value.likeCount = videoData.like_count?.toString() || '0'
       videoStats.value.favoriteCount = videoData.favorite_count?.toString() || '0'
       videoStats.value.shareCount = videoData.share_count?.toString() || '0'
+      videoStats.value.viewCount = videoData.view_count?.toString() || '0'
     }
 
     // 加载弹幕数据
