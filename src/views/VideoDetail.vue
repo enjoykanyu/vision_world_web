@@ -1310,6 +1310,12 @@ const formatDuration = (seconds: number) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
+// 充电功能
+const chargeUp = () => {
+  // TODO: 实现充电功能
+  console.log('充电功能')
+}
+
 // 切换关注状态
 const toggleFollow = async () => {
   if (!video.value || !videoAuthor.value.id) return
