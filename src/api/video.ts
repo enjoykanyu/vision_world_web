@@ -396,15 +396,21 @@ export const videoAPI = {
    * @returns 视频统计数据
    */
   getVideoStats(videoId: string) {
-    return http.get<{ 
-      status: string; 
-      data: { 
-        like_count: number; 
-        favorite_count: number; 
-        share_count: number; 
-        is_liked: boolean; 
-        is_favorite: boolean 
-      } 
+    return http.get<{
+      status: string;
+      data: {
+        video_id: number;
+        like_count: number;
+        favorite_count: number;
+        coin_count: number;
+        share_count: number;
+        play_count: number;
+        danmaku_count: number;
+        comment_count: number;
+        is_liked: boolean;
+        is_favorite: boolean;
+        is_coined: boolean;
+      }
     }>(`/api/video/${videoId}/stats`)
   }
 }
