@@ -350,20 +350,54 @@
               <div class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
                 {{ video.note }}
               </div>
-              <div class="mt-4 flex flex-wrap items-center">
-                <span 
-                  v-for="(tag, index) in video.tags" 
-                  :key="index" 
-                  class="mr-3 mb-2 px-3 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-bilibili-pink hover:text-white transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md active:scale-95"
-                >
-                  {{ tag }}
-                </span>
-                <div class="flex items-center ml-auto text-xs text-gray-500 dark:text-gray-400 space-x-4">
-                  <span>{{ video.author }}</span>
-                  <span>{{ video.category }}</span>
+              <!-- 展开更多按钮 -->
+              <div class="mt-2">
+                <button class="text-sm text-gray-500 hover:text-[#00AEEC] transition-colors flex items-center">
+                  展开更多
+                  <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                </button>
+              </div>
+              <!-- 标签区域 - B站风格 -->
+              <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex flex-wrap items-center gap-2">
+                  <!-- 活动标签 -->
+                  <a href="#" class="group flex items-center px-3 py-1.5 bg-[#00AEEC]/10 hover:bg-[#00AEEC]/20 rounded-full transition-colors">
+                    <i class="fas fa-cube text-[#00AEEC] text-sm mr-1.5"></i>
+                    <span class="text-sm text-[#00AEEC] font-medium">青年用「财」图鉴</span>
+                    <i class="fas fa-chevron-right text-[#00AEEC] text-xs ml-1 group-hover:translate-x-0.5 transition-transform"></i>
+                  </a>
+                  <!-- 普通标签 -->
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    金融
+                  </a>
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    财经
+                  </a>
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    黄金
+                  </a>
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    股市
+                  </a>
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    投资
+                  </a>
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    贵金属
+                  </a>
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    金条
+                  </a>
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    大宗商品
+                  </a>
+                  <a href="#" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-sm text-gray-600 dark:text-gray-300 transition-colors">
+                    金价
+                  </a>
                 </div>
               </div>
             </div>
+
 
             <!-- 评论区 -->
             <CommentSection :video-id="video.id" />
