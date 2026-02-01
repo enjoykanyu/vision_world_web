@@ -320,76 +320,27 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- 点赞、投币、收藏、转发 -->
             <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
               <div class="flex items-center space-x-8">
                 <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="toggleLike">
-                  <i class="fas text-xl group-hover:scale-110 transition-transform" :class="isLiked ? 'fa-thumbs-up text-bilibili-pink' : 'fa-thumbs-up'" :style="isLiked ? { color: '#FB7299' } : {}"></i>
+                  <i class="fas fa-thumbs-up text-xl group-hover:scale-110 transition-transform" :class="isLiked ? 'text-bilibili-pink' : ''" :style="isLiked ? { color: '#FB7299' } : {}"></i>
                   <span class="font-medium" :style="isLiked ? { color: '#FB7299' } : {}">{{ videoStats.likeCount }}</span>
                 </button>
                 <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="toggleCoin">
-                  <i class="fas fa-coins text-xl group-hover:scale-110 transition-transform" :class="isCoined ? 'text-bilibili-pink' : ''"></i>
-                  <span class="font-medium">{{ videoStats.coinCount }}</span>
+                  <div class="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center text-sm font-bold group-hover:scale-110 transition-transform" :class="isCoined ? 'text-bilibili-pink border-bilibili-pink' : ''">
+                    币
+                  </div>
+                  <span class="font-medium">投币</span>
                 </button>
                 <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="toggleFavorite">
-                  <i class="fas fa-bookmark text-xl group-hover:scale-110 transition-transform" :class="isFavorited ? 'text-bilibili-pink' : ''"></i>
+                  <i class="fas fa-star text-xl group-hover:scale-110 transition-transform" :class="isFavorited ? 'text-bilibili-pink' : ''"></i>
                   <span class="font-medium">{{ videoStats.favoriteCount }}</span>
                 </button>
                 <button class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-bilibili-pink transition-all duration-200 group" @click="shareVideo">
-                  <i class="fas fa-share-alt text-xl group-hover:scale-110 transition-transform"></i>
-                  <span class="font-medium">{{ videoStats.shareCount }}</span>
-                </button>
-              </div>
-            </div>
-            
-            <!-- 正在观看人数和弹幕发送 -->
-            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <i class="fas fa-eye mr-1"></i> {{ videoStats.watchingCount }}人正在看，已装填{{ videoStats.danmakuCount }}条弹幕
-                </div>
-                <div class="flex items-center space-x-2">
-                  <button class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
-                    <i class="fas fa-shield-alt mr-1"></i> 防挡弹幕
-                  </button>
-                  <button class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
-                    <i class="fas fa-list mr-1"></i> 弹幕列表
-                  </button>
-                </div>
-              </div>
-              
-              <!-- 弹幕发送组件 -->
-              <div class="flex items-center space-x-2">
-                <input
-                  v-model="newDanmakuText"
-                  @keyup.enter="sendDanmaku"
-                  placeholder="发个友善的弹幕见证当下"
-                  class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-bilibili-pink dark:bg-gray-700 dark:text-white transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:border-gray-200 dark:disabled:border-gray-700"
-                  :disabled="!danmakuEnabled"
-                >
-                <!-- 弹幕颜色选择器 -->
-                <input
-                  type="color"
-                  v-model="danmakuColor"
-                  class="w-10 h-10 border border-gray-300 dark:border-gray-600 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-bilibili-pink transition-all duration-200"
-                  :disabled="!danmakuEnabled"
-                >
-                <select
-                  v-model="danmakuSpeed"
-                  class="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-2 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-bilibili-pink transition-all duration-200"
-                  :disabled="!danmakuEnabled"
-                >
-                  <option value="slow">慢</option>
-                  <option value="normal">正常</option>
-                  <option value="fast">快</option>
-                </select>
-                <button
-                  @click="sendDanmaku"
-                  :disabled="!danmakuEnabled || !newDanmakuText.trim()"
-                  class="bg-bilibili-pink hover:bg-bilibili-pink-dark text-white px-4 py-2 rounded-md font-medium transition-all duration-200 disabled:bg-gray-300 dark:disabled:bg-gray-600 hover:shadow-md active:scale-95"
-                >
-                  发送
+                  <i class="fas fa-share text-xl group-hover:scale-110 transition-transform"></i>
+                  <span class="font-medium">分享</span>
                 </button>
               </div>
             </div>
