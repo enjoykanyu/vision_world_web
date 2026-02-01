@@ -29,6 +29,27 @@
         <div v-else-if="video" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Left side: Video Player and Info -->
           <div class="lg:col-span-8">
+            <!-- 视频标题 - 移到视频上方 -->
+            <div class="mb-3">
+              <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ video.title }}</h1>
+              <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-2 space-x-4">
+                <div class="flex items-center space-x-1">
+                  <i class="fas fa-play-circle text-gray-400"></i>
+                  <span>{{ videoStats.viewCount }}</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="5" width="18" height="14" rx="2" ry="2"/>
+                    <line x1="7" y1="9" x2="17" y2="9"/>
+                    <line x1="7" y1="12" x2="17" y2="12"/>
+                    <line x1="7" y1="15" x2="13" y2="15"/>
+                  </svg>
+                  <span>{{ videoStats.danmakuCount }}</span>
+                </div>
+                <span>{{ videoStats.publishTime }}</span>
+              </div>
+            </div>
+
             <!-- 视频播放器容器 -->
             <div class="relative bg-black rounded-lg overflow-hidden shadow-lg group" id="video-container">
               <!-- 弹幕容器 -->
