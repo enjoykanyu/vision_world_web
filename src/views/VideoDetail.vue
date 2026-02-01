@@ -268,16 +268,56 @@
               <!-- 鼠标移动检测，用于显示/隐藏控制栏 -->
               <div class="absolute inset-0 pointer-events-none" @mousemove="onMouseMove" @mouseleave="onMouseLeave"></div>
             </div>
-            
-            <!-- 视频标题 -->
-            <div class="mt-4">
-              <h1 class="text-2xl font-bold">{{ video.title }}</h1>
-              <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-2">
-                <span>{{ videoStats.viewCount }}播放</span>
-                <span class="mx-2">•</span>
-                <span>{{ videoStats.danmakuCount }}弹幕</span>
-                <span class="mx-2">•</span>
-                <span>{{ videoStats.publishTime }}</span>
+
+            <!-- 弹幕发送区域 - 紧贴视频下方 -->
+            <div class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+              <div class="flex items-center justify-between">
+                <!-- 左侧：观看人数和弹幕开关 -->
+                <div class="flex items-center space-x-4">
+                  <span class="text-sm text-gray-500 dark:text-gray-400">{{ videoStats.watchingCount }}人正在看，已装填 {{ videoStats.danmakuCount }} 条弹幕</span>
+                  <div class="flex items-center space-x-2">
+                    <!-- 弹幕开关按钮 -->
+                    <button
+                      @click="toggleDanmaku"
+                      class="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all duration-200"
+                      :class="danmakuEnabled ? 'border-bilibili-pink text-bilibili-pink bg-pink-50' : 'border-gray-400 text-gray-400'"
+                    >
+                      弹
+                    </button>
+                    <!-- 弹幕设置按钮 -->
+                    <button class="w-8 h-8 rounded-full border-2 border-gray-400 text-gray-400 flex items-center justify-center text-xs transition-all duration-200 hover:border-bilibili-pink hover:text-bilibili-pink">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v6m0 6v6m4.22-10.22l4.24-4.24M6.34 6.34L2.1 2.1m17.8 17.8l-4.24-4.24M6.34 17.66l-4.24 4.24"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 右侧：弹幕输入框 -->
+                <div class="flex items-center space-x-3 flex-1 max-w-2xl ml-6">
+                  <div class="flex items-center space-x-2 flex-1 bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2">
+                    <i class="fas fa-font text-gray-400"></i>
+                    <input
+                      v-model="newDanmakuText"
+                      @keyup.enter="sendDanmaku"
+                      placeholder="发个友善的弹幕见证当下"
+                      class="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400"
+                      :disabled="!danmakuEnabled"
+                    >
+                  </div>
+                  <a href="#" class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 whitespace-nowrap">
+                    弹幕礼仪 <i class="fas fa-chevron-right text-xs"></i>
+                  </a>
+                  <button
+                    @click="sendDanmaku"
+                    :disabled="!danmakuEnabled || !newDanmakuText.trim()"
+                    class="px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-md active:scale-95"
+                    :class="danmakuEnabled && newDanmakuText.trim() ? 'bg-[#00AEEC] hover:bg-[#0099D4] text-white cursor-pointer' : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'"
+                  >
+                    发送
+                  </button>
+                </div>
               </div>
             </div>
             
