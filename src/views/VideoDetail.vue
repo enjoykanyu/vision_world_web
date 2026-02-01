@@ -139,28 +139,6 @@
                 </div>
               </div>
 
-              <!-- 用户头像和关注按钮 -->
-              <div class="absolute top-4 left-4 flex items-center space-x-2">
-                <div 
-                  class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold overflow-hidden shadow-md" 
-                  :class="{'bg-bilibili-pink bg-gradient-to-br from-bilibili-pink to-bilibili-pink-dark': !video.authorAvatar}"
-                >
-                  <img 
-                    v-if="video.authorAvatar" 
-                    :src="video.authorAvatar" 
-                    alt="作者头像" 
-                    class="w-full h-full object-cover"
-                  >
-                  <span v-else>{{ video.author?.charAt(0) || 'U' }}</span>
-                </div>
-                <button 
-                  class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 py-1 rounded-md text-sm font-medium transition-all duration-200"
-                  @click="toggleFollow"
-                >
-                  {{ video.isFollowed ? '已关注' : '+ 关注' }}
-                </button>
-              </div>
-
               <!-- 自定义视频控制栏 -->
               <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 opacity-0 transition-opacity duration-300 ease-in-out" :class="{ 'opacity-100': !isPlaying || showControls }" id="video-controls">
                 <!-- 进度条 - B站风格三层进度条 -->
@@ -403,10 +381,12 @@
           <!-- 右侧: 视频信息展示区域 -->
           <div class="lg:col-span-4">
             <!-- UP主信息卡片 -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600 shadow hover:shadow-md transition-shadow duration-300">
-              <div class="flex items-center space-x-3">
+            <!-- 创作者信息区域 - B站风格 -->
+            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+              <div class="flex items-start space-x-4">
+                <!-- 用户头像 -->
                 <div 
-                  class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold overflow-hidden shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                  class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold overflow-hidden shadow-md cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0" 
                   :class="{'bg-bilibili-pink bg-gradient-to-br from-bilibili-pink to-bilibili-pink-dark': !video.authorAvatar}"
                   @click="goToUserHome"
                 >
@@ -416,22 +396,39 @@
                     alt="作者头像" 
                     class="w-full h-full object-cover"
                   >
-                  <span v-else>{{ video.author.charAt(0) }}</span>
+                  <span v-else>{{ video.author?.charAt(0) || 'U' }}</span>
                 </div>
+                <!-- 用户信息 -->
                 <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-gray-900 dark:text-white truncate">{{ video.author }}</h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ video.authorStats.followerCount }}粉丝</p>
-                </div>
-                <div class="flex space-x-2">
-                  <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow active:scale-95">
-                    <i class="fas fa-envelope"></i>
-                  </button>
-                  <button 
-                    class="bg-bilibili-pink hover:bg-bilibili-pink-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md active:scale-95"
-                    @click="toggleFollow"
-                  >
-                    {{ video.isFollowed ? '已关注' : '+ 关注' }}
-                  </button>
+                  <!-- 用户名和发消息 -->
+                  <div class="flex items-center space-x-3">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ video.author || '陈陈陈Clara' }}</h3>
+                    <button class="flex items-center space-x-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+                      <i class="fas fa-envelope text-sm"></i>
+                      <span class="text-sm">发消息</span>
+                    </button>
+                  </div>
+                  <!-- 用户简介 -->
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ video.authorBio || '对冲基金量化研究员，CFA，剑桥大学' }}</p>
+                  <!-- 充电和关注按钮 -->
+                  <div class="flex items-center space-x-3 mt-3">
+                    <!-- 充电按钮 -->
+                    <button 
+                      class="flex items-center space-x-1 px-4 py-1.5 border-2 border-[#FB7299] text-[#FB7299] rounded-full hover:bg-[#FB7299]/10 transition-colors"
+                      @click="chargeUp"
+                    >
+                      <i class="fas fa-bolt"></i>
+                      <span class="text-sm font-medium">充电</span>
+                    </button>
+                    <!-- 关注按钮 -->
+                    <button 
+                      class="flex items-center space-x-1 px-6 py-1.5 bg-[#00AEEC] hover:bg-[#0099D4] text-white rounded-full transition-colors"
+                      @click="toggleFollow"
+                    >
+                      <i class="fas fa-plus text-sm"></i>
+                      <span class="text-sm font-medium">关注 {{ video.authorStats?.followerCount || '7823' }}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
