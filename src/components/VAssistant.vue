@@ -10,28 +10,93 @@
       :class="{ 'is-open': isDialogOpen }"
     >
       <div class="v-icon-wrapper">
-        <svg class="v-icon-svg" viewBox="0 0 100 100">
-          <defs>
-            <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color: #5A67D8;" />
-              <stop offset="100%" style="stop-color: #818CF8;" />
-            </linearGradient>
-            <filter id="icon-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-              <feOffset dx="0" dy="2" result="offsetblur"/>
-              <feComponentTransfer>
-                <feFuncA type="linear" slope="0.5"/>
-              </feComponentTransfer>
-              <feMerge>
-                <feMergeNode/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          <circle cx="50" cy="50" r="45" fill="url(#icon-gradient)" filter="url(#icon-shadow)"/>
-          <path d="M35 40 L50 65 L65 40" stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                class="v-icon-chevron" />
-        </svg>
+        <!-- 粒子动画Canvas -->
+        <canvas
+          ref="particleCanvas"
+          class="particle-canvas"
+          width="60"
+          height="60"
+        ></canvas>
+        <!-- 虚拟精灵形象 -->
+        <div class="sprite-container" :class="{ 'is-open': isDialogOpen, 'is-blinking': isBlinking }">
+          <svg viewBox="0 0 60 60" class="sprite-svg">
+            <defs>
+              <!-- 身体渐变 -->
+              <radialGradient id="sprite-body-gradient" cx="50%" cy="40%" r="50%">
+                <stop offset="0%" style="stop-color: #A8E6CF;" />
+                <stop offset="60%" style="stop-color: #7FD8BE;" />
+                <stop offset="100%" style="stop-color: #5AC8A8;" />
+              </radialGradient>
+              <!-- 耳朵渐变 -->
+              <linearGradient id="sprite-ear-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color: #FFB6C1;" />
+                <stop offset="100%" style="stop-color: #FF9AAE;" />
+              </linearGradient>
+              <!-- 眼睛渐变 -->
+              <radialGradient id="sprite-eye-gradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" style="stop-color: #2C3E50;" />
+                <stop offset="70%" style="stop-color: #1A252F;" />
+                <stop offset="100%" style="stop-color: #0D1318;" />
+              </radialGradient>
+              <!-- 发光滤镜 -->
+              <filter id="sprite-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            
+            <!-- 精灵形象 -->
+            <g class="sprite-character">
+              <!-- 左耳 -->
+              <ellipse cx="18" cy="18" rx="8" ry="12" fill="url(#sprite-ear-gradient)" transform="rotate(-20 18 18)"/>
+              <ellipse cx="18" cy="18" rx="4" ry="7" fill="#FF8FA3" transform="rotate(-20 18 18)"/>
+              
+              <!-- 右耳 -->
+              <ellipse cx="42" cy="18" rx="8" ry="12" fill="url(#sprite-ear-gradient)" transform="rotate(20 42 18)"/>
+              <ellipse cx="42" cy="18" rx="4" ry="7" fill="#FF8FA3" transform="rotate(20 42 18)"/>
+              
+              <!-- 身体 -->
+              <ellipse cx="30" cy="38" rx="20" ry="18" fill="url(#sprite-body-gradient)"/>
+              
+              <!-- 肚子 -->
+              <ellipse cx="30" cy="42" rx="12" ry="10" fill="#E8F8F5" opacity="0.6"/>
+              
+              <!-- 左眼 -->
+              <g class="sprite-eye left">
+                <ellipse cx="23" cy="32" rx="5" ry="6" fill="url(#sprite-eye-gradient)"/>
+                <circle cx="24" cy="30" r="2" fill="white" opacity="0.9"/>
+                <circle cx="22" cy="33" r="1" fill="white" opacity="0.5"/>
+              </g>
+              
+              <!-- 右眼 -->
+              <g class="sprite-eye right">
+                <ellipse cx="37" cy="32" rx="5" ry="6" fill="url(#sprite-eye-gradient)"/>
+                <circle cx="38" cy="30" r="2" fill="white" opacity="0.9"/>
+                <circle cx="36" cy="33" r="1" fill="white" opacity="0.5"/>
+              </g>
+              
+              <!-- 眨眼时的闭眼线条 -->
+              <g class="sprite-eye-closed">
+                <path d="M18 32 Q23 35 28 32" stroke="#2C3E50" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M32 32 Q37 35 42 32" stroke="#2C3E50" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </g>
+              
+              <!-- 腮红 -->
+              <ellipse cx="16" cy="38" rx="4" ry="2.5" fill="#FFB6C1" opacity="0.5"/>
+              <ellipse cx="44" cy="38" rx="4" ry="2.5" fill="#FFB6C1" opacity="0.5"/>
+              
+              <!-- 嘴巴 -->
+              <path d="M27 42 Q30 45 33 42" stroke="#2C3E50" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              
+              <!-- 小手 -->
+              <ellipse cx="12" cy="40" rx="4" ry="5" fill="#7FD8BE"/>
+              <ellipse cx="48" cy="40" rx="4" ry="5" fill="#7FD8BE"/>
+            </g>
+          </svg>
+        </div>
       </div>
     </div>
 
@@ -141,6 +206,350 @@ const messages = ref<Array<{ type: 'user' | 'assistant'; content: string }>>([])
 const chatMessages = ref<HTMLElement | null>(null)
 const inputArea = ref<HTMLTextAreaElement | null>(null)
 const currentTab = ref('home')
+
+// 精灵眨眼动画
+const isBlinking = ref(false)
+let blinkInterval: number | null = null
+
+// 开始眨眼动画
+const startBlinking = () => {
+  // 随机间隔眨眼（2-6秒）
+  const scheduleNextBlink = () => {
+    const nextBlinkDelay = 2000 + Math.random() * 4000
+    blinkInterval = window.setTimeout(() => {
+      isBlinking.value = true
+      // 眨眼持续150ms
+      setTimeout(() => {
+        isBlinking.value = false
+        scheduleNextBlink()
+      }, 150)
+    }, nextBlinkDelay)
+  }
+  scheduleNextBlink()
+}
+
+// 停止眨眼动画
+const stopBlinking = () => {
+  if (blinkInterval) {
+    clearTimeout(blinkInterval)
+    blinkInterval = null
+  }
+  isBlinking.value = false
+}
+
+// 粒子动画相关
+const particleCanvas = ref<HTMLCanvasElement | null>(null)
+let particleAnimationId: number | null = null
+let animationTime = 0
+
+// 科技感粒子类
+class TechParticle {
+  x: number
+  y: number
+  size: number
+  opacity: number
+  color: string
+  angle: number
+  orbitRadius: number
+  orbitSpeed: number
+  layer: number
+  pulsePhase: number
+
+  constructor(centerX: number, centerY: number, layer: number) {
+    this.layer = layer
+    this.angle = Math.random() * Math.PI * 2
+    this.orbitRadius = 12 + layer * 8 + Math.random() * 6
+    this.orbitSpeed = (0.01 + Math.random() * 0.02) * (layer % 2 === 0 ? 1 : -1)
+    this.x = centerX + Math.cos(this.angle) * this.orbitRadius
+    this.y = centerY + Math.sin(this.angle) * this.orbitRadius
+    this.size = 1.5 + Math.random() * 2
+    this.opacity = 0.6 + Math.random() * 0.4
+    this.color = this.getTechColor()
+    this.pulsePhase = Math.random() * Math.PI * 2
+  }
+
+  getTechColor(): string {
+    const colors = [
+      '#A8E6CF', // 薄荷绿
+      '#7FD8BE', // 青绿
+      '#5AC8A8', // 翠绿
+      '#FFB6C1', // 粉色
+      '#FF9AAE', // 浅粉
+      '#FFD1DC', // 淡粉
+    ]
+    return colors[Math.floor(Math.random() * colors.length)]
+  }
+
+  update(centerX: number, centerY: number, time: number) {
+    // 轨道运动
+    this.angle += this.orbitSpeed
+    
+    // 添加波浪效果
+    const wave = Math.sin(time * 0.002 + this.angle * 3) * 2
+    this.x = centerX + Math.cos(this.angle) * (this.orbitRadius + wave)
+    this.y = centerY + Math.sin(this.angle) * (this.orbitRadius + wave)
+
+    // 脉动效果
+    this.opacity = 0.4 + Math.sin(time * 0.003 + this.pulsePhase) * 0.4
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    // 绘制发光效果
+    ctx.shadowBlur = 8
+    ctx.shadowColor = this.color
+    
+    ctx.beginPath()
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+    ctx.fillStyle = this.color
+    ctx.globalAlpha = this.opacity
+    ctx.fill()
+    
+    // 重置阴影
+    ctx.shadowBlur = 0
+    ctx.globalAlpha = 1
+  }
+}
+
+// 数据流粒子
+class DataParticle {
+  x: number
+  y: number
+  length: number
+  speed: number
+  opacity: number
+  angle: number
+  distance: number
+  maxDistance: number
+
+  constructor(centerX: number, centerY: number) {
+    this.angle = Math.random() * Math.PI * 2
+    this.distance = 15
+    this.maxDistance = 28 + Math.random() * 8
+    this.speed = 0.3 + Math.random() * 0.4
+    this.x = centerX + Math.cos(this.angle) * this.distance
+    this.y = centerY + Math.sin(this.angle) * this.distance
+    this.length = 3 + Math.random() * 5
+    this.opacity = 0.8
+  }
+
+  update(centerX: number, centerY: number) {
+    this.distance += this.speed
+    this.x = centerX + Math.cos(this.angle) * this.distance
+    this.y = centerY + Math.sin(this.angle) * this.distance
+    this.opacity = 1 - (this.distance - 15) / (this.maxDistance - 15)
+    
+    if (this.distance >= this.maxDistance) {
+      this.distance = 15
+      this.angle = Math.random() * Math.PI * 2
+      this.opacity = 0.8
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D, centerX: number, centerY: number) {
+    const startX = centerX + Math.cos(this.angle) * (this.distance - this.length)
+    const startY = centerY + Math.sin(this.angle) * (this.distance - this.length)
+
+    ctx.strokeStyle = '#A8E6CF'
+    ctx.lineWidth = 1.5
+    ctx.globalAlpha = this.opacity
+
+    ctx.beginPath()
+    ctx.moveTo(startX, startY)
+    ctx.lineTo(this.x, this.y)
+    ctx.stroke()
+
+    ctx.globalAlpha = 1
+  }
+}
+
+// 粒子系统
+let techParticles: TechParticle[] = []
+let dataParticles: DataParticle[] = []
+
+// 初始化粒子
+const initParticles = () => {
+  techParticles = []
+  dataParticles = []
+  const centerX = 30
+  const centerY = 30
+  
+  // 创建三层轨道粒子
+  for (let layer = 0; layer < 3; layer++) {
+    const count = 8 + layer * 4
+    for (let i = 0; i < count; i++) {
+      techParticles.push(new TechParticle(centerX, centerY, layer))
+    }
+  }
+  
+  // 创建数据流粒子
+  for (let i = 0; i < 12; i++) {
+    dataParticles.push(new DataParticle(centerX, centerY))
+  }
+}
+
+// 绘制精灵魔法光环
+const drawAICore = (ctx: CanvasRenderingContext2D, centerX: number, centerY: number, time: number) => {
+  const pulse = Math.sin(time * 0.003) * 0.1 + 1
+
+  // 外环发光 - 柔和的绿色
+  ctx.shadowBlur = 15 * pulse
+  ctx.shadowColor = '#A8E6CF'
+
+  // 外环
+  ctx.beginPath()
+  ctx.arc(centerX, centerY, 16 * pulse, 0, Math.PI * 2)
+  ctx.strokeStyle = 'rgba(168, 230, 207, 0.4)'
+  ctx.lineWidth = 2
+  ctx.globalAlpha = 0.5
+  ctx.stroke()
+
+  // 中环 - 粉色
+  ctx.shadowBlur = 10
+  ctx.shadowColor = '#FFB6C1'
+  ctx.beginPath()
+  ctx.arc(centerX, centerY, 12, 0, Math.PI * 2)
+  ctx.strokeStyle = 'rgba(255, 182, 193, 0.5)'
+  ctx.lineWidth = 1.5
+  ctx.globalAlpha = 0.6
+  ctx.stroke()
+
+  // 内核心 - 温暖的光点
+  ctx.shadowBlur = 8 * pulse
+  ctx.shadowColor = '#FFD1DC'
+  ctx.beginPath()
+  ctx.arc(centerX, centerY, 4 * pulse, 0, Math.PI * 2)
+  const coreGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 4 * pulse)
+  coreGradient.addColorStop(0, '#FFFFFF')
+  coreGradient.addColorStop(0.5, '#FFD1DC')
+  coreGradient.addColorStop(1, '#FFB6C1')
+  ctx.fillStyle = coreGradient
+  ctx.globalAlpha = 0.8
+  ctx.fill()
+
+  ctx.shadowBlur = 0
+}
+
+// 绘制轨道环
+const drawOrbitRings = (ctx: CanvasRenderingContext2D, centerX: number, centerY: number, time: number) => {
+  ctx.strokeStyle = 'rgba(168, 230, 207, 0.2)'
+  ctx.lineWidth = 1
+
+  // 旋转的轨道环
+  for (let i = 0; i < 3; i++) {
+    const radius = 20 + i * 10
+    const rotation = time * 0.0005 * (i % 2 === 0 ? 1 : -1) + i * Math.PI / 3
+
+    ctx.save()
+    ctx.translate(centerX, centerY)
+    ctx.rotate(rotation)
+
+    ctx.beginPath()
+    ctx.arc(0, 0, radius, 0, Math.PI * 2)
+    ctx.stroke()
+
+    // 轨道上的装饰点
+    const dotAngle = time * 0.002 + i
+    const dotX = Math.cos(dotAngle) * radius
+    const dotY = Math.sin(dotAngle) * radius
+
+    ctx.shadowBlur = 4
+    ctx.shadowColor = i % 2 === 0 ? '#A8E6CF' : '#FFB6C1'
+    ctx.beginPath()
+    ctx.arc(dotX, dotY, 2, 0, Math.PI * 2)
+    ctx.fillStyle = i % 2 === 0 ? '#A8E6CF' : '#FFB6C1'
+    ctx.fill()
+    ctx.shadowBlur = 0
+
+    ctx.restore()
+  }
+}
+
+// 绘制粒子连线 - 魔法网络
+const drawTechConnections = (ctx: CanvasRenderingContext2D, particles: TechParticle[]) => {
+  ctx.strokeStyle = 'rgba(168, 230, 207, 0.25)'
+  ctx.lineWidth = 0.8
+
+  for (let i = 0; i < particles.length; i++) {
+    let connectionCount = 0
+    for (let j = i + 1; j < particles.length && connectionCount < 3; j++) {
+      const dx = particles[i].x - particles[j].x
+      const dy = particles[i].y - particles[j].y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+
+      if (distance < 20) {
+        ctx.globalAlpha = (1 - distance / 20) * 0.4
+        ctx.beginPath()
+        ctx.moveTo(particles[i].x, particles[i].y)
+        ctx.lineTo(particles[j].x, particles[j].y)
+        ctx.stroke()
+        connectionCount++
+      }
+    }
+  }
+  ctx.globalAlpha = 1
+}
+
+// 绘制粒子动画
+const animateParticles = () => {
+  const canvas = particleCanvas.value
+  if (!canvas) return
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  const centerX = canvas.width / 2
+  const centerY = canvas.height / 2
+  animationTime += 16
+
+  // 清空画布
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  // 绘制背景渐变 - 柔和的魔法光晕
+  const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 35)
+  bgGradient.addColorStop(0, 'rgba(232, 248, 245, 0.6)')
+  bgGradient.addColorStop(0.5, 'rgba(213, 245, 227, 0.3)')
+  bgGradient.addColorStop(1, 'rgba(168, 230, 207, 0)')
+  ctx.fillStyle = bgGradient
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  // 绘制轨道环
+  drawOrbitRings(ctx, centerX, centerY, animationTime)
+
+  // 更新和绘制数据流粒子
+  dataParticles.forEach(particle => {
+    particle.update(centerX, centerY)
+    particle.draw(ctx, centerX, centerY)
+  })
+
+  // 绘制粒子连线
+  drawTechConnections(ctx, techParticles)
+
+  // 更新和绘制科技粒子
+  techParticles.forEach(particle => {
+    particle.update(centerX, centerY, animationTime)
+    particle.draw(ctx)
+  })
+
+  // 绘制AI核心
+  drawAICore(ctx, centerX, centerY, animationTime)
+
+  particleAnimationId = requestAnimationFrame(animateParticles)
+}
+
+// 启动粒子动画
+const startParticleAnimation = () => {
+  animationTime = 0
+  initParticles()
+  animateParticles()
+}
+
+// 停止粒子动画
+const stopParticleAnimation = () => {
+  if (particleAnimationId) {
+    cancelAnimationFrame(particleAnimationId)
+    particleAnimationId = null
+  }
+}
 
 // 移动端检测
 const isMobile = computed(() => {
@@ -449,7 +858,7 @@ const handleResize = () => {
 
 onMounted(() => {
   window.addEventListener('resize', handleResize);
-  
+
   // 添加全局点击事件处理器，用于检测点击对话框外部时关闭对话框
   document.addEventListener('click', (e) => {
     // 如果对话框已打开
@@ -457,27 +866,41 @@ onMounted(() => {
       const dialog = document.querySelector('.v-assistant-dialog');
       const icon = assistantIcon.value;
       const navBar = document.querySelector('.mobile-nav-bar');
-      
+
       // 检查点击是否在对话框外部和图标外部
       const isOutsideDialog = dialog && !dialog.contains(e.target as Node);
       const isOutsideIcon = icon && !icon.contains(e.target as Node);
       const isOutsideNavBar = navBar && !navBar.contains(e.target as Node);
-      
+
       // 只有当点击在对话框、图标和导航栏之外时才关闭对话框
       if (isOutsideDialog && isOutsideIcon && (isMobile.value ? isOutsideNavBar : true)) {
         isDialogOpen.value = false;
       }
     }
   });
-  
+
   // 初始检测设备类型
   handleResize();
+
+  // 启动粒子动画
+  nextTick(() => {
+    startParticleAnimation()
+  })
+
+  // 启动眨眼动画
+  startBlinking()
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
   document.removeEventListener('mousemove', drag);
   document.removeEventListener('mouseup', stopDrag);
+
+  // 停止粒子动画
+  stopParticleAnimation()
+
+  // 停止眨眼动画
+  stopBlinking()
 })
 </script>
 
@@ -507,14 +930,24 @@ onUnmounted(() => {
   height: 60px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   z-index: 10000;
   border-radius: 50%;
+  background: linear-gradient(135deg, #E8F8F5 0%, #D5F5E3 50%, #A8E6CF 100%);
+  border: 2px solid rgba(90, 200, 168, 0.4);
+  box-shadow:
+    0 4px 15px rgba(90, 200, 168, 0.3),
+    0 8px 25px rgba(90, 200, 168, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5);
 }
 
 .v-assistant-icon:hover {
   transform: scale(1.1);
-  box-shadow: 0 10px 25px -5px rgba(90, 103, 216, 0.4), 0 8px 10px -6px rgba(90, 103, 216, 0.4);
+  border-color: rgba(90, 200, 168, 0.7);
+  box-shadow:
+    0 6px 20px rgba(90, 200, 168, 0.4),
+    0 12px 35px rgba(90, 200, 168, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.6);
 }
 
 .v-assistant-icon:active {
@@ -528,6 +961,91 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+/* 粒子动画Canvas */
+.particle-canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+/* 虚拟精灵形象容器 */
+.sprite-container {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: transform 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.sprite-container.is-open {
+  transform: scale(0.9);
+}
+
+.sprite-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* 精灵动画 */
+.sprite-character {
+  animation: sprite-float 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes sprite-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* 眼睛样式 */
+.sprite-eye {
+  transition: opacity 0.05s ease;
+}
+
+.sprite-eye-closed {
+  opacity: 0;
+  transition: opacity 0.05s ease;
+}
+
+/* 眨眼状态 */
+.sprite-container.is-blinking .sprite-eye {
+  opacity: 0;
+}
+
+.sprite-container.is-blinking .sprite-eye-closed {
+  opacity: 1;
+}
+
+/* 耳朵动画 */
+.sprite-character ellipse[fill="url(#sprite-ear-gradient)"] {
+  animation: ear-twitch 4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.sprite-character ellipse[fill="url(#sprite-ear-gradient)"]:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+@keyframes ear-twitch {
+  0%, 90%, 100% {
+    transform: rotate(-20deg);
+  }
+  95% {
+    transform: rotate(-25deg);
+  }
 }
 
 .v-icon-svg {
@@ -535,13 +1053,7 @@ onUnmounted(() => {
   height: 100%;
 }
 
-.v-icon-chevron {
-  transition: transform 0.3s ease-in-out;
-}
 
-.v-assistant-icon.is-open .v-icon-chevron {
-  transform: rotate(180deg);
-}
 
 .v-assistant-dialog {
   position: fixed;
