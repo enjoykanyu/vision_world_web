@@ -1903,7 +1903,8 @@ const sendDanmaku = async () => {
       speed: danmakuSpeed.value
     })
 
-    if (response.success) {
+    // 检查响应是否成功（status_msg 为 'success' 且 danmaku 存在）
+    if (response?.status_msg === 'success' && response?.danmaku) {
       // 使用轨道系统避免重叠
       const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
       let currentTrackIndex = 0
@@ -1945,7 +1946,7 @@ const sendDanmaku = async () => {
           translateX: 0
         })
 
-        console.log('用户发送的弹幕立即显示:', serverDanmaku.id, '内容:', serverDanmaku.text)
+        console.log('用户发送的弹幕立即显示:', serverDanmaku.id, '内容:', serverDanmaku.text, '颜色:', serverDanmaku.color)
       }
 
       // 清空输入框
@@ -1954,7 +1955,7 @@ const sendDanmaku = async () => {
       // 更新弹幕统计
       videoStats.value.danmakuCount = (parseInt(videoStats.value.danmakuCount) + 1).toString()
     } else {
-      console.error('发送弹幕失败:', response.message)
+      console.error('发送弹幕失败:', response.status_msg)
     }
   } catch (error) {
     console.error('发送弹幕出错:', error)

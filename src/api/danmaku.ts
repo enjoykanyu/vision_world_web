@@ -21,10 +21,9 @@ export interface SendDanmakuRequest {
   speed: string
 }
 
-// 发送弹幕响应
+// 发送弹幕响应（后端实际返回）
 export interface SendDanmakuResponse {
-  success: boolean
-  message: string
+  status_msg: string
   danmaku: Danmaku
 }
 
@@ -41,8 +40,8 @@ export const danmakuAPI = {
   // 发送弹幕
   sendDanmaku: async (data: SendDanmakuRequest): Promise<SendDanmakuResponse> => {
     const response = await http.post('/api/danmaku/send', data)
-    // 后端返回 { code, message, data: { success, message, danmaku } }
-    return response.data.data || { success: false, message: '发送失败', danmaku: null as any }
+    // 后端返回 { code, message, data: { status_msg, danmaku } }
+    return response.data.data || { status_msg: '发送失败', danmaku: null as any }
   },
 
   // 获取视频弹幕列表
