@@ -54,9 +54,17 @@
             <div class="relative bg-black rounded-lg overflow-hidden shadow-lg group" id="video-container">
               <!-- 弹幕容器 -->
               <div class="absolute inset-0 pointer-events-none" ref="danmakuContainer">
-                <div v-for="(danmaku, index) in danmakus" :key="index" 
-                  :style="{ left: '100%', top: `${danmaku.top}%`, color: danmaku.color, transform: `translateX(${danmaku.translateX || 0}px)` }"
-                  class="absolute whitespace-nowrap text-white danmaku-item">
+                <!-- 服务器弹幕 -->
+                <div v-for="danmaku in displayDanmakus" :key="'srv-' + danmaku.id" 
+                  :style="{ 
+                    left: `${danmaku.left}%`, 
+                    top: `${danmaku.top}%`, 
+                    color: danmaku.color,
+                    transform: `translateX(${danmaku.translateX || 0}px)`,
+                    fontSize: '18px',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+                  }"
+                  class="absolute whitespace-nowrap danmaku-item">
                   {{ danmaku.text }}
                 </div>
               </div>
@@ -491,11 +499,12 @@ import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 import CommentSection from '@/components/CommentSection.vue'
-import { danmakuAPI } from '@/api/danmaku'
+import { danmakuAPI, type Danmaku } from '@/api/danmaku'
 import { useUserStore } from '@/stores/userStore'
 import { videoAPI } from '@/api/video'
 import Hls, { type Config } from 'hls.js'
 import { useVideoAnalytics } from '@/composables/useVideoAnalytics'
+import { useDanmakuLoader } from '@/composables/useDanmakuLoader'
 
 // 使用store
 const userStore = useUserStore()
@@ -553,16 +562,29 @@ const {
 })
 
 // 弹幕相关状态
-// 弹幕池 - 存储所有预生成的弹幕
-const danmakuPool = ref<Array<{text: string, color: string, top: number, speed: number, timestamp: number, visible: boolean, translateX: number}>>([])
-// 当前显示的弹幕
-const danmakus = ref<Array<{text: string, color: string, top: number, speed: number, timestamp: number, visible: boolean, translateX: number}>>([])
+// 弹幕相关状态
 const newDanmakuText = ref('')
 const danmakuEnabled = ref(true)
 const danmakuContainer = ref<HTMLDivElement | null>(null)
 const danmakuColor = ref('#FFFFFF')
 const danmakuSpeed = ref('normal')
-const danmakuDensity = ref('normal') // low, normal, high
+
+// 弹幕加载器
+let danmakuLoader: ReturnType<typeof useDanmakuLoader> | null = null
+
+// 从服务器加载的弹幕列表
+const serverDanmakus = ref<Danmaku[]>([])
+// 当前显示的弹幕（来自服务器）
+const displayDanmakus = ref<Array<{
+  id: number
+  text: string
+  color: string
+  top: number
+  left: number
+  speed: number
+  timestamp: number
+  translateX: number
+}>>([])
 
 // 修复视频URL中的重复路径问题
 const cleanVideoUrl = (url: string): string => {
@@ -1653,37 +1675,14 @@ const toggleFullscreen = () => {
 
 // 进度条跳转时更新弹幕
 const updateDanmakusOnSeek = (newTime: number) => {
-  // 清空当前显示的弹幕
-  danmakus.value = []
+  // 清空服务器弹幕显示
+  displayDanmakus.value = []
+  displayedServerDanmakuIds.value.clear()
   
-  // 重置弹幕池中的visible状态
-  danmakuPool.value.forEach(danmaku => {
-    danmaku.visible = false
-    danmaku.translateX = 0
-  })
-  
-  // 根据新的视频时间，添加应该显示的弹幕
-  const containerWidth = danmakuContainer.value?.offsetWidth || 0
-  
-  // 找到所有时间戳 <= 新视频时间的弹幕
-  const visibleDanmakus = danmakuPool.value.filter(danmaku => danmaku.timestamp <= newTime)
-  
-  // 更新这些弹幕的状态和位置
-  visibleDanmakus.forEach(danmaku => {
-    danmaku.visible = true
-    
-    // 计算弹幕应该移动的距离
-    const elapsedTimeSec = newTime - danmaku.timestamp
-    const distancePerSecond = containerWidth / danmaku.speed
-    const totalDistance = distancePerSecond * elapsedTimeSec
-    
-    danmaku.translateX = -totalDistance
-    
-    // 只有当弹幕还在屏幕内时，才添加到显示列表
-    if (totalDistance <= containerWidth + 200) {
-      danmakus.value.push(danmaku)
-    }
-  })
+  // 触发弹幕预加载
+  if (danmakuLoader) {
+    danmakuLoader.checkPreload(newTime)
+  }
 }
 
 // 切换弹幕显示
@@ -1691,16 +1690,19 @@ const toggleDanmaku = () => {
   danmakuEnabled.value = !danmakuEnabled.value
   if (!danmakuEnabled.value) {
     // 关闭弹幕时清空
-    danmakus.value = []
-    if (danmakuInterval) {
-      clearInterval(danmakuInterval)
-      danmakuInterval = null
+    displayDanmakus.value = []
+    displayedServerDanmakuIds.value.clear()
+    // 通知弹幕加载器
+    if (danmakuLoader) {
+      danmakuLoader.toggleDanmaku(false)
     }
-  } else if (isPlaying.value) {
-    // 重新开启弹幕时重新生成
-    simulateDanmakus()
+  } else {
+    // 重新开启弹幕时通知加载器
+    if (danmakuLoader) {
+      danmakuLoader.toggleDanmaku(true)
+    }
   }
-  
+
   if (danmakuContainer.value) {
     danmakuContainer.value.style.pointerEvents = danmakuEnabled.value ? 'none' : 'auto'
   }
@@ -1737,24 +1739,42 @@ const sendDanmaku = async () => {
       const track = danmakuTracks[currentTrackIndex]
       currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
 
-      // 创建本地弹幕对象
-      const newDanmaku = {
+      // 创建服务器弹幕对象
+      const serverDanmaku: Danmaku = {
+        id: response.danmaku.id,
+        user_id: response.danmaku.user_id,
+        video_id: response.danmaku.video_id,
         text: response.danmaku.text,
         color: response.danmaku.color,
-        top: track,
-        speed: response.danmaku.speed === 'normal' ? 10 : response.danmaku.speed === 'fast' ? 8 : 12,
-        timestamp: response.danmaku.video_timestamp,
-        visible: true,
-        translateX: 0
+        video_timestamp: response.danmaku.video_timestamp,
+        speed: response.danmaku.speed,
+        created_at: response.danmaku.created_at
       }
+      serverDanmakus.value.push(serverDanmaku)
 
-      // 添加到当前显示的弹幕列表
-      danmakus.value.push(newDanmaku)
-      // 也添加到弹幕池，以便进度条跳转时能找到
-      danmakuPool.value.push(newDanmaku)
+      // 立即显示到屏幕上
+      const speedMap: Record<string, number> = {
+        'slow': 12,
+        'normal': 10,
+        'fast': 8
+      }
+      displayDanmakus.value.push({
+        id: serverDanmaku.id,
+        text: serverDanmaku.text,
+        color: serverDanmaku.color || '#FFFFFF',
+        top: track,
+        left: 100,
+        speed: speedMap[serverDanmaku.speed] || speedMap['normal'],
+        timestamp: serverDanmaku.video_timestamp,
+        translateX: 0
+      })
+      displayedServerDanmakuIds.value.add(serverDanmaku.id)
 
       // 清空输入框
       newDanmakuText.value = ''
+
+      // 更新弹幕统计
+      videoStats.value.danmakuCount = (parseInt(videoStats.value.danmakuCount) + 1).toString()
     } else {
       console.error('发送弹幕失败:', response.message)
     }
@@ -1763,90 +1783,107 @@ const sendDanmaku = async () => {
   }
 }
 
-// 模拟弹幕
-const generateDanmakuPool = () => {
-  const sampleTexts = [
-    '这个视频太棒了！', '前方高能！', '666', '主播加油！', '哈哈哈哈',
-    '这个操作太秀了', '学习了', '打卡', '支持一下', '路过留名',
-    '太厉害了', '收藏了', '已投币', '一键三连', '质量很高',
-    '制作精良', '内容很棒', '继续加油', '期待更新', '支持UP主'
-  ]
+// 已显示的弹幕ID集合（用于去重）
+const displayedServerDanmakuIds = ref<Set<number>>(new Set())
 
-  // 清空现有弹幕池
-  danmakuPool.value = []
+const displayServerDanmakus = (currentVideoTime: number) => {
+  if (!danmakuEnabled.value || !serverDanmakus.value.length) return
 
-  // 预生成30条弹幕，分布在视频整个时长内
-  const videoDuration = duration.value || 30 // 默认30秒
+  // 找到当前时间应该显示的弹幕（时间窗口1.5秒，增加容错）
+  const timeWindow = 1.5
+  const newDanmakus = serverDanmakus.value.filter(danmaku => {
+    const shouldShow = (
+      danmaku.video_timestamp >= currentVideoTime - timeWindow &&
+      danmaku.video_timestamp <= currentVideoTime + timeWindow &&
+      !displayedServerDanmakuIds.value.has(danmaku.id)
+    )
+    // 调试：如果弹幕在30秒附近，打印日志
+    if (Math.abs(danmaku.video_timestamp - 30) < 2 && shouldShow) {
+      console.log('准备显示弹幕:', danmaku.id, '时间:', danmaku.video_timestamp, '当前视频时间:', currentVideoTime)
+    }
+    return shouldShow
+  })
   
-  for (let i = 0; i < 30; i++) {
-    const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
-    const track = danmakuTracks[i % danmakuTracks.length]
-    // 随机时间戳，分布在视频整个时长内
-    const timestamp = Math.random() * videoDuration
-    
-    danmakuPool.value.push({
-      text: sampleTexts[Math.floor(Math.random() * sampleTexts.length)],
-      color: ['#FFFFFF', '#FB7299', '#00A1D6', '#FFD700', '#FF6B6B', '#4ECDC4'][Math.floor(Math.random() * 6)],
-      top: track,
-      speed: 8 + Math.random() * 4, // 8-12秒随机速度
-      timestamp: timestamp,
-      visible: false,
+  // 限制同时显示的弹幕数量
+  const maxDisplayCount = 30
+  const availableSlots = maxDisplayCount - displayDanmakus.value.length
+  const danmakusToShow = newDanmakus.slice(0, availableSlots)
+  
+  // 添加到显示列表
+  if (danmakusToShow.length > 0) {
+    console.log(`显示 ${danmakusToShow.length} 条新弹幕，当前视频时间:`, currentVideoTime)
+  }
+  danmakusToShow.forEach(danmaku => {
+    displayedServerDanmakuIds.value.add(danmaku.id)
+
+    // 计算轨道位置（简单轮询）
+    const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80]
+    const trackIndex = danmaku.id % danmakuTracks.length
+    const top = danmakuTracks[trackIndex]
+
+    // 计算速度
+    const speedMap: Record<string, number> = {
+      'slow': 12,
+      'normal': 10,
+      'fast': 8
+    }
+    const speed = speedMap[danmaku.speed] || speedMap['normal']
+
+    console.log('添加弹幕到显示列表:', danmaku.id, '内容:', danmaku.text, '时间:', danmaku.video_timestamp)
+
+    displayDanmakus.value.push({
+      id: danmaku.id,
+      text: danmaku.text,
+      color: danmaku.color || '#FFFFFF',
+      top,
+      left: 100, // 从右侧开始
+      speed,
+      timestamp: danmaku.video_timestamp,
       translateX: 0
     })
-  }
-  
-  // 按时间戳排序
-  danmakuPool.value.sort((a, b) => a.timestamp - b.timestamp)
+  })
 }
 
-// 模拟弹幕 - 现在改为根据视频时间从弹幕池获取
-const simulateDanmakus = () => {
-  // 预生成弹幕池
-  generateDanmakuPool()
-
-  // 持续生成弹幕 - 改为根据视频时间动态添加
-  const danmakuDensityMap = {
-    low: 3000,
-    normal: 1500,
-    high: 800
-  }
+// 更新服务器弹幕位置
+const updateServerDanmakuPositions = () => {
+  if (!danmakuContainer.value) return
   
-  const interval = danmakuDensityMap[danmakuDensity.value as keyof typeof danmakuDensityMap]
+  const containerWidth = danmakuContainer.value.offsetWidth || 640
   
-  if (danmakuInterval) {
-    clearInterval(danmakuInterval)
-  }
-  
-  danmakuInterval = setInterval(() => {
-    if (isPlaying.value && danmakus.value.length < 30) {
-      // 根据视频时间从弹幕池添加新弹幕
-      addDanmakusByTime()
+  displayDanmakus.value.forEach((danmaku, index) => {
+    // 更新位置
+    danmaku.left -= 0.5 // 每帧移动0.5%
+    danmaku.translateX = -(100 - danmaku.left) / 100 * containerWidth
+    
+    // 如果弹幕完全移出屏幕，移除它
+    if (danmaku.left < -50) {
+      displayDanmakus.value.splice(index, 1)
     }
-  }, interval)
+  })
 }
 
-// 根据视频时间从弹幕池添加新弹幕
-const addDanmakusByTime = () => {
+// 初始化弹幕加载器
+const initDanmakuLoader = () => {
   if (!videoPlayer.value) return
-  
-  const currentVideoTime = videoPlayer.value.currentTime
-  
-  // 从弹幕池找到符合条件的弹幕：
-  // 1. 时间戳 <= 当前视频时间
-  // 2. 尚未显示
-  // 3. 数量不超过30
-  const newDanmakus = danmakuPool.value.filter(danmaku => {
-    return danmaku.timestamp <= currentVideoTime && !danmaku.visible && danmakus.value.length < 30
-  })
-  
-  // 添加到当前显示的弹幕列表
-  newDanmakus.forEach(danmaku => {
-    danmaku.visible = true
-    danmakus.value.push(danmaku)
-  })
-}
 
-let danmakuInterval: number | null = null
+  danmakuLoader = useDanmakuLoader(videoId, videoPlayer.value)
+
+  // 加载初始弹幕
+  danmakuLoader.init()
+
+  // 监听弹幕加载完成
+  watch(() => danmakuLoader?.allDanmakus.value, (newDanmakus) => {
+    if (newDanmakus && newDanmakus.length > 0) {
+      serverDanmakus.value = newDanmakus
+      console.log('服务器弹幕加载完成:', newDanmakus.length, '条')
+      // 调试：打印30秒附近的弹幕
+      const danmakuAt30 = newDanmakus.filter(d => Math.abs(d.video_timestamp - 30) < 5)
+      if (danmakuAt30.length > 0) {
+        console.log('30秒附近的弹幕:', danmakuAt30)
+      }
+    }
+  }, { deep: true })
+}
 
 // 鼠标移动事件，显示控制栏
 const onMouseMove = () => {
@@ -2036,9 +2073,6 @@ const togglePlay = async () => {
     try {
       await videoPlayer.value.play()
       isPlaying.value = true
-      if (danmakuEnabled.value && danmakuPool.value.length === 0) {
-        simulateDanmakus()
-      }
     } catch (err) {
       console.error('播放失败:', err)
       isPlaying.value = false
@@ -2051,11 +2085,6 @@ const togglePlay = async () => {
   } else {
     videoPlayer.value.pause()
     isPlaying.value = false
-    
-    if (danmakuInterval) {
-      clearInterval(danmakuInterval)
-      danmakuInterval = null
-    }
   }
 }
 
@@ -2204,6 +2233,11 @@ const fetchVideoData = async () => {
         isLiked.value = statsData.is_liked
         isFavorited.value = statsData.is_favorite
         isCoined.value = statsData.is_coined
+        
+        // 更新弹幕加载器的总数
+        if (danmakuLoader) {
+          danmakuLoader.totalCount.value = statsData.danmaku_count || 0
+        }
       }
     } catch (statsError) {
       console.warn('获取视频统计数据失败:', statsError)
@@ -2214,39 +2248,8 @@ const fetchVideoData = async () => {
       videoStats.value.viewCount = videoData.view_count?.toString() || '0'
     }
 
-    // 加载弹幕数据
-    try {
-      const response = await danmakuAPI.getDanmakus(videoId)
-      if (response.danmakus) {
-        // 清空现有的弹幕池
-        danmakuPool.value = []
-        
-        // 初始化弹幕池
-        const danmakuTracks = [10, 20, 30, 40, 50, 60, 70, 80] // 8个轨道
-        let currentTrackIndex = 0
-
-        response.danmakus.forEach(danmaku => {
-          const track = danmakuTracks[currentTrackIndex]
-          currentTrackIndex = (currentTrackIndex + 1) % danmakuTracks.length
-
-          danmakuPool.value.push({
-            text: danmaku.text,
-            color: danmaku.color,
-            top: track,
-            speed: danmaku.speed === 'normal' ? 10 : danmaku.speed === 'fast' ? 8 : 12,
-            timestamp: danmaku.video_timestamp,
-            visible: false,
-            translateX: 0
-          })
-        })
-
-        // 按时间戳排序
-        danmakuPool.value.sort((a, b) => a.timestamp - b.timestamp)
-      }
-    } catch (error) {
-      console.error('加载弹幕失败:', error)
-      // 弹幕加载失败不影响视频播放，继续执行
-    }
+    // 弹幕数据会通过 danmakuLoader 自动加载，这里不需要额外处理
+    // useDanmakuLoader 会在 onMounted 中初始化并加载弹幕
   } catch (error: any) {
     videoError.value = true
     console.error('视频加载错误:', error)
@@ -2470,12 +2473,6 @@ const onVideoPlay = async () => {
 
   // 开始预加载分片
   preloadSegments()
-
-  // 开始更新弹幕位置
-  if (danmakuEnabled.value && danmakuPool.value.length === 0) {
-    // 只有当弹幕池为空时，才重新生成弹幕
-    simulateDanmakus()
-  }
 }
 
 // 视频暂停事件
@@ -2485,12 +2482,6 @@ const onVideoPause = () => {
   
   // 上报暂停事件
   reportProgress('pause')
-  
-  // 暂停时停止生成新弹幕
-  if (danmakuInterval) {
-    clearInterval(danmakuInterval)
-    danmakuInterval = null
-  }
 }
 
 // 视频结束事件
@@ -2499,35 +2490,40 @@ const onVideoEnded = () => {
   isPlaying.value = false
   currentTime.value = 0
   progress.value = 0
-  
+
   // 标记完整观看
   markComplete()
-  
-  // 视频结束时重置弹幕状态
-  danmakus.value = []
-  // 重置弹幕池中的visible状态
-  danmakuPool.value.forEach(danmaku => {
-    danmaku.visible = false
-    danmaku.translateX = 0
-  })
-  
-  if (danmakuInterval) {
-    clearInterval(danmakuInterval)
-    danmakuInterval = null
-  }
+
+  // 视频结束时清空弹幕显示
+  displayDanmakus.value = []
+  displayedServerDanmakuIds.value.clear()
 }
 
 // 监听视频时间更新事件
 const onTimeUpdate = () => {
   if (videoPlayer.value && !isSeeking.value) {
-    currentTime.value = videoPlayer.value.currentTime
-    progress.value = (videoPlayer.value.currentTime / duration.value) * 100
-    
+    const videoCurrentTime = videoPlayer.value.currentTime
+    currentTime.value = videoCurrentTime
+    progress.value = (videoCurrentTime / duration.value) * 100
+
     // 更新缓存进度
     updateBufferProgress()
-    
+
     // 更新弹幕位置
     updateDanmakusPosition()
+
+    // 弹幕预加载检查（每5秒检查一次）
+    if (Math.floor(videoCurrentTime) % 5 === 0 && danmakuLoader) {
+      danmakuLoader.checkPreload(videoCurrentTime)
+    }
+
+    // 从服务器弹幕列表中显示当前时间应该出现的弹幕
+    displayServerDanmakus(videoCurrentTime)
+
+    // 调试：在30秒附近打印日志
+    if (Math.abs(videoCurrentTime - 30) < 0.5) {
+      console.log('onTimeUpdate - 视频时间:', videoCurrentTime, 'serverDanmakus数量:', serverDanmakus.value.length, 'displayDanmakus数量:', displayDanmakus.value.length)
+    }
   }
 }
 
@@ -2592,38 +2588,8 @@ const preloadSegments = async () => {
 const updateDanmakusPosition = () => {
   if (!danmakuEnabled.value || !videoPlayer.value || !isPlaying.value) return
   
-  const containerWidth = danmakuContainer.value?.offsetWidth || 0
-  const currentVideoTime = videoPlayer.value.currentTime
-  
-  // 首先根据当前视频时间添加应该出现的弹幕
-  addDanmakusByTime()
-  
-  // 遍历所有弹幕，更新位置
-  danmakus.value.forEach((danmaku, index) => {
-    // 只有当视频时间 >= 弹幕时间戳时，弹幕才会移动
-    if (currentVideoTime >= danmaku.timestamp) {
-      // 计算弹幕已经移动的时间（秒）= 视频当前时间 - 弹幕时间戳
-      const elapsedTimeSec = currentVideoTime - danmaku.timestamp
-      
-      // 计算弹幕应该移动的距离（像素）
-      // 速度单位为秒，所以每秒移动 containerWidth / speed 像素
-      const distancePerSecond = containerWidth / danmaku.speed
-      const totalDistance = distancePerSecond * elapsedTimeSec
-      
-      // 更新弹幕的translateX属性
-      danmaku.translateX = -totalDistance
-      
-      // 检查弹幕是否超出屏幕左侧，超出则移除
-      if (totalDistance > containerWidth + 200) { // 200为缓冲值，确保完全移出屏幕
-        danmakus.value.splice(index, 1)
-        // 重置visible状态，以便下次进度条跳转到该位置时能重新显示
-        const poolIndex = danmakuPool.value.findIndex(poolDanmaku => poolDanmaku === danmaku)
-        if (poolIndex !== -1) {
-          danmakuPool.value[poolIndex].visible = false
-        }
-      }
-    }
-  })
+  // 更新服务器弹幕位置
+  updateServerDanmakuPositions()
 }
 
 // 进度条拖动状态
@@ -2670,18 +2636,21 @@ watch(video, async (newVideo) => {
 // 生命周期
 onMounted(() => {
   fetchVideoData()
-  simulateDanmakus()
   window.addEventListener('keydown', handleKeydown)
-  
+
   // 开始定时更新弹幕位置
   const danmakuUpdateInterval = setInterval(updateDanmakusPosition, 16) // 约60fps
-  
+
+  // 初始化弹幕加载器（延迟初始化，等待videoPlayer就绪）
+  setTimeout(() => {
+    if (videoPlayer.value) {
+      initDanmakuLoader()
+    }
+  }, 1000)
+
   onUnmounted(() => {
     clearInterval(danmakuUpdateInterval)
     window.removeEventListener('keydown', handleKeydown)
-    if (danmakuInterval) {
-      clearInterval(danmakuInterval)
-    }
     if (controlsTimeout) {
       clearTimeout(controlsTimeout)
     }
@@ -2689,6 +2658,10 @@ onMounted(() => {
     cleanupHLS()
     // 重置播放量统计
     resetAnalytics()
+    // 清理弹幕加载器
+    if (danmakuLoader) {
+      danmakuLoader.clearDisplay()
+    }
   })
 })
 </script>
