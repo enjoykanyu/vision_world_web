@@ -303,15 +303,141 @@
                 </div>
 
                 <!-- 右侧：弹幕输入框 -->
-                <div class="flex items-center space-x-3 flex-1 max-w-2xl ml-6">
+                <div class="flex items-center space-x-3 flex-1 max-w-2xl ml-6 relative">
+                  <!-- 颜色选择器弹窗 -->
+                  <div v-if="showColorPicker" class="absolute bottom-full left-0 mb-2 bg-[#2C2D30] rounded-lg p-4 w-[320px] shadow-xl z-50">
+                    <!-- 字号选择 -->
+                    <div class="mb-4">
+                      <div class="text-gray-300 text-sm mb-2">字号</div>
+                      <div class="flex space-x-2">
+                        <button
+                          @click="danmakuFontSize = 'small'"
+                          class="flex-1 py-1.5 px-3 rounded text-sm transition-colors"
+                          :class="danmakuFontSize === 'small' ? 'bg-[#00AEEC] text-white' : 'bg-[#4A4A4A] text-gray-300 hover:bg-[#5A5A5A]'"
+                        >
+                          小
+                        </button>
+                        <button
+                          @click="danmakuFontSize = 'normal'"
+                          class="flex-1 py-1.5 px-3 rounded text-sm transition-colors"
+                          :class="danmakuFontSize === 'normal' ? 'bg-[#00AEEC] text-white' : 'bg-[#4A4A4A] text-gray-300 hover:bg-[#5A5A5A]'"
+                        >
+                          标准
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 模式选择 -->
+                    <div class="mb-4">
+                      <div class="text-gray-300 text-sm mb-2">模式</div>
+                      <div class="flex space-x-3">
+                        <button
+                          @click="danmakuMode = 'scroll'"
+                          class="flex flex-col items-center p-2 rounded transition-colors"
+                          :class="danmakuMode === 'scroll' ? 'text-[#00AEEC]' : 'text-gray-400 hover:text-gray-300'"
+                        >
+                          <div class="w-10 h-8 bg-[#00AEEC] rounded flex items-center justify-center mb-1">
+                            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M3 6h18v2H3V6zm0 5h12v2H3v-2zm0 5h18v2H3v-2z"/>
+                            </svg>
+                          </div>
+                          <span class="text-xs">滚动</span>
+                        </button>
+                        <button
+                          @click="danmakuMode = 'top'"
+                          class="flex flex-col items-center p-2 rounded transition-colors"
+                          :class="danmakuMode === 'top' ? 'text-[#00AEEC]' : 'text-gray-400 hover:text-gray-300'"
+                        >
+                          <div class="w-10 h-8 bg-[#4A4A4A] rounded flex items-center justify-center mb-1" :class="{ 'bg-[#00AEEC]': danmakuMode === 'top' }">
+                            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/>
+                            </svg>
+                          </div>
+                          <span class="text-xs">顶部</span>
+                        </button>
+                        <button
+                          @click="danmakuMode = 'bottom'"
+                          class="flex flex-col items-center p-2 rounded transition-colors"
+                          :class="danmakuMode === 'bottom' ? 'text-[#00AEEC]' : 'text-gray-400 hover:text-gray-300'"
+                        >
+                          <div class="w-10 h-8 bg-[#4A4A4A] rounded flex items-center justify-center mb-1" :class="{ 'bg-[#00AEEC]': danmakuMode === 'bottom' }">
+                            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/>
+                            </svg>
+                          </div>
+                          <span class="text-xs">底部</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 颜色选择 -->
+                    <div class="mb-4">
+                      <div class="text-gray-300 text-sm mb-2">颜色</div>
+                      <!-- 颜色输入框和预览 -->
+                      <div class="flex items-center space-x-2 mb-3">
+                        <input
+                          v-model="danmakuColor"
+                          type="text"
+                          placeholder="#FFFFFF"
+                          class="flex-1 bg-[#1A1A1A] border border-[#4A4A4A] rounded px-3 py-1.5 text-sm text-white uppercase"
+                          maxlength="7"
+                        >
+                        <div
+                          class="w-16 h-8 rounded border border-[#4A4A4A]"
+                          :style="{ backgroundColor: danmakuColor }"
+                        ></div>
+                      </div>
+                      <!-- 预设颜色网格 -->
+                      <div class="grid grid-cols-7 gap-2">
+                        <button
+                          v-for="color in presetColors"
+                          :key="color"
+                          @click="danmakuColor = color"
+                          class="w-8 h-8 rounded border-2 transition-all"
+                          :class="danmakuColor === color ? 'border-white scale-110' : 'border-transparent hover:scale-105'"
+                          :style="{ backgroundColor: color }"
+                        ></button>
+                      </div>
+                    </div>
+
+                    <!-- 大会员专属颜色 -->
+                    <div>
+                      <div class="text-gray-400 text-sm mb-2">大会员专属颜色</div>
+                      <div class="flex space-x-2">
+                        <button
+                          v-for="color in vipColors"
+                          :key="color"
+                          @click="danmakuColor = color"
+                          class="w-8 h-8 rounded border-2 transition-all"
+                          :class="danmakuColor === color ? 'border-white scale-110' : 'border-transparent hover:scale-105'"
+                          :style="{ backgroundColor: color }"
+                        ></button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 点击外部关闭颜色选择器 -->
+                  <div v-if="showColorPicker" class="fixed inset-0 z-40" @click="showColorPicker = false"></div>
+
                   <div class="flex items-center space-x-2 flex-1 bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2">
-                    <i class="fas fa-font text-gray-400"></i>
+                    <!-- 颜色选择按钮 -->
+                    <button
+                      @click="showColorPicker = !showColorPicker"
+                      class="flex items-center justify-center w-6 h-6 rounded transition-colors"
+                      :style="{ color: danmakuColor }"
+                      title="选择弹幕颜色"
+                    >
+                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                      </svg>
+                    </button>
                     <input
                       v-model="newDanmakuText"
                       @keyup.enter="sendDanmaku"
                       placeholder="发个友善的弹幕见证当下"
                       class="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400"
                       :disabled="!danmakuEnabled"
+                      :style="{ color: danmakuEnabled ? danmakuColor : '' }"
                     >
                   </div>
                   <a href="#" class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 whitespace-nowrap">
@@ -568,6 +694,51 @@ const danmakuEnabled = ref(true)
 const danmakuContainer = ref<HTMLDivElement | null>(null)
 const danmakuColor = ref('#FFFFFF')
 const danmakuSpeed = ref('normal')
+const danmakuFontSize = ref('normal') // 'small' | 'normal'
+const danmakuMode = ref('scroll') // 'scroll' | 'top' | 'bottom'
+const showColorPicker = ref(false)
+
+// 预设颜色（参考B站标准颜色）
+const presetColors = [
+  '#FF0000', // 红
+  '#FF7F00', // 橙
+  '#FFA500', // 深橙
+  '#FFD700', // 金
+  '#FFFF00', // 黄
+  '#ADFF2F', // 黄绿
+  '#00FF00', // 绿
+  '#00CED1', // 青
+  '#4169E1', // 蓝
+  '#87CEEB', // 浅蓝
+  '#FF1493', // 深粉
+  '#FF69B4', // 粉
+  '#808080', // 灰
+  '#FFFFFF', // 白
+  '#000000', // 黑
+  '#1E90FF', // 亮蓝
+  '#8A2BE2', // 紫
+  '#FF6347', // 番茄红
+  '#40E0D0', //  turquoise
+  '#EE82EE', // 紫罗兰
+  '#F0E68C', // 卡其
+  '#DDA0DD', // 梅红
+  '#98FB98', // 浅绿
+  '#F5DEB3', // 小麦
+  '#D3D3D3', // 浅灰
+  '#FFB6C1', // 浅粉
+  '#FFA07A', // 浅橙
+  '#20B2AA', // 浅青
+]
+
+// 大会员专属颜色（渐变色）
+const vipColors = [
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+]
 
 // 弹幕加载器
 let danmakuLoader: ReturnType<typeof useDanmakuLoader> | null = null
@@ -1752,23 +1923,30 @@ const sendDanmaku = async () => {
       }
       serverDanmakus.value.push(serverDanmaku)
 
-      // 立即显示到屏幕上
+      // 立即显示到屏幕上（用户发送的弹幕立即显示，不等待时间窗口）
       const speedMap: Record<string, number> = {
         'slow': 12,
         'normal': 10,
         'fast': 8
       }
-      displayDanmakus.value.push({
-        id: serverDanmaku.id,
-        text: serverDanmaku.text,
-        color: serverDanmaku.color || '#FFFFFF',
-        top: track,
-        left: 100,
-        speed: speedMap[serverDanmaku.speed] || speedMap['normal'],
-        timestamp: serverDanmaku.video_timestamp,
-        translateX: 0
-      })
-      displayedServerDanmakuIds.value.add(serverDanmaku.id)
+
+      // 确保不重复添加
+      if (!displayedServerDanmakuIds.value.has(serverDanmaku.id)) {
+        displayedServerDanmakuIds.value.add(serverDanmaku.id)
+
+        displayDanmakus.value.push({
+          id: serverDanmaku.id,
+          text: serverDanmaku.text,
+          color: serverDanmaku.color || '#FFFFFF',
+          top: track,
+          left: 100, // 从右侧开始
+          speed: speedMap[serverDanmaku.speed] || speedMap['normal'],
+          timestamp: serverDanmaku.video_timestamp,
+          translateX: 0
+        })
+
+        console.log('用户发送的弹幕立即显示:', serverDanmaku.id, '内容:', serverDanmaku.text)
+      }
 
       // 清空输入框
       newDanmakuText.value = ''
@@ -2586,9 +2764,9 @@ const preloadSegments = async () => {
 
 // 更新弹幕位置
 const updateDanmakusPosition = () => {
-  if (!danmakuEnabled.value || !videoPlayer.value || !isPlaying.value) return
-  
-  // 更新服务器弹幕位置
+  if (!danmakuEnabled.value || !videoPlayer.value) return
+
+  // 更新服务器弹幕位置（无论视频是否播放，都要更新弹幕位置）
   updateServerDanmakuPositions()
 }
 
