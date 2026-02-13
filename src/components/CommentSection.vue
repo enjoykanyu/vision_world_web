@@ -335,6 +335,11 @@ const props = defineProps<{
   videoId: string
 }>()
 
+// Emits
+const emit = defineEmits<{
+  commentSubmitted: []
+}>()
+
 // Stores
 const userStore = useUserStore()
 const videoStore = useVideoStore()
@@ -477,6 +482,8 @@ const getUserInitials = () => {
 const fetchComments = async (reset = false) => {
   if (isLoading.value) return
   
+  console.log('开始获取评论, videoId:', props.videoId, 'reset:', reset)
+  
   isLoading.value = true
   try {
     const page = reset ? 1 : currentPage.value
@@ -508,7 +515,9 @@ const fetchComments = async (reset = false) => {
       commentTotal.value = result.total || 0
       hasMoreComments.value = result.has_more || false
       
-      console.log('处理后的评论:', comments.value)
+      console.log('处理后的评论数量:', comments.value.length, '总数:', commentTotal.value)
+    } else {
+      console.error('获取评论失败:', result.status_msg)
     }
   } catch (error) {
     console.error('获取评论失败:', error)
@@ -538,17 +547,28 @@ const submitComment = async () => {
   
   isSubmitting.value = true
   try {
+    console.log('开始发布评论, videoId:', props.videoId)
     const result = await videoStore.commentVideo({
       videoId: props.videoId,
       content: commentContent.value.trim()
     })
     
-    if (result.status_code === 0) {
+    console.log('发布评论结果:', result)
+    
+    // 后端返回的是 status_msg 而不是 status_code，根据 status_msg 判断成功
+    if (result.status_msg === '发表评论成功' || result.status_msg === 'success' || result.comment) {
       // 清空输入框
       commentContent.value = ''
       
       // 刷新评论列表
+      console.log('评论发布成功，开始刷新评论列表')
       await fetchComments(true)
+      console.log('评论列表刷新完成')
+      
+      // 通知父组件评论已提交，刷新统计信息
+      emit('commentSubmitted')
+    } else {
+      console.error('发布评论失败:', result.status_msg)
     }
   } catch (error) {
     console.error('发布评论失败:', error)
@@ -572,10 +592,15 @@ const handleLikeComment = async (comment: any) => {
       actionType: !comment.is_liked
     })
     
-    if (result.status_code === 0) {
+    console.log('点赞评论结果:', result)
+    
+    // 后端返回的是 status_msg 而不是 status_code，根据 status_msg 判断成功
+    if (result.status_msg === '点赞成功' || result.status_msg === 'success' || result.status_msg === '取消点赞成功') {
       // 更新本地状态
       comment.is_liked = !comment.is_liked
       comment.like_count += comment.is_liked ? 1 : -1
+    } else {
+      console.error('点赞评论失败:', result.status_msg)
     }
   } catch (error) {
     console.error('点赞评论失败:', error)
@@ -612,7 +637,10 @@ const submitReply = async (comment: any) => {
       replyToUserId: replyToUser.value?.id || 0
     })
     
-    if (result.status_code === 0) {
+    console.log('回复评论结果:', result)
+    
+    // 后端返回的是 status_msg 而不是 status_code，根据 status_msg 或 comment 判断成功
+    if (result.status_msg === '回复评论成功' || result.status_msg === 'success' || result.comment) {
       // 清空输入框
       replyContent.value = ''
       replyCommentId.value = 0
@@ -620,6 +648,11 @@ const submitReply = async (comment: any) => {
       
       // 刷新评论列表
       await fetchComments(true)
+      
+      // 通知父组件评论已提交，刷新统计信息
+      emit('commentSubmitted')
+    } else {
+      console.error('回复评论失败:', result.status_msg)
     }
   } catch (error) {
     console.error('回复评论失败:', error)
@@ -644,9 +677,14 @@ const loadMoreReplies = async (comment: any) => {
       pageSize: 10
     })
     
-    if (result.status_code === 0) {
+    console.log('加载更多回复结果:', result)
+    
+    // 后端返回的是 status_msg 而不是 status_code，根据 status_msg 或 replies 判断成功
+    if (result.status_msg === 'success' || result.replies || result.status_code === 0) {
       // 更新评论的回复列表
       comment.replies = [...(comment.replies || []), ...(result.replies || [])]
+    } else {
+      console.error('加载更多回复失败:', result.status_msg)
     }
   } catch (error) {
     console.error('加载更多回复失败:', error)

@@ -534,7 +534,13 @@
 
 
             <!-- 评论区 -->
-            <CommentSection :video-id="video.id" />
+            <div class="mt-6">
+              <div class="flex items-center space-x-2 mb-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">评论3</h3>
+                <span class="text-sm text-gray-500 dark:text-gray-400">({{ videoStats.commentCount }})</span>
+              </div>
+              <CommentSection :video-id="String(video.id)" @comment-submitted="refreshVideoStats" />
+            </div>
           </div>
 
           <!-- 右侧: 视频信息展示区域 -->
@@ -861,7 +867,8 @@ const videoStats = ref({
   favoriteCount: '0',
   shareCount: '0',
   publishTime: '',
-  watchingCount: '0'
+  watchingCount: '0',
+  commentCount: '0'
 })
 
 // 点赞、投币、收藏转发状态
@@ -2060,6 +2067,8 @@ const initDanmakuLoader = () => {
       if (danmakuAt30.length > 0) {
         console.log('30秒附近的弹幕:', danmakuAt30)
       }
+      // 更新弹幕数量统计（使用实际加载的弹幕数量）
+      videoStats.value.danmakuCount = newDanmakus.length.toString()
     }
   }, { deep: true })
 }
@@ -2092,6 +2101,36 @@ const onMouseLeave = () => {
 const goToUserHome = () => {
   console.log('跳转到用户主页')
   // 实际应用中应该使用router.push或window.location.href
+}
+
+// 刷新视频统计信息
+const refreshVideoStats = async () => {
+  if (!video.value?.id) return
+  
+  try {
+    console.log('刷新视频统计信息, videoId:', video.value.id)
+    const statsResponse = await videoAPI.getVideoStats(video.value.id)
+    console.log('获取视频统计信息响应:', statsResponse)
+    
+    if (statsResponse.data?.data) {
+      const stats = statsResponse.data.data
+      videoStats.value.likeCount = Math.max(stats.like_count, 0).toString()
+      videoStats.value.favoriteCount = Math.max(stats.favorite_count, 0).toString()
+      videoStats.value.shareCount = Math.max(stats.share_count, 0).toString()
+      videoStats.value.coinCount = Math.max(stats.coin_count, 0).toString()
+      videoStats.value.viewCount = Math.max(stats.play_count, 0).toString()
+      videoStats.value.danmakuCount = Math.max(stats.danmaku_count, 0).toString()
+      videoStats.value.commentCount = Math.max(stats.comment_count, 0).toString()
+      
+      isLiked.value = stats.is_liked
+      isFavorited.value = stats.is_favorite
+      isCoined.value = stats.is_coined
+      
+      console.log('视频统计信息刷新完成:', videoStats.value)
+    }
+  } catch (error) {
+    console.error('刷新视频统计信息失败:', error)
+  }
 }
 
 // 点赞功能
@@ -2364,6 +2403,16 @@ const fetchVideoData = async () => {
       })
     }
     
+    // 格式化发布时间（精确到时分秒）
+    const formattedPublishTime = new Date(videoData.create_time * 1000).toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+
     video.value = {
       id: videoData.video_id,
       title: videoData.title,
@@ -2381,14 +2430,11 @@ const fetchVideoData = async () => {
       tags: videoData.tags || [],
       category: videoData.category || '',
       isFollowed: videoData.is_followed || false,
-      createTime: new Date(videoData.create_time * 1000).toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      createTime: formattedPublishTime
     }
+
+    // 设置视频统计中的发布时间
+    videoStats.value.publishTime = formattedPublishTime
 
     // 更新视频作者信息
     videoAuthor.value = {
@@ -2409,10 +2455,11 @@ const fetchVideoData = async () => {
         videoStats.value.viewCount = statsData.play_count?.toString() || videoData.view_count?.toString() || '0'
         videoStats.value.danmakuCount = statsData.danmaku_count?.toString() || '0'
         videoStats.value.coinCount = statsData.coin_count?.toString() || '0'
+        videoStats.value.commentCount = statsData.comment_count?.toString() || '0'
         isLiked.value = statsData.is_liked
         isFavorited.value = statsData.is_favorite
         isCoined.value = statsData.is_coined
-        
+
         // 更新弹幕加载器的总数
         if (danmakuLoader) {
           danmakuLoader.totalCount.value = statsData.danmaku_count || 0
@@ -2425,6 +2472,7 @@ const fetchVideoData = async () => {
       videoStats.value.favoriteCount = videoData.favorite_count?.toString() || '0'
       videoStats.value.shareCount = videoData.share_count?.toString() || '0'
       videoStats.value.viewCount = videoData.view_count?.toString() || '0'
+      videoStats.value.commentCount = videoData.comment_count?.toString() || '0'
     }
 
     // 弹幕数据会通过 danmakuLoader 自动加载，这里不需要额外处理

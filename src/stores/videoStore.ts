@@ -477,18 +477,21 @@ export const useVideoStore = defineStore('video', () => {
     const userStore = useUserStore()
     
     try {
-      const result = await videoAPI.getVideoComments({
+      const response = await videoAPI.getVideoComments({
         video_id: videoId,
         page,
         page_size: pageSize,
         sort_order: sortOrder
       })
       
-      // 处理不同的响应格式
-      if (result.data) {
-        return result.data
-      } else {
+      // axios 返回的是 response 对象，response.data 才是真正的 API 响应
+      // 后端返回格式: { status_code, status_msg, comments, total, has_more }
+      const result = response.data
+      
+      if (result.status_code === 0) {
         return result
+      } else {
+        return { status_code: result.status_code || 500, status_msg: result.status_msg || '获取评论失败', comments: [], total: 0, has_more: false }
       }
     } catch (error: any) {
       console.error('获取评论失败:', error)
@@ -511,20 +514,23 @@ export const useVideoStore = defineStore('video', () => {
     const userStore = useUserStore()
     
     try {
-      const result = await videoAPI.commentVideo({
+      const response = await videoAPI.commentVideo({
         video_id: videoId,
         content,
         parent_id,
         reply_to_user_id
       })
       
-      console.log('发布评论响应:', result)
+      console.log('发布评论响应:', response)
       
-      // 处理不同的响应格式
-      if (result.data) {
+      // axios 返回的是 response 对象，response.data 才是真正的 API 响应
+      const result = response.data
+      
+      // 后端返回格式: { code: 0, message: 'success', data: { status_code, status_msg, comment } }
+      if (result.code === 0 && result.data) {
         return result.data
       } else {
-        return result
+        return { status_code: result.code || 500, status_msg: result.message || '发布评论失败' }
       }
     } catch (error: any) {
       console.error('发布评论失败:', error)
@@ -545,18 +551,21 @@ export const useVideoStore = defineStore('video', () => {
     const { commentId, actionType } = params
     
     try {
-      const result = await videoAPI.likeComment({
+      const response = await videoAPI.likeComment({
         comment_id: commentId,
         action_type: actionType
       })
       
-      console.log('点赞评论响应:', result)
+      console.log('点赞评论响应:', response)
       
-      // 处理不同的响应格式
-      if (result.data) {
+      // axios 返回的是 response 对象，response.data 才是真正的 API 响应
+      const result = response.data
+      
+      // 后端返回格式: { code: 0, message: 'success', data: { status_code, status_msg, ... } }
+      if (result.code === 0 && result.data) {
         return result.data
       } else {
-        return result
+        return { status_code: result.code || 500, status_msg: result.message || '点赞评论失败', like_count: 0, is_liked: false }
       }
     } catch (error: any) {
       console.error('点赞评论失败:', error)
@@ -577,19 +586,22 @@ export const useVideoStore = defineStore('video', () => {
     const { commentId, content, replyToUserId } = params
     
     try {
-      const result = await videoAPI.replyComment({
+      const response = await videoAPI.replyComment({
         comment_id: commentId,
         content,
         reply_to_user_id: replyToUserId
       })
       
-      console.log('回复评论响应:', result)
+      console.log('回复评论响应:', response)
       
-      // 处理不同的响应格式
-      if (result.data) {
+      // axios 返回的是 response 对象，response.data 才是真正的 API 响应
+      const result = response.data
+      
+      // 后端返回格式: { code: 0, message: 'success', data: { status_code, status_msg, comment } }
+      if (result.code === 0 && result.data) {
         return result.data
       } else {
-        return result
+        return { status_code: result.code || 500, status_msg: result.message || '回复评论失败' }
       }
     } catch (error: any) {
       console.error('回复评论失败:', error)
@@ -612,19 +624,22 @@ export const useVideoStore = defineStore('video', () => {
     const { commentId, page = 1, pageSize = 10 } = params
     
     try {
-      const result = await videoAPI.getCommentReplies({
+      const response = await videoAPI.getCommentReplies({
         comment_id: commentId,
         page,
         page_size: pageSize
       })
       
-      console.log('获取评论回复响应:', result)
+      console.log('获取评论回复响应:', response)
       
-      // 处理不同的响应格式
-      if (result.data) {
-        return result.data
-      } else {
+      // axios 返回的是 response 对象，response.data 才是真正的 API 响应
+      // 后端返回格式: { status_code, status_msg, replies, total, has_more }
+      const result = response.data
+      
+      if (result.status_code === 0) {
         return result
+      } else {
+        return { status_code: result.status_code || 500, status_msg: result.status_msg || '获取评论回复失败', replies: [], total: 0, has_more: false }
       }
     } catch (error: any) {
       console.error('获取评论回复失败:', error)
