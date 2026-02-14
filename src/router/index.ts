@@ -8,6 +8,7 @@ import UserProfile from '@/views/UserProfile.vue'
 import EditProfile from '@/views/EditProfile.vue'
 import Messages from '@/views/Messages.vue'
 import Live from '@/views/Live.vue'
+import LiveRoom from '@/views/LiveRoom.vue'
 import StreamSetup from '@/views/StreamSetup.vue'
 import VideoUpload from '@/views/VideoUpload.vue'
 import VideoManage from '@/views/VideoManage.vue'
@@ -40,6 +41,14 @@ const router = createRouter({
       component: Live,
       meta: {
         title: '正在直播 - Vision World'
+      }
+    },
+    {
+      path: '/live/:id',
+      name: 'liveRoom',
+      component: LiveRoom,
+      meta: {
+        title: '直播间 - Vision World'
       }
     },
     {
