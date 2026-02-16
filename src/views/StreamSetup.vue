@@ -613,6 +613,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick, h } from 'vue'
 import NavHeader from '@/components/NavHeader.vue'
 import { useUserStore } from '@/stores/userStore'
+import { liveAPI } from '@/api/live'
 
 const userStore = useUserStore()
 
@@ -1106,24 +1107,51 @@ const removeSource = (index: number) => {
 }
 
 // 开始/结束直播
-const toggleStreaming = () => {
+const toggleStreaming = async () => {
   if (isStreaming.value) {
-    isStreaming.value = false
-    if (streamTimer) {
-      clearInterval(streamTimer)
-      streamTimer = null
+    // 结束直播
+    try {
+      const userId = userStore.userId || 1
+      await liveAPI.stopLive({
+        user_id: userId
+      })
+      isStreaming.value = false
+      if (streamTimer) {
+        clearInterval(streamTimer)
+        streamTimer = null
+      }
+      durationSeconds = 0
+      streamDuration.value = '00:00:00'
+    } catch (error) {
+      console.error('结束直播失败:', error)
+      alert('结束直播失败，请重试')
     }
-    durationSeconds = 0
-    streamDuration.value = '00:00:00'
   } else {
-    isStreaming.value = true
-    streamTimer = window.setInterval(() => {
-      durationSeconds++
-      const hours = Math.floor(durationSeconds / 3600).toString().padStart(2, '0')
-      const minutes = Math.floor((durationSeconds % 3600) / 60).toString().padStart(2, '0')
-      const seconds = (durationSeconds % 60).toString().padStart(2, '0')
-      streamDuration.value = `${hours}:${minutes}:${seconds}`
-    }, 1000)
+    // 开始直播
+    try {
+      const userId = userStore.userId || 1
+      const response = await liveAPI.startLive({
+        user_id: userId,
+        title: '我的直播间',
+        category: '娱乐'
+      })
+
+      if (response.data.code === 0) {
+        isStreaming.value = true
+        streamTimer = window.setInterval(() => {
+          durationSeconds++
+          const hours = Math.floor(durationSeconds / 3600).toString().padStart(2, '0')
+          const minutes = Math.floor((durationSeconds % 3600) / 60).toString().padStart(2, '0')
+          const seconds = (durationSeconds % 60).toString().padStart(2, '0')
+          streamDuration.value = `${hours}:${minutes}:${seconds}`
+        }, 1000)
+      } else {
+        alert('开始直播失败: ' + response.data.message)
+      }
+    } catch (error) {
+      console.error('开始直播失败:', error)
+      alert('开始直播失败，请重试')
+    }
   }
 }
 
