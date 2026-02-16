@@ -268,75 +268,139 @@
         </div>
         
         <!-- 底部控制栏 -->
-        <div class="h-14 bg-white border-t border-gray-200 flex items-center px-3 space-x-2 shrink-0">
-          <!-- 麦克风控制 -->
-          <div class="flex items-center space-x-1.5">
-            <button 
-              @click="micEnabled = !micEnabled"
-              class="w-7 h-7 rounded flex items-center justify-center transition-colors"
-              :class="micEnabled ? 'bg-[#00b5e5] text-white' : 'bg-gray-200 text-gray-500'"
-            >
-              <svg v-if="micEnabled" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-              </svg>
-              <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
-              </svg>
-            </button>
-            <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
-              <div class="h-full bg-[#00b5e5] transition-all duration-100" :style="{ width: micVolume + '%' }"></div>
+        <div class="bg-white border-t border-gray-200 flex flex-col shrink-0">
+          <!-- 直播设置区域 -->
+          <div class="px-4 py-3 border-b border-gray-100">
+            <div class="flex items-start space-x-4">
+              <!-- 封面设置 -->
+              <div class="flex-shrink-0">
+                <div 
+                  @click="showCoverModal = true"
+                  class="w-28 h-16 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-[#00b5e5] hover:bg-blue-50 transition-all overflow-hidden relative"
+                >
+                  <img v-if="liveCover" :src="liveCover" class="w-full h-full object-cover" />
+                  <template v-else>
+                    <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span class="text-xs text-gray-500">封面设置</span>
+                  </template>
+                </div>
+              </div>
+              
+              <!-- 中间设置区域 -->
+              <div class="flex-1 space-y-2">
+                <!-- 直播标题和分区 -->
+                <div class="flex items-center space-x-3">
+                  <input 
+                    v-model="liveTitle"
+                    type="text" 
+                    placeholder="填写直播间标题，让更多人看见~"
+                    class="flex-1 bg-gray-50 border border-gray-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[#00b5e5] focus:ring-1 focus:ring-[#00b5e5]"
+                  />
+                  <button 
+                    @click="showCategoryModal = true"
+                    class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm text-gray-600 hover:border-[#00b5e5] hover:text-[#00b5e5] transition-colors flex items-center space-x-1"
+                  >
+                    <span>{{ selectedCategory ? selectedCategory.name : '选择分区' }}</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- 直播简介 -->
+                <div class="relative">
+                  <input 
+                    v-model="liveDescription"
+                    type="text" 
+                    placeholder="填写直播简介，介绍你的直播内容..."
+                    class="w-full bg-gray-50 border border-gray-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[#00b5e5] focus:ring-1 focus:ring-[#00b5e5]"
+                  />
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                    {{ liveDescription.length }}/100
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 右侧提示文字 -->
+              <div class="flex-shrink-0 text-xs text-gray-400 pt-1">
+                <p>能够吸引更多观众进入直播间噢~</p>
+              </div>
             </div>
           </div>
           
-          <!-- 扬声器控制 -->
-          <div class="flex items-center space-x-1.5">
-            <button 
-              @click="speakerEnabled = !speakerEnabled"
-              class="w-7 h-7 rounded flex items-center justify-center transition-colors"
-              :class="speakerEnabled ? 'bg-[#00b5e5] text-white' : 'bg-gray-200 text-gray-500'"
-            >
-              <svg v-if="speakerEnabled" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
-              </svg>
-              <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
-              </svg>
-            </button>
-            <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
-              <div class="h-full bg-[#00b5e5] transition-all duration-100" :style="{ width: speakerVolume + '%' }"></div>
+          <!-- 控制按钮区域 -->
+          <div class="h-12 flex items-center px-3 space-x-2">
+            <!-- 麦克风控制 -->
+            <div class="flex items-center space-x-1.5">
+              <button 
+                @click="micEnabled = !micEnabled"
+                class="w-7 h-7 rounded flex items-center justify-center transition-colors"
+                :class="micEnabled ? 'bg-[#00b5e5] text-white' : 'bg-gray-200 text-gray-500'"
+              >
+                <svg v-if="micEnabled" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                </svg>
+                <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                </svg>
+              </button>
+              <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-[#00b5e5] transition-all duration-100" :style="{ width: micVolume + '%' }"></div>
+              </div>
             </div>
+            
+            <!-- 扬声器控制 -->
+            <div class="flex items-center space-x-1.5">
+              <button 
+                @click="speakerEnabled = !speakerEnabled"
+                class="w-7 h-7 rounded flex items-center justify-center transition-colors"
+                :class="speakerEnabled ? 'bg-[#00b5e5] text-white' : 'bg-gray-200 text-gray-500'"
+              >
+                <svg v-if="speakerEnabled" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                </svg>
+                <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                </svg>
+              </button>
+              <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-[#00b5e5] transition-all duration-100" :style="{ width: speakerVolume + '%' }"></div>
+              </div>
+            </div>
+            
+            <div class="flex-1"></div>
+            
+            <!-- 状态信息 -->
+            <div class="flex items-center space-x-3 text-xs text-gray-500 whitespace-nowrap">
+              <span>码率:0kbps</span>
+              <span>FPS:0</span>
+              <span>丢帧:0.0%</span>
+              <span>CPU:4%</span>
+            </div>
+            
+            <div class="flex-1"></div>
+            
+            <!-- 录制按钮 -->
+            <button 
+              @click="isRecording = !isRecording"
+              class="px-3 py-1 rounded text-sm font-medium transition-all flex items-center space-x-1.5 border shrink-0"
+              :class="isRecording ? 'bg-red-50 border-red-300 text-red-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'"
+            >
+              <div class="w-2 h-2 rounded-full" :class="isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-400'"></div>
+              <span>{{ isRecording ? '录制中' : '录制' }}</span>
+            </button>
+            
+            <!-- 开始直播按钮 -->
+            <button 
+              @click="toggleStreaming"
+              class="px-4 py-1 rounded text-sm font-medium transition-all shrink-0"
+              :class="isStreaming ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-[#00b5e5] hover:bg-[#00a3d1] text-white'"
+            >
+              {{ isStreaming ? '结束直播' : '开始直播' }}
+            </button>
           </div>
-          
-          <div class="flex-1"></div>
-          
-          <!-- 状态信息 -->
-          <div class="flex items-center space-x-3 text-xs text-gray-500 whitespace-nowrap">
-            <span>码率:0kbps</span>
-            <span>FPS:0</span>
-            <span>丢帧:0.0%</span>
-            <span>CPU:4%</span>
-          </div>
-          
-          <div class="flex-1"></div>
-          
-          <!-- 录制按钮 -->
-          <button 
-            @click="isRecording = !isRecording"
-            class="px-3 py-1.5 rounded text-sm font-medium transition-all flex items-center space-x-1.5 border shrink-0"
-            :class="isRecording ? 'bg-red-50 border-red-300 text-red-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'"
-          >
-            <div class="w-2 h-2 rounded-full" :class="isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-400'"></div>
-            <span>{{ isRecording ? '录制中' : '录制' }}</span>
-          </button>
-          
-          <!-- 开始直播按钮 -->
-          <button 
-            @click="toggleStreaming"
-            class="px-4 py-1.5 rounded text-sm font-medium transition-all shrink-0"
-            :class="isStreaming ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-[#00b5e5] hover:bg-[#00a3d1] text-white'"
-          >
-            {{ isStreaming ? '结束直播' : '开始直播' }}
-          </button>
         </div>
       </main>
 
@@ -606,6 +670,174 @@
         </div>
       </div>
     </div>
+
+    <!-- 封面设置弹窗 -->
+    <div v-if="showCoverModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showCoverModal = false">
+      <div class="bg-white rounded-lg w-[600px] shadow-xl overflow-hidden">
+        <!-- 头部 -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <h3 class="text-base font-medium text-gray-800">直播封面</h3>
+          <button @click="showCoverModal = false" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- 内容 -->
+        <div class="p-6">
+          <!-- 封面类型标签 -->
+          <div class="flex items-center space-x-6 mb-4">
+            <span class="text-sm text-gray-600 font-medium">普通封面</span>
+            <span class="text-sm text-gray-400">颜值封面 <span class="text-gray-300">仅适用于PC端"颜值领域推荐区"</span></span>
+          </div>
+          
+          <!-- 封面上传区域 -->
+          <div class="flex space-x-4 mb-4">
+            <!-- 当前封面 -->
+            <div class="w-40 h-24 bg-gray-100 rounded-lg overflow-hidden relative">
+              <img v-if="liveCover" :src="liveCover" class="w-full h-full object-cover" />
+              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-pink-100">
+                <div class="text-center">
+                  <div class="w-10 h-10 mx-auto mb-1 rounded-full overflow-hidden">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" class="w-full h-full" />
+                  </div>
+                </div>
+              </div>
+              <div class="absolute top-1 left-1 bg-[#00b5e5] text-white text-[10px] px-1.5 py-0.5 rounded">当前封面</div>
+            </div>
+            
+            <!-- 上传区域 -->
+            <div 
+              @click="uploadCover"
+              class="w-40 h-24 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-[#00b5e5] hover:bg-blue-50 transition-all"
+            >
+              <svg class="w-8 h-8 text-gray-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span class="text-xs text-gray-400">颜值领域专属封面</span>
+            </div>
+          </div>
+          
+          <!-- 提示文字 -->
+          <div class="text-xs text-gray-400 space-y-1">
+            <p>优秀的封面是获得流量的基础哦，请仔细阅读<span class="text-[#00b5e5] cursor-pointer hover:underline">封面上传规范</span></p>
+            <p>支持 JPG、PNG格式，文件大小≤2M，建议尺寸1280*720，比例16：9。无法上传图片？尝试使用<span class="text-[#00b5e5] cursor-pointer hover:underline">普通模式</span></p>
+          </div>
+        </div>
+        
+        <!-- 底部按钮 -->
+        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-200">
+          <button 
+            @click="showCoverModal = false"
+            class="px-6 py-2 bg-[#00b5e5] hover:bg-[#00a3d1] text-white rounded text-sm font-medium transition-colors"
+          >
+            确定
+          </button>
+          <button 
+            @click="showCoverModal = false"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分区设置弹窗 -->
+    <div v-if="showCategoryModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showCategoryModal = false">
+      <div class="bg-white rounded-lg w-[560px] shadow-xl overflow-hidden">
+        <!-- 头部 -->
+        <div class="flex items-center justify-between px-4 py-3 bg-[#00b5e5]">
+          <h3 class="text-base font-medium text-white">分区设置</h3>
+          <button @click="showCategoryModal = false" class="text-white/80 hover:text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- 内容 -->
+        <div class="p-5">
+          <!-- 当前分区 -->
+          <div class="mb-4">
+            <span class="text-sm text-gray-500">当前分区：</span>
+            <span class="text-sm text-gray-800">{{ selectedCategory ? selectedCategory.name : '娱乐-视频聊天' }}</span>
+          </div>
+          
+          <!-- 常用 -->
+          <div class="flex items-center space-x-2 mb-4">
+            <span class="text-sm text-gray-500 w-10">常用</span>
+            <button class="px-4 py-1.5 bg-white border border-[#00b5e5] text-[#00b5e5] rounded-full text-sm hover:bg-blue-50 transition-colors">
+              视频聊天
+            </button>
+          </div>
+          
+          <!-- 搜索框 -->
+          <div class="relative mb-4">
+            <input 
+              v-model="searchCategory"
+              type="text" 
+              placeholder="输入拼音首字母或者全称,快速搜索"
+              class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#00b5e5]"
+            />
+            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          
+          <!-- 主分类标签 -->
+          <div class="flex flex-wrap gap-2 mb-4 border-b border-gray-100 pb-4">
+            <button 
+              v-for="cat in categories" 
+              :key="cat.id"
+              @click="activeCategory = cat.id"
+              class="px-3 py-1.5 text-sm rounded transition-colors"
+              :class="activeCategory === cat.id ? 'text-[#00b5e5] border-b-2 border-[#00b5e5]' : 'text-gray-600 hover:text-[#00b5e5]'"
+            >
+              {{ cat.name }}
+            </button>
+          </div>
+          
+          <!-- 子分类 -->
+          <div class="flex flex-wrap gap-3 mb-6">
+            <button 
+              v-for="subCat in categories.find(c => c.id === activeCategory)?.subCategories" 
+              :key="subCat"
+              @click="selectCategory(subCat)"
+              class="px-4 py-2 text-sm rounded-full border transition-colors"
+              :class="selectedCategory?.name === subCat ? 'bg-[#00b5e5] text-white border-[#00b5e5]' : 'bg-white text-gray-600 border-gray-300 hover:border-[#00b5e5] hover:text-[#00b5e5]'"
+            >
+              {{ subCat }}
+            </button>
+          </div>
+          
+          <!-- 计数和提示 -->
+          <div class="text-center mb-4">
+            <span class="text-sm text-gray-400">1/1</span>
+          </div>
+          <div class="text-center text-xs text-gray-400 mb-4">
+            温馨提示:开播前要确认分区是否正确，有助于保持SAN值的健康状态哦~
+          </div>
+        </div>
+        
+        <!-- 底部按钮 -->
+        <div class="flex items-center justify-center space-x-4 px-6 py-4 border-t border-gray-200">
+          <button 
+            @click="confirmCategory"
+            class="px-10 py-2 bg-[#00b5e5] hover:bg-[#00a3d1] text-white rounded text-sm font-medium transition-colors"
+          >
+            确认
+          </button>
+          <button 
+            @click="showCategoryModal = false"
+            class="px-10 py-2 border border-[#00b5e5] text-[#00b5e5] rounded text-sm font-medium hover:bg-blue-50 transition-colors"
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -643,6 +875,60 @@ const sources = ref<Array<{id: string, type: string, name: string, url?: string,
 const selectedSource = ref<string | null>(null)
 const screenSourceName = ref('显示器 1')
 const showMouse = ref(true)
+
+// 直播设置
+const liveTitle = ref('')
+const liveDescription = ref('')
+const liveCover = ref('')
+const showCoverModal = ref(false)
+const showCategoryModal = ref(false)
+const selectedCategory = ref<{id: string, name: string} | null>(null)
+
+// 分区数据
+const categories = ref([
+  {
+    id: 'game',
+    name: '网游',
+    subCategories: ['英雄联盟', '王者荣耀', '绝地求生', 'CS:GO']
+  },
+  {
+    id: 'mobile',
+    name: '手游',
+    subCategories: ['和平精英', '原神', '崩坏：星穹铁道', '明日方舟']
+  },
+  {
+    id: 'single',
+    name: '单机游戏',
+    subCategories: ['艾尔登法环', '塞尔达传说', '只狼', '黑神话：悟空']
+  },
+  {
+    id: 'entertainment',
+    name: '娱乐',
+    subCategories: ['视频唱见', '视频聊天', '舞见', '户外', '日常']
+  },
+  {
+    id: 'radio',
+    name: '电台',
+    subCategories: ['读文', '情感', '音乐', '脱口秀']
+  },
+  {
+    id: 'vtuber',
+    name: '虚拟主播',
+    subCategories: ['虚拟偶像', '虚拟歌姬', '虚拟UP主']
+  },
+  {
+    id: 'life',
+    name: '生活',
+    subCategories: ['美食', '萌宠', '时尚', '旅行']
+  },
+  {
+    id: 'study',
+    name: '学习',
+    subCategories: ['考研', '考公', '英语学习', '编程']
+  }
+])
+const activeCategory = ref('entertainment')
+const searchCategory = ref('')
 
 // 右侧标签页
 const activeTab = ref('rank')
@@ -1106,6 +1392,56 @@ const removeSource = (index: number) => {
   sources.value.splice(index, 1)
 }
 
+// 上传封面
+const uploadCover = () => {
+  // 创建文件输入元素
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'image/jpeg,image/png'
+  input.onchange = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    if (target.files && target.files[0]) {
+      const file = target.files[0]
+      // 检查文件大小 (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('文件大小不能超过2M')
+        return
+      }
+      // 读取文件并显示预览
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        liveCover.value = e.target?.result as string
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+  input.click()
+}
+
+// 选择分区
+const selectCategory = (subCat: string) => {
+  const parentCat = categories.value.find(c => c.id === activeCategory.value)
+  selectedCategory.value = {
+    id: activeCategory.value,
+    name: subCat
+  }
+}
+
+// 确认分区选择
+const confirmCategory = () => {
+  if (!selectedCategory.value) {
+    // 默认选择第一个子分类
+    const parentCat = categories.value.find(c => c.id === activeCategory.value)
+    if (parentCat && parentCat.subCategories.length > 0) {
+      selectedCategory.value = {
+        id: activeCategory.value,
+        name: parentCat.subCategories[0]
+      }
+    }
+  }
+  showCategoryModal.value = false
+}
+
 // 开始/结束直播
 const toggleStreaming = async () => {
   if (isStreaming.value) {
@@ -1132,8 +1468,9 @@ const toggleStreaming = async () => {
       const userId = userStore.userId || 1
       const response = await liveAPI.startLive({
         user_id: userId,
-        title: '我的直播间',
-        category: '娱乐'
+        title: liveTitle.value || '我的直播间',
+        category: selectedCategory.value?.name || '娱乐',
+        cover_url: liveCover.value
       })
 
       if (response.data.code === 0) {
