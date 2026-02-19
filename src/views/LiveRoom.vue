@@ -72,13 +72,14 @@
         <!-- 视频播放器 -->
         <div class="flex-1 relative flex items-center justify-center group">
           <video
-            v-if="streamInfo.videoUrl"
-            :src="streamInfo.videoUrl"
+            ref="videoPlayer"
             autoplay
             muted
+            controls
+            playsinline
             class="w-full h-full object-contain"
           ></video>
-          <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+          <div v-if="!streamInfo.playUrl" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
             <img :src="streamInfo.cover" class="w-full h-full object-cover opacity-80">
             <div class="absolute inset-0 flex items-center justify-center">
               <div class="w-20 h-20 bg-black/50 rounded-full flex items-center justify-center cursor-pointer hover:bg-black/70 transition-colors">
@@ -391,6 +392,8 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 import { useUserStore } from '@/stores/userStore'
+import { liveAPI } from '@/api/live'
+import Hls from 'hls.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -405,12 +408,18 @@ const goBack = () => {
   router.back()
 }
 
+// 视频播放器
+const videoPlayer = ref<HTMLVideoElement | null>(null)
+let hls: Hls | null = null
+
 // 直播信息
 const streamInfo = ref({
   id: streamId,
   title: '超牛的直播间',
   cover: 'https://images.unsplash.com/photo-1605098195882-b6819b8555b6?auto=format&fit=crop&w=1200&q=80',
-  videoUrl: '',
+  playUrl: '',
+  flvUrl: '',
+  webrtcUrl: '',
   viewers: '2.1万',
   likes: '8.5万',
   streamer: {
@@ -539,8 +548,108 @@ const toggleFullscreen = async () => {
   }
 }
 
+// 初始化视频播放器
+const initVideoPlayer = (playUrl: string) => {
+  if (!videoPlayer.value || !playUrl) return
+
+  // 销毁旧的 HLS 实例
+  if (hls) {
+    hls.destroy()
+    hls = null
+  }
+
+  const video = videoPlayer.value
+
+  if (Hls.isSupported()) {
+    hls = new Hls({
+      debug: false,
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 90
+    })
+
+    hls.loadSource(playUrl)
+    hls.attachMedia(video)
+
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      video.play().catch(err => {
+        console.log('自动播放被阻止:', err)
+      })
+    })
+
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      console.error('HLS error:', data)
+      if (data.fatal) {
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            console.log('网络错误，尝试恢复...')
+            hls?.startLoad()
+            break
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            console.log('媒体错误，尝试恢复...')
+            hls?.recoverMediaError()
+            break
+          default:
+            console.log('无法恢复的错误，重新初始化播放器')
+            initVideoPlayer(playUrl)
+            break
+        }
+      }
+    })
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari 原生支持 HLS
+    video.src = playUrl
+    video.addEventListener('loadedmetadata', () => {
+      video.play().catch(err => {
+        console.log('自动播放被阻止:', err)
+      })
+    })
+  } else {
+    console.error('浏览器不支持 HLS 播放')
+  }
+}
+
+// 获取直播信息
+const fetchLiveInfo = async () => {
+  try {
+    const roomId = parseInt(streamId)
+    if (isNaN(roomId)) {
+      console.error('Invalid room ID:', streamId)
+      return
+    }
+
+    const response = await liveAPI.getRoomInfo(roomId)
+    
+    if (response.data.code === 0 && response.data.data && response.data.data.room) {
+      const room = response.data.data.room
+      
+      // 更新直播间信息
+      streamInfo.value.title = room.title || '无标题'
+      streamInfo.value.cover = room.cover_url || ''
+      streamInfo.value.viewers = room.online_count?.toString() || '0'
+      streamInfo.value.playUrl = room.play_url || ''
+      streamInfo.value.flvUrl = room.play_url ? room.play_url.replace('.m3u8', '.flv') : ''
+      streamInfo.value.webrtcUrl = room.play_url ? room.play_url.replace('http://', 'webrtc://').replace('.m3u8', '') : ''
+      
+      // 如果正在直播，初始化播放器
+      if (room.status === 'streaming' && room.play_url) {
+        nextTick(() => {
+          initVideoPlayer(room.play_url)
+        })
+      }
+    } else {
+      console.error('获取直播间信息失败:', response.data.msg || response.data.message || '未知错误')
+    }
+  } catch (error) {
+    console.error('获取直播信息失败:', error)
+  }
+}
+
 // 监听全屏变化
 onMounted(() => {
+  // 获取直播信息并初始化播放器
+  fetchLiveInfo()
+
   // 启动直播时长计时
   durationTimer = window.setInterval(() => {
     durationSeconds++
@@ -705,6 +814,11 @@ const simulateDanmaku = () => {
 onUnmounted(() => {
   if (durationTimer) {
     clearInterval(durationTimer)
+  }
+  // 销毁 HLS 播放器
+  if (hls) {
+    hls.destroy()
+    hls = null
   }
   // 移除全屏监听
   document.removeEventListener('fullscreenchange', () => {

@@ -264,6 +264,77 @@
             <div v-if="isStreaming" class="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded text-white font-mono text-sm">
               {{ streamDuration }}
             </div>
+            
+            <!-- 直播视频播放器 (SRS 直播画面) -->
+            <div v-if="isStreaming && streamInfo" class="absolute inset-0 bg-black">
+              <video
+                ref="localVideo"
+                class="w-full h-full object-contain"
+                autoplay
+                muted
+                playsinline
+                crossorigin="anonymous"
+              ></video>
+            </div>
+            
+            <!-- 推流信息面板 -->
+            <div v-if="showStreamInfo && streamInfo" class="absolute bottom-4 left-4 right-4 bg-black/80 rounded-lg p-4 text-white">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold flex items-center">
+                  <svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  推流信息 (复制到 OBS)
+                </h3>
+                <button @click="showStreamInfo = false" class="text-gray-400 hover:text-white">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between bg-black/50 rounded px-3 py-2">
+                  <span class="text-gray-400">推流地址 (服务器):</span>
+                  <div class="flex items-center space-x-2">
+                    <code class="text-green-400 font-mono">{{ streamInfo.pushUrl }}</code>
+                    <button @click="copyToClipboard(streamInfo.pushUrl)" class="text-blue-400 hover:text-blue-300">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between bg-black/50 rounded px-3 py-2">
+                  <span class="text-gray-400">流密钥:</span>
+                  <div class="flex items-center space-x-2">
+                    <code class="text-yellow-400 font-mono">{{ streamInfo.streamKey }}</code>
+                    <button @click="copyToClipboard(streamInfo.streamKey)" class="text-blue-400 hover:text-blue-300">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between bg-black/50 rounded px-3 py-2">
+                  <span class="text-gray-400">播放地址 (HLS):</span>
+                  <div class="flex items-center space-x-2">
+                    <code class="text-blue-400 font-mono truncate max-w-[200px]">{{ streamInfo.playUrl }}</code>
+                    <button @click="copyToClipboard(streamInfo.playUrl)" class="text-blue-400 hover:text-blue-300">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mt-3 text-xs text-gray-500">
+                提示: 在 OBS 设置 → 直播 → 服务选择"自定义"，将推流地址和流密钥填入对应位置
+              </div>
+            </div>
           </div>
         </div>
         
@@ -381,6 +452,18 @@
             </div>
             
             <div class="flex-1"></div>
+            
+            <!-- 屏幕共享按钮 -->
+            <button 
+              @click="toggleScreenShare"
+              class="px-3 py-1 rounded text-sm font-medium transition-all flex items-center space-x-1.5 border shrink-0"
+              :class="isScreenSharing ? 'bg-green-50 border-green-300 text-green-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <span>{{ isScreenSharing ? '共享中' : '屏幕共享' }}</span>
+            </button>
             
             <!-- 录制按钮 -->
             <button 
@@ -846,8 +929,16 @@ import { ref, computed, onMounted, onUnmounted, nextTick, h } from 'vue'
 import NavHeader from '@/components/NavHeader.vue'
 import { useUserStore } from '@/stores/userStore'
 import { liveAPI } from '@/api/live'
+import Hls from 'hls.js'
+import 'webrtc-adapter'
 
 const userStore = useUserStore()
+
+// WebRTC 推流相关
+const localVideo = ref<HTMLVideoElement | null>(null)
+const localStream = ref<MediaStream | null>(null)
+const pc = ref<RTCPeerConnection | null>(null)
+const isWebRTCConnected = ref(false)
 
 // 处理登录事件
 const handleLogin = () => {
@@ -858,6 +949,7 @@ const handleLogin = () => {
 // 直播状态
 const isStreaming = ref(false)
 const isRecording = ref(false)
+const isScreenSharing = ref(false)
 const streamDuration = ref('00:00:00')
 let streamTimer: number | null = null
 let durationSeconds = 0
@@ -883,6 +975,19 @@ const liveCover = ref('')
 const showCoverModal = ref(false)
 const showCategoryModal = ref(false)
 const selectedCategory = ref<{id: string, name: string} | null>(null)
+
+// 直播流信息
+const streamInfo = ref<{
+  roomId: number
+  streamKey: string
+  pushUrl: string
+  playUrl: string
+  flvUrl: string
+  webrtcUrl: string
+} | null>(null)
+const showStreamInfo = ref(false)
+const videoPlayer = ref<HTMLVideoElement | null>(null)
+let hlsInstance: Hls | null = null
 
 // 分区数据
 const categories = ref([
@@ -1443,6 +1548,207 @@ const confirmCategory = () => {
 }
 
 // 开始/结束直播
+// 初始化摄像头
+const initCamera = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 30 }
+      },
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 44100
+      }
+    })
+    localStream.value = stream
+    if (localVideo.value) {
+      localVideo.value.srcObject = stream
+    }
+    return stream
+  } catch (error) {
+    console.error('获取摄像头失败:', error)
+    alert('无法访问摄像头，请检查权限设置')
+    throw error
+  }
+}
+
+// WebRTC 推流到 SRS
+const startWebRTCPush = async (webrtcUrl: string) => {
+  try {
+    console.log('Starting WebRTC push to:', webrtcUrl)
+    
+    if (!localStream.value) {
+      await initCamera()
+    }
+
+    // 解析 webrtcUrl: webrtc://localhost:1985/live/stream_key
+    const urlMatch = webrtcUrl.match(/webrtc:\/\/([^\/]+)\/([^\/]+)\/(.+)/)
+    if (!urlMatch) {
+      throw new Error('Invalid WebRTC URL format: ' + webrtcUrl)
+    }
+    const [, host, app, stream] = urlMatch
+    console.log('Parsed URL - host:', host, 'app:', app, 'stream:', stream)
+
+    // 创建 RTCPeerConnection
+    pc.value = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' }
+      ]
+    })
+
+    // 监听连接状态变化
+    pc.value.onconnectionstatechange = () => {
+      console.log('WebRTC connection state:', pc.value?.connectionState)
+    }
+    
+    pc.value.oniceconnectionstatechange = () => {
+      console.log('ICE connection state:', pc.value?.iceConnectionState)
+    }
+
+    // 添加音视频轨道
+    localStream.value?.getTracks().forEach(track => {
+      console.log('Adding track:', track.kind, track.label)
+      if (localStream.value && pc.value) {
+        pc.value.addTrack(track, localStream.value)
+      }
+    })
+
+    // 创建 offer
+    const offer = await pc.value.createOffer()
+    console.log('Created offer:', offer.sdp?.substring(0, 100) + '...')
+    
+    await pc.value.setLocalDescription(offer)
+
+    // 等待 ICE gathering 完成或超时
+    await new Promise<void>((resolve) => {
+      if (!pc.value) return
+      if (pc.value.iceGatheringState === 'complete') {
+        resolve()
+      } else {
+        const timeout = setTimeout(() => {
+          console.log('ICE gathering timeout, continuing...')
+          resolve()
+        }, 3000)
+        const checkState = () => {
+          if (pc.value?.iceGatheringState === 'complete') {
+            clearTimeout(timeout)
+            pc.value.removeEventListener('icegatheringstatechange', checkState)
+            resolve()
+          }
+        }
+        pc.value.addEventListener('icegatheringstatechange', checkState)
+      }
+    })
+
+    // SRS WebRTC 推流 API
+    // 参考: https://ossrs.net/lts/zh-cn/docs/v4/doc/webrtc#http-api
+    // host 已经是 localhost:1985 格式
+    const srsApiUrl = `http://${host}/rtc/v1/publish/`
+    console.log('Sending request to:', srsApiUrl)
+    console.log('Full URL debug:', { host, srsApiUrl, webrtcUrl })
+    
+    const requestBody = {
+      api: srsApiUrl,
+      streamurl: webrtcUrl,
+      sdp: pc.value.localDescription?.sdp
+    }
+    console.log('Request body length:', JSON.stringify(requestBody).length)
+    
+    const response = await fetch(srsApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    })
+
+    console.log('SRS response status:', response.status)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`WebRTC 连接失败: ${response.status} ${errorText}`)
+    }
+
+    const result = await response.json()
+    console.log('SRS response:', result)
+    
+    if (result.code !== 0) {
+      throw new Error(`SRS error: ${result.msg || JSON.stringify(result)}`)
+    }
+
+    await pc.value.setRemoteDescription(new RTCSessionDescription({
+      type: 'answer',
+      sdp: result.sdp
+    }))
+    console.log('Set remote description success')
+
+    isWebRTCConnected.value = true
+    console.log('WebRTC 推流已连接')
+  } catch (error) {
+    console.error('WebRTC 推流失败:', error)
+    alert('推流连接失败: ' + (error as Error).message)
+    throw error
+  }
+}
+
+// 停止 WebRTC 推流
+const stopWebRTCPush = () => {
+  if (pc.value) {
+    pc.value.close()
+    pc.value = null
+  }
+  if (localStream.value) {
+    localStream.value.getTracks().forEach(track => track.stop())
+    localStream.value = null
+  }
+  isWebRTCConnected.value = false
+}
+
+// 切换屏幕共享
+const toggleScreenShare = async () => {
+  if (isScreenSharing.value) {
+    // 停止屏幕共享
+    if (screenStream.value) {
+      screenStream.value.getTracks().forEach(track => track.stop())
+      screenStream.value = null
+    }
+    isScreenSharing.value = false
+    // 恢复摄像头预览
+    if (localVideo.value && localStream.value) {
+      localVideo.value.srcObject = localStream.value
+    }
+  } else {
+    // 开始屏幕共享
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { cursor: 'always' },
+        audio: true
+      })
+      screenStream.value = stream
+      isScreenSharing.value = true
+      
+      // 显示屏幕共享画面
+      if (localVideo.value) {
+        localVideo.value.srcObject = stream
+      }
+      
+      // 监听屏幕共享结束
+      stream.getVideoTracks()[0].onended = () => {
+        isScreenSharing.value = false
+        screenStream.value = null
+        // 恢复摄像头预览
+        if (localVideo.value && localStream.value) {
+          localVideo.value.srcObject = localStream.value
+        }
+      }
+    } catch (error) {
+      console.error('屏幕共享失败:', error)
+      alert('屏幕共享失败: ' + (error as Error).message)
+    }
+  }
+}
+
 const toggleStreaming = async () => {
   if (isStreaming.value) {
     // 结束直播
@@ -1451,6 +1757,10 @@ const toggleStreaming = async () => {
       await liveAPI.stopLive({
         user_id: userId
       })
+      
+      // 停止 WebRTC 推流
+      stopWebRTCPush()
+      
       isStreaming.value = false
       if (streamTimer) {
         clearInterval(streamTimer)
@@ -1466,6 +1776,10 @@ const toggleStreaming = async () => {
     // 开始直播
     try {
       const userId = userStore.userId || 1
+      
+      // 先初始化摄像头
+      await initCamera()
+      
       const response = await liveAPI.startLive({
         user_id: userId,
         title: liveTitle.value || '我的直播间',
@@ -1473,8 +1787,51 @@ const toggleStreaming = async () => {
         cover_url: liveCover.value
       })
 
-      if (response.data.code === 0) {
+      if (response.data.code === 0 && response.data.data) {
+        const data = response.data.data
         isStreaming.value = true
+        
+        // 保存直播流信息
+        streamInfo.value = {
+          roomId: data.room_id,
+          streamKey: data.stream_key,
+          pushUrl: data.push_url,
+          playUrl: data.play_url,
+          flvUrl: data.flv_url,
+          webrtcUrl: data.webrtc_url
+        }
+        showStreamInfo.value = true
+        
+        // 开始 WebRTC 推流
+        console.log('准备开始 WebRTC 推流, webrtc_url:', data.webrtc_url)
+        let webrtcSuccess = false
+        if (data.webrtc_url) {
+          try {
+            await startWebRTCPush(data.webrtc_url)
+            console.log('WebRTC 推流启动成功')
+            webrtcSuccess = true
+            // 初始化视频播放器（本地摄像头预览）
+            nextTick(() => {
+              if (localVideo.value && localStream.value) {
+                localVideo.value.srcObject = localStream.value
+              }
+            })
+          } catch (webrtcError) {
+            console.error('WebRTC 推流启动失败:', webrtcError)
+            // WebRTC 失败时，显示 OBS 推流提示，并使用 HLS 播放 SRS 直播画面
+            alert('浏览器推流失败，请使用 OBS 推流\n推流地址: ' + data.push_url + '\n流密钥: ' + data.stream_key)
+            // 使用 HLS 播放 SRS 的直播画面（主播也能看到自己的直播）
+            nextTick(() => {
+              // 将 localVideo 临时用作 HLS 播放器
+              if (localVideo.value) {
+                initVideoPlayerForElement(data.play_url, localVideo.value)
+              }
+            })
+          }
+        } else {
+          console.warn('没有 webrtc_url, 跳过 WebRTC 推流')
+        }
+        
         streamTimer = window.setInterval(() => {
           durationSeconds++
           const hours = Math.floor(durationSeconds / 3600).toString().padStart(2, '0')
@@ -1512,6 +1869,73 @@ const sendDanmaku = () => {
   })
 }
 
+// 初始化视频播放器
+const initVideoPlayer = (playUrl: string) => {
+  if (!videoPlayer.value) return
+  
+  // 销毁之前的实例
+  if (hlsInstance) {
+    hlsInstance.destroy()
+    hlsInstance = null
+  }
+  
+  // 使用 HLS.js 播放
+  if (Hls.isSupported()) {
+    hlsInstance = new Hls({
+      debug: false,
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 90
+    })
+    hlsInstance.loadSource(playUrl)
+    hlsInstance.attachMedia(videoPlayer.value)
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+      videoPlayer.value?.play().catch(e => console.log('Auto-play prevented:', e))
+    })
+    hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+      console.error('HLS error:', data)
+    })
+  } else if (videoPlayer.value.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari 原生支持 HLS
+    videoPlayer.value.src = playUrl
+    videoPlayer.value.play().catch(e => console.log('Auto-play prevented:', e))
+  }
+}
+
+// 为指定视频元素初始化 HLS 播放器
+const initVideoPlayerForElement = (playUrl: string, videoElement: HTMLVideoElement) => {
+  // 使用 HLS.js 播放
+  if (Hls.isSupported()) {
+    const hls = new Hls({
+      debug: false,
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 90
+    })
+    hls.loadSource(playUrl)
+    hls.attachMedia(videoElement)
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      videoElement.play().catch(e => console.log('Auto-play prevented:', e))
+    })
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      console.error('HLS error:', data)
+    })
+  } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari 原生支持 HLS
+    videoElement.src = playUrl
+    videoElement.play().catch(e => console.log('Auto-play prevented:', e))
+  }
+}
+
+// 复制到剪贴板
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    alert('已复制到剪贴板')
+  }).catch(err => {
+    console.error('复制失败:', err)
+  })
+}
+
 // 模拟音量变化
 onMounted(() => {
   const volumeInterval = setInterval(() => {
@@ -1539,6 +1963,11 @@ onUnmounted(() => {
   }
   if (cameraStream.value) {
     cameraStream.value.getTracks().forEach(track => track.stop())
+  }
+  // 清理 HLS 播放器
+  if (hlsInstance) {
+    hlsInstance.destroy()
+    hlsInstance = null
   }
 })
 </script>
