@@ -107,43 +107,62 @@
             </div>
           </div>
 
-          <!-- 礼物动画层 - 右下角显示 -->
+          <!-- 礼物动画层 - 右下角显示 (已注释) -->
+          <!--
           <div class="absolute bottom-24 right-4 pointer-events-none overflow-hidden">
-            <!-- 小心心动效 -->
             <div v-for="heart in activeHearts" :key="heart.id" class="gift-animation">
-              <div class="heart-burst">
-                <div class="heart-main">💝</div>
-                <div v-for="n in 8" :key="n" class="heart-particle" :style="{ '--i': n }">✨</div>
-              </div>
-            </div>
-
-            <!-- 人气票动效 -->
-            <div v-for="ticket in activeTickets" :key="ticket.id" class="gift-animation">
-              <div class="ticket-burst">
-                <div class="ticket-main">
-                  <div class="ticket-card">
-                    <div class="ticket-text">人气票</div>
-                    <div class="ticket-sub">1电池</div>
+              <div class="fan-badge-burst">
+                <div class="fan-badge-main">
+                  <div class="fan-badge-card pink">
+                    <div class="fan-badge-avatar">
+                      <img src="https://i.pravatar.cc/150?u=me" class="w-full h-full rounded-full">
+                    </div>
+                    <div class="fan-badge-content">
+                      <div class="fan-badge-title">粉丝团灯牌</div>
+                      <div class="fan-badge-gift">💝 小心心 x1</div>
+                    </div>
+                    <div class="fan-badge-level">1</div>
                   </div>
                 </div>
-                <!-- 飘落的小人气票 -->
-                <div v-for="n in 12" :key="n" class="ticket-falling" :style="{ '--i': n }">
-                  <div class="mini-ticket">票</div>
-                </div>
-                <!-- 闪光粒子 -->
-                <div v-for="n in 6" :key="n" class="ticket-sparkle" :style="{ '--i': n }">✦</div>
+                <div v-for="n in 8" :key="n" class="fan-badge-particle" :style="{ '--i': n }">💝</div>
               </div>
             </div>
-
-            <!-- 小花花动效 -->
+            <div v-for="ticket in activeTickets" :key="ticket.id" class="gift-animation">
+              <div class="fan-badge-burst">
+                <div class="fan-badge-main">
+                  <div class="fan-badge-card blue">
+                    <div class="fan-badge-avatar">
+                      <img src="https://i.pravatar.cc/150?u=me" class="w-full h-full rounded-full">
+                    </div>
+                    <div class="fan-badge-content">
+                      <div class="fan-badge-title">粉丝团灯牌</div>
+                      <div class="fan-badge-gift">🎫 人气票 x1</div>
+                    </div>
+                    <div class="fan-badge-level">1</div>
+                  </div>
+                </div>
+                <div v-for="n in 8" :key="n" class="fan-badge-particle" :style="{ '--i': n }">🎫</div>
+              </div>
+            </div>
             <div v-for="flower in activeFlowers" :key="flower.id" class="gift-animation">
-              <div class="flower-burst">
-                <div class="flower-main">🌸</div>
-                <div v-for="n in 10" :key="n" class="flower-particle" :style="{ '--i': n }">🌺</div>
-                <div v-for="n in 5" :key="n" class="flower-petal" :style="{ '--i': n }">🍃</div>
+              <div class="fan-badge-burst">
+                <div class="fan-badge-main">
+                  <div class="fan-badge-card rose">
+                    <div class="fan-badge-avatar">
+                      <img src="https://i.pravatar.cc/150?u=me" class="w-full h-full rounded-full">
+                    </div>
+                    <div class="fan-badge-content">
+                      <div class="fan-badge-title">粉丝团灯牌</div>
+                      <div class="fan-badge-gift">🌸 小花花 x1</div>
+                    </div>
+                    <div class="fan-badge-level">1</div>
+                  </div>
+                </div>
+                <div v-for="n in 8" :key="n" class="fan-badge-particle" :style="{ '--i': n }">🌸</div>
               </div>
             </div>
           </div>
+          -->
 
           <!-- 直播状态 -->
           <div class="absolute top-4 left-4 flex items-center space-x-2">
@@ -325,11 +344,27 @@
             v-for="(msg, index) in chatMessages" 
             :key="index"
             class="text-sm"
+            :class="{ 'chat-gift-animation': msg.isGift }"
           >
-            <span v-if="msg.isAnchor" class="text-yellow-400 font-bold">[主播] </span>
-            <span v-if="msg.level" class="text-pink-400">[{{ msg.level }}] </span>
-            <span class="text-gray-300">{{ msg.username }}:</span>
-            <span class="text-white">{{ msg.content }}</span>
+            <!-- 礼物消息特殊样式 -->
+            <template v-if="msg.isGift">
+              <div class="flex items-center">
+                <span :class="['chat-gift-badge', msg.giftType === 'heart' ? 'pink' : msg.giftType === 'ticket' ? 'blue' : 'rose']">
+                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                  粉丝团灯牌
+                </span>
+                <span class="text-gray-300">{{ msg.username }}:</span>
+                <span class="text-white ml-1">{{ msg.content }}</span>
+              </div>
+            </template>
+            <template v-else>
+              <span v-if="msg.isAnchor" class="text-yellow-400 font-bold">[主播] </span>
+              <span v-if="msg.level" class="text-pink-400">[{{ msg.level }}] </span>
+              <span class="text-gray-300">{{ msg.username }}:</span>
+              <span class="text-white">{{ msg.content }}</span>
+            </template>
           </div>
         </div>
 
@@ -770,11 +805,13 @@ const sendGift = (gift: any) => {
     // 播放礼物动画
     playGiftAnimation(gift.type)
 
-    // 添加弹幕通知
+    // 添加弹幕通知 - 带礼物动效
     chatMessages.value.push({
       username: '我',
       content: `给主播投喂了 ${gift.name} 💝`,
-      level: 5
+      level: 5,
+      isGift: true,
+      giftType: gift.type
     })
 
     // 滚动到底部
@@ -1135,6 +1172,202 @@ onUnmounted(() => {
 }
 
 @keyframes ticketPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* 粉丝团灯牌动画 - 类似B站风格 */
+.fan-badge-burst {
+  position: relative;
+  width: 200px;
+  height: 120px;
+}
+
+.fan-badge-main {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: fanBadgePop 2.5s ease-out forwards;
+  z-index: 10;
+}
+
+@keyframes fanBadgePop {
+  0% {
+    transform: translate(-50%, -50%) scale(0) translateX(100px);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, -50%) scale(1.1) translateX(0);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1) translateX(0);
+  }
+  85% {
+    transform: translate(-50%, -50%) scale(1) translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.9) translateX(-20px);
+    opacity: 0;
+  }
+}
+
+/* 粉丝团灯牌卡片 */
+.fan-badge-card {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  min-width: 180px;
+  backdrop-filter: blur(10px);
+}
+
+.fan-badge-card.pink {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.95) 0%, rgba(219, 39, 119, 0.95) 100%);
+  border: 2px solid #f472b6;
+}
+
+.fan-badge-card.blue {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(37, 99, 235, 0.95) 100%);
+  border: 2px solid #60a5fa;
+}
+
+.fan-badge-card.rose {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.95) 0%, rgba(225, 29, 72, 0.95) 100%);
+  border: 2px solid #fb7185;
+}
+
+.fan-badge-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid white;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.fan-badge-content {
+  flex: 1;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.fan-badge-title {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fan-badge-gift {
+  font-size: 13px;
+  color: white;
+  font-weight: bold;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.fan-badge-level {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+/* 飘落的粒子 */
+.fan-badge-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 20px;
+  animation: fanBadgeParticle 2s ease-out forwards;
+  animation-delay: calc(var(--i) * 0.1s);
+  z-index: 5;
+}
+
+@keyframes fanBadgeParticle {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+      calc(-50% + (var(--i) - 4) * 30px),
+      calc(-50% + 80px + var(--i) * 10px)
+    ) scale(0.5) rotate(calc(var(--i) * 45deg));
+    opacity: 0;
+  }
+}
+
+/* 聊天框礼物动效 */
+.chat-gift-animation {
+  animation: chatGiftSlide 3s ease-out forwards;
+}
+
+@keyframes chatGiftSlide {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  90% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
+
+.chat-gift-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 6px;
+  animation: chatBadgePulse 2s ease-in-out infinite;
+}
+
+.chat-gift-badge.pink {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: white;
+}
+
+.chat-gift-badge.blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.chat-gift-badge.rose {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  color: white;
+}
+
+@keyframes chatBadgePulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
