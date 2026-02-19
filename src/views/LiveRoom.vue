@@ -74,7 +74,7 @@
           <video
             ref="videoPlayer"
             autoplay
-            muted
+            :muted="streamInfo.isMuted"
             controls
             playsinline
             class="w-full h-full object-contain"
@@ -169,8 +169,12 @@
                   </svg>
                 </button>
                 <!-- 音量 -->
-                <button class="text-white hover:text-pink-400 transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button @click="toggleMute" class="text-white hover:text-pink-400 transition-colors">
+                  <svg v-if="streamInfo.isMuted" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                   </svg>
                 </button>
@@ -422,6 +426,7 @@ const streamInfo = ref({
   webrtcUrl: '',
   viewers: '2.1万',
   likes: '8.5万',
+  isMuted: true, // 默认静音
   streamer: {
     name: '超牛的直播间，快来看',
     avatar: 'https://i.pravatar.cc/150?u=streamer1'
@@ -548,6 +553,15 @@ const toggleFullscreen = async () => {
   }
 }
 
+// 切换静音
+const toggleMute = () => {
+  streamInfo.value.isMuted = !streamInfo.value.isMuted
+  if (videoPlayer.value) {
+    videoPlayer.value.muted = streamInfo.value.isMuted
+  }
+  console.log('静音状态:', streamInfo.value.isMuted)
+}
+
 // 初始化视频播放器
 const initVideoPlayer = (playUrl: string) => {
   if (!videoPlayer.value || !playUrl) return
@@ -568,7 +582,10 @@ const initVideoPlayer = (playUrl: string) => {
       backBufferLength: 90
     })
 
-    hls.loadSource(playUrl)
+    // 添加时间戳绕过缓存？？？ 这里感觉修复了可以看到直播了但是有延迟
+    const urlWithTimestamp = playUrl + (playUrl.includes('?') ? '&' : '?') + '_t=' + Date.now()
+    console.log('Loading HLS source:', urlWithTimestamp)
+    hls.loadSource(urlWithTimestamp)
     hls.attachMedia(video)
 
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
