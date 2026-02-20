@@ -95,12 +95,13 @@
             <div
               v-for="danmaku in floatingDanmaku"
               :key="danmaku.id"
-              class="absolute text-white text-lg font-medium whitespace-nowrap"
+              class="absolute text-white text-lg font-medium whitespace-nowrap will-change-transform"
               :style="{
                 top: danmaku.top + '%',
-                left: danmaku.left + '%',
-                transform: `translateX(-${danmaku.progress}%)`,
-                color: danmaku.color
+                left: 0,
+                transform: `translateX(${danmaku.position}px)`,
+                color: danmaku.color,
+                textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
               }"
             >
               {{ danmaku.text }}
@@ -505,8 +506,7 @@ const floatingDanmaku = ref<Array<{
   id: number
   text: string
   top: number
-  left: number
-  progress: number
+  position: number
   color: string
 }>>([])
 
@@ -748,27 +748,35 @@ const sendChat = () => {
 const addFloatingDanmaku = (text: string) => {
   const id = Date.now()
   const colors = ['#ffffff', '#ff6b9d', '#4ecdc4', '#ffe66d', '#a8e6cf']
+  
+  // 获取视频容器宽度
+  const containerWidth = window.innerWidth - 320 // 减去右侧聊天框宽度
+  
   const danmaku = {
     id,
     text,
     top: Math.random() * 60 + 10, // 10% - 70%
-    left: 100,
-    progress: 0,
+    position: containerWidth, // 从右侧开始
     color: colors[Math.floor(Math.random() * colors.length)]
   }
   floatingDanmaku.value.push(danmaku)
   
-  // 动画
-  let progress = 0
+  // 动画 - 从右向左移动
+  const speed = 2 + Math.random() * 2 // 随机速度 2-4px/帧
+  
   const animate = () => {
-    progress += 0.5
     const index = floatingDanmaku.value.findIndex(d => d.id === id)
     if (index > -1) {
-      floatingDanmaku.value[index].progress = progress
-      if (progress < 120) {
-        requestAnimationFrame(animate)
-      } else {
+      // 更新位置 - 向左移动
+      floatingDanmaku.value[index].position -= speed
+      
+      // 如果弹幕完全移出左侧屏幕，移除它
+      // 估算弹幕宽度为文字长度 * 20px
+      const textWidth = text.length * 20
+      if (floatingDanmaku.value[index].position < -textWidth) {
         floatingDanmaku.value.splice(index, 1)
+      } else {
+        requestAnimationFrame(animate)
       }
     }
   }
