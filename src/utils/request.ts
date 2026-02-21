@@ -47,20 +47,42 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = []
 }
 
+// 需要登录才能访问的接口列表
+const authRequiredEndpoints = [
+  '/api/live/start',
+  '/api/live/stop',
+  '/api/live/room/'
+]
+
+// 检查接口是否需要登录
+const isAuthRequiredEndpoint = (url?: string): boolean => {
+  if (!url) return false
+  return authRequiredEndpoints.some(endpoint => url.includes(endpoint))
+}
+
 // 请求拦截器
 request.interceptors.request.use(
   (config: any) => {
     // 添加请求ID
     config.headers = config.headers || {}
     config.headers['X-Request-ID'] = generateRequestId()
-    
+
     // 添加认证token - 从userStore获取，确保与应用状态同步
     const userStore = useUserStore()
     const token = userStore.accessToken || localStorage.getItem('access_token')
+
+    // 检查是否是 live 相关接口且用户未登录
+    if (isAuthRequiredEndpoint(config.url) && !token) {
+      // 触发全局登录弹窗事件
+      window.dispatchEvent(new CustomEvent('show-login-modal'))
+      // 返回一个被拒绝的 Promise，阻止请求继续
+      return Promise.reject(new Error('需要登录才能访问该功能'))
+    }
+
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
     }
-    
+
     return config
   },
   (error: AxiosError) => {
