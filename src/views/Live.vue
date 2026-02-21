@@ -178,9 +178,9 @@ const liveStreams = ref([
 ])
 
 const goToLiveRoom = (id: string) => {
-  // 实际应用中会跳转到具体的直播间页面
+  // 跳转到具体的直播间页面
   console.log(`Navigating to live room: ${id}`)
-  // router.push(`/live/${id}`)
+  router.push(`/live/${id}`)
 }
 
 const goToStreamSetup = () => {

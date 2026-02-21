@@ -96,7 +96,11 @@
       <main class="flex-1 flex flex-col bg-[#2a2a2a]">
         <!-- 预览窗口 -->
         <div class="flex-1 relative flex items-center justify-center p-4">
-          <div class="relative w-full max-w-4xl aspect-video bg-black rounded overflow-hidden shadow-2xl">
+          <div
+            ref="previewContainer"
+            class="relative w-full max-w-4xl aspect-video bg-black rounded overflow-hidden shadow-2xl"
+            @click="selectedSourceId = null; sources.forEach(s => s.selected = false)"
+          >
             <!-- 无信号/未开始状态 -->
             <div v-if="!isStreaming && sources.length === 0" class="absolute inset-0 flex flex-col items-center justify-center">
               <div class="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mb-4">
@@ -105,168 +109,197 @@
                 </svg>
               </div>
               <p class="text-gray-500 mb-4 text-sm">点击左侧"添加素材"按钮添加直播素材</p>
-              <button 
+              <button
                 @click="showAddSourceModal = true"
                 class="px-6 py-2 bg-[#00b5e5] hover:bg-[#00a3d1] text-white rounded text-sm transition-colors"
               >
                 添加素材
               </button>
             </div>
-            
-            <!-- 已添加的素材预览 -->
-            <div v-else-if="sources.length > 0" class="absolute inset-0">
-              <div 
-                v-for="(source, index) in sources" 
-                :key="source.id"
-                class="absolute inset-0 flex items-center justify-center"
-                :style="{ zIndex: index }"
-              >
-                <img v-if="source.type === 'image'" :src="source.url" class="w-full h-full object-cover" />
-                <div v-else-if="source.type === 'camera'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <video 
-                    v-if="source.stream" 
-                    :srcObject="source.stream" 
-                    autoplay 
-                    playsinline
-                    muted
-                    class="w-full h-full object-cover"
-                  ></video>
-                  <div v-else class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <!-- 可拖拽的素材层 (直播时隐藏，因为已经渲染到Canvas中) -->
+            <div
+              v-for="source in sortedSources"
+              v-show="!isStreaming"
+              :key="source.id"
+              class="absolute overflow-hidden"
+              :class="{
+                'ring-2 ring-[#00b5e5] ring-offset-2 ring-offset-black/50': source.selected,
+                'cursor-move': !isResizing
+              }"
+              :style="{
+                left: source.x + '%',
+                top: source.y + '%',
+                width: source.width + '%',
+                height: source.height + '%',
+                zIndex: source.zIndex + 10
+              }"
+              @mousedown="startDrag($event, source.id)"
+              @touchstart="startDrag($event, source.id)"
+              @click.stop="selectSource(source.id)"
+            >
+              <!-- 图片素材 -->
+              <template v-if="source.type === 'image'">
+                <img :src="source.url" class="w-full h-full object-cover" draggable="false" />
+              </template>
+
+              <!-- 摄像头素材 -->
+              <template v-else-if="source.type === 'camera'">
+                <video
+                  v-if="source.stream"
+                  v-stream="source.stream"
+                  autoplay
+                  playsinline
+                  muted
+                  class="w-full h-full object-cover"
+                  draggable="false"
+                ></video>
+                <div v-else class="w-full h-full bg-gray-800 flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
+                      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                       </svg>
                     </div>
-                    <span class="text-gray-500 text-sm">摄像头画面</span>
+                    <span class="text-gray-500 text-xs">摄像头</span>
                   </div>
                 </div>
-                <div v-else-if="source.type === 'screen'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <video 
-                    v-if="source.stream" 
-                    :srcObject="source.stream" 
-                    autoplay 
-                    playsinline
-                    class="w-full h-full object-contain"
-                  ></video>
-                  <div v-else class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              </template>
+
+              <!-- 屏幕/窗口共享素材 -->
+              <template v-else-if="source.type === 'screen' || source.type === 'window'">
+                <video
+                  v-if="source.stream"
+                  v-stream="source.stream"
+                  autoplay
+                  playsinline
+                  class="w-full h-full object-contain"
+                  draggable="false"
+                ></video>
+                <div v-else class="w-full h-full bg-gray-800 flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
+                      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                       </svg>
                     </div>
-                    <span class="text-gray-500 text-sm">屏幕捕捉</span>
+                    <span class="text-gray-500 text-xs">{{ source.type === 'screen' ? '屏幕' : '窗口' }}</span>
                   </div>
                 </div>
-                <div v-else-if="source.type === 'game'" class="w-full h-full bg-gray-800 flex items-center justify-center">
+              </template>
+
+              <!-- 文字素材 -->
+              <template v-else-if="source.type === 'text'">
+                <div class="w-full h-full flex items-center justify-center bg-black/30 pointer-events-auto" @dblclick.stop="editText(source)">
+                  <div v-if="!source.isEditing" class="text-white font-bold text-center px-2 select-none pointer-events-none" :style="{ fontSize: Math.min(source.width, source.height) * 0.15 + 'vw' }">
+                    {{ source.content }}
+                  </div>
+                  <input
+                    v-else
+                    v-model="source.content"
+                    class="w-full h-full bg-transparent text-white font-bold text-center outline-none border-2 border-[#00b5e5] rounded px-2 pointer-events-auto"
+                    :style="{ fontSize: Math.min(source.width, source.height) * 0.15 + 'vw' }"
+                    @blur="source.isEditing = false"
+                    @keyup.enter="source.isEditing = false"
+                    @keyup.esc="source.isEditing = false"
+                    @click.stop
+                    @mousedown.stop
+                    :ref="(el) => { if (el && source.isEditing) textInput = el as HTMLInputElement }"
+                  />
+                </div>
+              </template>
+
+              <!-- 游戏素材 -->
+              <template v-else-if="source.type === 'game'">
+                <div class="w-full h-full bg-gray-800 flex items-center justify-center">
                   <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
+                      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                       </svg>
                     </div>
-                    <span class="text-gray-500 text-sm">游戏捕获</span>
+                    <span class="text-gray-500 text-xs">游戏</span>
                   </div>
                 </div>
-                <div v-else-if="source.type === 'window'" class="w-full h-full bg-gray-800 flex items-center justify-center">
+              </template>
+
+              <!-- 其他素材类型 -->
+              <template v-else>
+                <div class="w-full h-full bg-gray-800 flex items-center justify-center">
                   <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/>
+                    <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
+                      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                       </svg>
                     </div>
-                    <span class="text-gray-500 text-sm">窗口捕获</span>
+                    <span class="text-gray-500 text-xs">{{ source.name }}</span>
                   </div>
                 </div>
-                <div v-else-if="source.type === 'text'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="text-2xl text-white">{{ source.content }}</div>
-                  </div>
-                </div>
-                <div v-else-if="source.type === 'audio'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13"/>
-                      </svg>
-                    </div>
-                    <span class="text-gray-500 text-sm">音频输入</span>
-                  </div>
-                </div>
-                <div v-else-if="source.type === 'danmaku'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                      </svg>
-                    </div>
-                    <span class="text-gray-500 text-sm">弹幕姬</span>
-                  </div>
-                </div>
-                <div v-else-if="source.type === 'crop'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-                      </svg>
-                    </div>
-                    <span class="text-gray-500 text-sm">截屏</span>
-                  </div>
-                </div>
-                <div v-else-if="source.type === 'phone'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                      </svg>
-                    </div>
-                    <span class="text-gray-500 text-sm">投屏</span>
-                  </div>
-                </div>
-                <div v-else-if="source.type === 'browser'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3"/>
-                      </svg>
-                    </div>
-                    <span class="text-gray-500 text-sm">浏览器</span>
-                  </div>
-                </div>
-                <div v-else-if="source.type === 'media'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                      </svg>
-                    </div>
-                    <span class="text-gray-500 text-sm">多媒体</span>
-                  </div>
-                </div>
-                <div v-else-if="source.type === 'thirdparty'" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                      </svg>
-                    </div>
-                    <span class="text-gray-500 text-sm">第三方推流</span>
-                  </div>
-                </div>
+              </template>
+
+              <!-- 选中时的控制按钮 -->
+              <div v-if="source.selected" class="absolute top-1 right-1 flex space-x-1">
+                <button
+                  @click.stop="moveUp(source.id)"
+                  class="w-6 h-6 bg-black/70 hover:bg-black/90 rounded text-white flex items-center justify-center"
+                  title="上移图层"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                  </svg>
+                </button>
+                <button
+                  @click.stop="moveDown(source.id)"
+                  class="w-6 h-6 bg-black/70 hover:bg-black/90 rounded text-white flex items-center justify-center"
+                  title="下移图层"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
               </div>
+
+              <!-- 调整大小的手柄 - 放在容器外部避免被裁剪 -->
+              <template v-if="source.selected">
+                <!-- 左上角 -->
+                <div
+                  class="absolute -top-1.5 -left-1.5 w-4 h-4 bg-[#00b5e5] border-2 border-white rounded-full cursor-nw-resize shadow-md z-50"
+                  @mousedown.stop="startResize($event, source.id, 'nw')"
+                  @touchstart.stop="startResize($event, source.id, 'nw')"
+                ></div>
+                <!-- 右上角 -->
+                <div
+                  class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#00b5e5] border-2 border-white rounded-full cursor-ne-resize shadow-md z-50"
+                  @mousedown.stop="startResize($event, source.id, 'ne')"
+                  @touchstart.stop="startResize($event, source.id, 'ne')"
+                ></div>
+                <!-- 左下角 -->
+                <div
+                  class="absolute -bottom-1.5 -left-1.5 w-4 h-4 bg-[#00b5e5] border-2 border-white rounded-full cursor-sw-resize shadow-md z-50"
+                  @mousedown.stop="startResize($event, source.id, 'sw')"
+                  @touchstart.stop="startResize($event, source.id, 'sw')"
+                ></div>
+                <!-- 右下角 -->
+                <div
+                  class="absolute -bottom-1.5 -right-1.5 w-4 h-4 bg-[#00b5e5] border-2 border-white rounded-full cursor-se-resize shadow-md z-50"
+                  @mousedown.stop="startResize($event, source.id, 'se')"
+                  @touchstart.stop="startResize($event, source.id, 'se')"
+                ></div>
+              </template>
             </div>
             
             <!-- 直播中标识 -->
-            <div v-if="isStreaming" class="absolute top-4 left-4">
+            <div v-if="isStreaming" class="absolute top-4 left-4" style="z-index: 100;">
               <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">LIVE</span>
             </div>
             
             <!-- 直播时长 -->
-            <div v-if="isStreaming" class="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded text-white font-mono text-sm">
+            <div v-if="isStreaming" class="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded text-white font-mono text-sm" style="z-index: 100;">
               {{ streamDuration }}
             </div>
             
-            <!-- 直播视频播放器 (SRS 直播画面) -->
-            <div v-if="isStreaming && streamInfo" class="absolute inset-0 bg-black">
+            <!-- 直播预览视频 (显示Canvas混合后的本地流) -->
+            <div v-show="isStreaming" class="absolute inset-0 bg-black" style="z-index: 1;">
               <video
                 ref="localVideo"
                 class="w-full h-full object-contain"
@@ -934,11 +967,17 @@ import 'webrtc-adapter'
 
 const userStore = useUserStore()
 
+// 按 zIndex 排序的素材列表
+const sortedSources = computed(() => {
+  return [...sources.value].sort((a, b) => a.zIndex - b.zIndex)
+})
+
 // WebRTC 推流相关
 const localVideo = ref<HTMLVideoElement | null>(null)
 const localStream = ref<MediaStream | null>(null)
 const pc = ref<RTCPeerConnection | null>(null)
 const isWebRTCConnected = ref(false)
+let canvasAnimationFrameId: number | null = null
 
 // 处理登录事件
 const handleLogin = () => {
@@ -963,7 +1002,28 @@ const speakerVolume = ref(100)
 // 素材相关
 const showAddSourceModal = ref(false)
 const showScreenModal = ref(false)
-const sources = ref<Array<{id: string, type: string, name: string, url?: string, content?: string, stream?: MediaStream}>>([])
+// 素材类型定义 - 支持位置和大小
+type SourceType = {
+  id: string
+  type: string
+  name: string
+  url?: string
+  content?: string
+  stream?: MediaStream
+  // 位置和大小（百分比，相对于画布）
+  x: number
+  y: number
+  width: number
+  height: number
+  zIndex: number
+  // 是否被选中
+  selected?: boolean
+  // 是否正在编辑
+  isEditing?: boolean
+}
+
+const sources = ref<SourceType[]>([])
+const selectedSourceId = ref<string | null>(null)
 const selectedSource = ref<string | null>(null)
 const screenSourceName = ref('显示器 1')
 const showMouse = ref(true)
@@ -1439,18 +1499,130 @@ const stopCamera = () => {
 }
 
 // 确认添加屏幕
-const confirmAddScreen = () => {
-  const newSource = {
+const confirmAddScreen = async () => {
+  const layout = getDefaultSourceLayout('screen', sources.value.length)
+  const newSource: SourceType = {
     id: Date.now().toString(),
     type: 'screen',
-    name: screenSourceName.value,
+    name: screenSourceName.value || '屏幕共享',
+    x: layout.x,
+    y: layout.y,
+    width: layout.width,
+    height: layout.height,
+    zIndex: layout.zIndex
   }
+  
+  // 自动获取屏幕共享流
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: true
+    })
+    newSource.stream = stream
+    screenStream.value = stream
+    
+    // 监听屏幕共享结束
+    stream.getVideoTracks()[0].onended = () => {
+      const index = sources.value.findIndex(s => s.id === newSource.id)
+      if (index > -1) {
+        sources.value.splice(index, 1)
+      }
+      screenStream.value = null
+    }
+  } catch (err) {
+    console.error('屏幕共享启动失败:', err)
+    alert('无法启动屏幕共享，请检查权限设置')
+    return
+  }
+  
   sources.value.push(newSource)
   showScreenModal.value = false
 }
 
+// 计算新素材的默认位置和大小
+const getDefaultSourceLayout = (type: string, index: number): { x: number, y: number, width: number, height: number, zIndex: number } => {
+  const count = sources.value.length
+  
+  // 计算基础 z-index：屏幕/窗口共享作为底层，文字和摄像头作为上层
+  // 屏幕/窗口共享: z-index 1-10
+  // 图片: z-index 11-20  
+  // 摄像头: z-index 21-30
+  // 文字: z-index 31-40
+  let baseZIndex = 1
+  if (type === 'screen' || type === 'window') {
+    baseZIndex = 1
+  } else if (type === 'image') {
+    baseZIndex = 11
+  } else if (type === 'camera') {
+    baseZIndex = 21
+  } else if (type === 'text') {
+    baseZIndex = 31
+  }
+  
+  // 同类型素材按顺序递增
+  const sameTypeCount = sources.value.filter(s => s.type === type).length
+  const zIndex = baseZIndex + sameTypeCount
+
+  // 根据素材类型决定布局 - 优先按类型判断
+  if (type === 'text') {
+    // 文字默认在顶部居中
+    return { x: 50, y: 10, width: 40, height: 15, zIndex }
+  } else if (type === 'camera') {
+    // 摄像头默认在右下角小窗口
+    return { x: 75, y: 75, width: 20, height: 20, zIndex }
+  } else if (type === 'image') {
+    // 图片默认在左下角
+    return { x: 10, y: 75, width: 20, height: 20, zIndex }
+  } else if (type === 'screen' || type === 'window') {
+    // 屏幕/窗口共享默认全屏
+    return { x: 0, y: 0, width: 100, height: 100, zIndex }
+  } else if (count === 0) {
+    // 第一个素材全屏
+    return { x: 0, y: 0, width: 100, height: 100, zIndex }
+  } else if (count === 1) {
+    // 第二个素材左右分屏
+    return { x: 50, y: 0, width: 50, height: 100, zIndex }
+  } else if (count === 2) {
+    // 第三个素材右下
+    return { x: 50, y: 50, width: 50, height: 50, zIndex }
+  } else {
+    // 其他素材使用网格布局
+    const cols = 2
+    const col = count % cols
+    const row = Math.floor(count / cols) % 2
+    return {
+      x: col * 50,
+      y: row * 50,
+      width: 50,
+      height: 50,
+      zIndex
+    }
+  }
+}
+
+// 绑定视频流到 video 元素
+// 自定义指令：绑定视频流
+const vStream = {
+  mounted(el: HTMLVideoElement, binding: any) {
+    if (binding.value && el.srcObject !== binding.value) {
+      el.srcObject = binding.value
+      el.play().catch((err: any) => {
+        console.warn('视频播放失败:', err)
+      })
+    }
+  },
+  updated(el: HTMLVideoElement, binding: any) {
+    if (binding.value && el.srcObject !== binding.value) {
+      el.srcObject = binding.value
+      el.play().catch((err: any) => {
+        console.warn('视频播放失败:', err)
+      })
+    }
+  }
+}
+
 // 添加素材
-const addSource = (type: string) => {
+const addSource = async (type: string) => {
   const typeNameMap: Record<string, string> = {
     camera: '摄像头',
     window: '窗口',
@@ -1466,14 +1638,72 @@ const addSource = (type: string) => {
     media: '多媒体',
     thirdparty: '第三方推流',
   }
-  
-  const newSource = {
+
+  const layout = getDefaultSourceLayout(type, sources.value.length)
+  console.log('Adding source:', type, 'layout:', layout)
+  const newSource: SourceType = {
     id: Date.now().toString(),
     type,
     name: typeNameMap[type] || '未知素材',
     url: type === 'image' ? 'https://images.unsplash.com/photo-1605098195882-b6819b8555b6?auto=format&fit=crop&w=600&q=80' : undefined,
-    content: type === 'text' ? '欢迎来到直播间' : undefined
+    content: type === 'text' ? '欢迎来到直播间' : undefined,
+    x: layout.x,
+    y: layout.y,
+    width: layout.width,
+    height: layout.height,
+    zIndex: layout.zIndex
   }
+  console.log('New source created:', newSource)
+
+  // 如果是摄像头类型，自动获取媒体流
+  if (type === 'camera') {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        }
+      })
+      newSource.stream = stream
+      cameraStream.value = stream
+    } catch (err) {
+      console.error('摄像头启动失败:', err)
+      alert('无法访问摄像头，请检查设备权限设置')
+      return
+    }
+  }
+
+  // 如果是屏幕共享类型，自动获取媒体流
+  if (type === 'screen') {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
+      })
+      newSource.stream = stream
+      screenStream.value = stream
+
+      // 监听屏幕共享结束
+      stream.getVideoTracks()[0].onended = () => {
+        const index = sources.value.findIndex(s => s.id === newSource.id)
+        if (index > -1) {
+          sources.value.splice(index, 1)
+        }
+        screenStream.value = null
+      }
+    } catch (err) {
+      console.error('屏幕共享启动失败:', err)
+      alert('无法启动屏幕共享，请检查权限设置')
+      return
+    }
+  }
+
   sources.value.push(newSource)
   showAddSourceModal.value = false
 }
@@ -1495,6 +1725,201 @@ const removeSource = (index: number) => {
     }
   }
   sources.value.splice(index, 1)
+}
+
+// ========== 素材拖拽功能 ==========
+const isDragging = ref(false)
+const isResizing = ref(false)
+const dragSourceId = ref<string | null>(null)
+const dragStartX = ref(0)
+const dragStartY = ref(0)
+const dragStartSourceX = ref(0)
+const dragStartSourceY = ref(0)
+const dragStartSourceWidth = ref(0)
+const dragStartSourceHeight = ref(0)
+const resizeHandle = ref<string>('')
+const previewContainer = ref<HTMLElement | null>(null)
+
+// 选择素材
+const selectSource = (id: string) => {
+  selectedSourceId.value = id
+  sources.value.forEach(s => s.selected = (s.id === id))
+}
+
+// 开始拖拽
+const startDrag = (e: MouseEvent | TouchEvent, sourceId: string) => {
+  e.preventDefault()
+  e.stopPropagation()
+
+  const source = sources.value.find(s => s.id === sourceId)
+  if (!source) return
+
+  isDragging.value = true
+  dragSourceId.value = sourceId
+  selectSource(sourceId)
+
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+
+  dragStartX.value = clientX
+  dragStartY.value = clientY
+  dragStartSourceX.value = source.x
+  dragStartSourceY.value = source.y
+
+  document.addEventListener('mousemove', onDrag)
+  document.addEventListener('mouseup', stopDrag)
+  document.addEventListener('touchmove', onDrag)
+  document.addEventListener('touchend', stopDrag)
+}
+
+// 拖拽中
+const onDrag = (e: MouseEvent | TouchEvent) => {
+  if (!isDragging.value || !dragSourceId.value || !previewContainer.value) return
+
+  const source = sources.value.find(s => s.id === dragSourceId.value)
+  if (!source) return
+
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+
+  const container = previewContainer.value
+  const rect = container.getBoundingClientRect()
+
+  // 计算移动距离（转换为百分比）
+  const deltaX = ((clientX - dragStartX.value) / rect.width) * 100
+  const deltaY = ((clientY - dragStartY.value) / rect.height) * 100
+
+  // 更新位置
+  source.x = Math.max(0, Math.min(100 - source.width, dragStartSourceX.value + deltaX))
+  source.y = Math.max(0, Math.min(100 - source.height, dragStartSourceY.value + deltaY))
+}
+
+// 停止拖拽
+const stopDrag = () => {
+  isDragging.value = false
+  dragSourceId.value = null
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', stopDrag)
+  document.removeEventListener('touchmove', onDrag)
+  document.removeEventListener('touchend', stopDrag)
+}
+
+// 开始调整大小
+const startResize = (e: MouseEvent | TouchEvent, sourceId: string, handle: string) => {
+  e.preventDefault()
+  e.stopPropagation()
+
+  const source = sources.value.find(s => s.id === sourceId)
+  if (!source) return
+
+  isResizing.value = true
+  dragSourceId.value = sourceId
+  resizeHandle.value = handle
+  selectSource(sourceId)
+
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+
+  dragStartX.value = clientX
+  dragStartY.value = clientY
+  dragStartSourceX.value = source.x
+  dragStartSourceY.value = source.y
+  dragStartSourceWidth.value = source.width
+  dragStartSourceHeight.value = source.height
+
+  document.addEventListener('mousemove', onResize)
+  document.addEventListener('mouseup', stopResize)
+  document.addEventListener('touchmove', onResize)
+  document.addEventListener('touchend', stopResize)
+}
+
+// 调整大小中
+const onResize = (e: MouseEvent | TouchEvent) => {
+  if (!isResizing.value || !dragSourceId.value || !previewContainer.value) return
+
+  const source = sources.value.find(s => s.id === dragSourceId.value)
+  if (!source) return
+
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+
+  const container = previewContainer.value
+  const rect = container.getBoundingClientRect()
+
+  const deltaX = ((clientX - dragStartX.value) / rect.width) * 100
+  const deltaY = ((clientY - dragStartY.value) / rect.height) * 100
+
+  const minSize = 10 // 最小尺寸 10%
+
+  switch (resizeHandle.value) {
+    case 'se': // 右下角
+      source.width = Math.max(minSize, dragStartSourceWidth.value + deltaX)
+      source.height = Math.max(minSize, dragStartSourceHeight.value + deltaY)
+      break
+    case 'sw': // 左下角
+      const newWidthSW = Math.max(minSize, dragStartSourceWidth.value - deltaX)
+      source.x = dragStartSourceX.value + (dragStartSourceWidth.value - newWidthSW)
+      source.width = newWidthSW
+      source.height = Math.max(minSize, dragStartSourceHeight.value + deltaY)
+      break
+    case 'ne': // 右上角
+      source.width = Math.max(minSize, dragStartSourceWidth.value + deltaX)
+      const newHeightNE = Math.max(minSize, dragStartSourceHeight.value - deltaY)
+      source.y = dragStartSourceY.value + (dragStartSourceHeight.value - newHeightNE)
+      source.height = newHeightNE
+      break
+    case 'nw': // 左上角
+      const newWidthNW = Math.max(minSize, dragStartSourceWidth.value - deltaX)
+      const newHeightNW = Math.max(minSize, dragStartSourceHeight.value - deltaY)
+      source.x = dragStartSourceX.value + (dragStartSourceWidth.value - newWidthNW)
+      source.y = dragStartSourceY.value + (dragStartSourceHeight.value - newHeightNW)
+      source.width = newWidthNW
+      source.height = newHeightNW
+      break
+  }
+}
+
+// 停止调整大小
+const stopResize = () => {
+  isResizing.value = false
+  dragSourceId.value = null
+  resizeHandle.value = ''
+  document.removeEventListener('mousemove', onResize)
+  document.removeEventListener('mouseup', stopResize)
+  document.removeEventListener('touchmove', onResize)
+  document.removeEventListener('touchend', stopResize)
+}
+
+// 上移图层
+const moveUp = (sourceId: string) => {
+  const source = sources.value.find(s => s.id === sourceId)
+  if (source) {
+    source.zIndex = Math.max(...sources.value.map(s => s.zIndex)) + 1
+  }
+}
+
+// 下移图层
+const moveDown = (sourceId: string) => {
+  const source = sources.value.find(s => s.id === sourceId)
+  if (source) {
+    source.zIndex = Math.min(...sources.value.map(s => s.zIndex)) - 1
+  }
+}
+
+// 编辑文字
+const textInput = ref<HTMLInputElement | null>(null)
+const editText = (source: SourceType) => {
+  // 先取消所有其他素材的编辑状态
+  sources.value.forEach(s => s.isEditing = false)
+  // 进入编辑模式
+  source.isEditing = true
+  // 等待 DOM 更新后聚焦
+  nextTick(() => {
+    if (textInput.value) {
+      textInput.value.focus()
+      textInput.value.select()
+    }
+  })
 }
 
 // 上传封面
@@ -1548,40 +1973,231 @@ const confirmCategory = () => {
 }
 
 // 开始/结束直播
-// 初始化摄像头
-const initCamera = async () => {
-  try {
+
+// 根据选择的素材创建混合流
+const createMixedStream = async (): Promise<MediaStream> => {
+  console.log('Creating mixed stream from sources:', sources.value)
+  console.log('Sources count:', sources.value.length)
+  sources.value.forEach((s, i) => {
+    console.log(`Source ${i}: type=${s.type}, hasStream=${!!s.stream}, x=${s.x}, y=${s.y}, width=${s.width}, height=${s.height}`)
+  })
+
+  // 如果没有选择任何素材，默认使用摄像头
+  if (sources.value.length === 0) {
+    console.log('No sources selected, using default camera')
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        frameRate: { ideal: 30 }
-      },
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        sampleRate: 44100
-      }
+      video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+      audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
     })
-    localStream.value = stream
-    if (localVideo.value) {
-      localVideo.value.srcObject = stream
-    }
     return stream
-  } catch (error) {
-    console.error('获取摄像头失败:', error)
-    alert('无法访问摄像头，请检查权限设置')
-    throw error
   }
+
+  // 创建画布用于混合视频
+  const canvas = document.createElement('canvas')
+  canvas.width = 1280
+  canvas.height = 720
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('无法创建 canvas context')
+
+  // 按 zIndex 排序素材
+  const sortedSources = [...sources.value].sort((a, b) => a.zIndex - b.zIndex)
+  console.log('Sorted sources:', sortedSources.map(s => ({ id: s.id, type: s.type, zIndex: s.zIndex, content: s.content })))
+
+  // 收集视频元素和音频流
+  const videoElements: Map<string, HTMLVideoElement> = new Map()
+  const audioStreams: MediaStream[] = []
+  const imageElements: Map<string, HTMLImageElement> = new Map()
+
+  // 等待所有资源加载完成
+  const loadPromises: Promise<void>[] = []
+
+  for (const source of sortedSources) {
+    if (source.stream) {
+      // 视频素材（摄像头、屏幕共享等）
+      const video = document.createElement('video')
+      video.srcObject = source.stream
+      video.autoplay = true
+      video.muted = true
+      video.playsInline = true
+      video.style.display = 'none'
+      document.body.appendChild(video)
+      
+      // 等待视频可以播放
+      const videoLoadPromise = new Promise<void>((resolve) => {
+        const checkReady = () => {
+          if (video.readyState >= 2 && video.videoWidth > 0) {
+            console.log('Video ready:', source.id, 'size:', video.videoWidth, 'x', video.videoHeight)
+            resolve()
+          }
+        }
+        
+        video.onloadedmetadata = () => {
+          console.log('Video metadata loaded:', source.id)
+          video.play().then(() => {
+            console.log('Video playing:', source.id)
+            checkReady()
+          }).catch((err) => {
+            console.error('Video play failed:', source.id, err)
+            resolve()
+          })
+        }
+        video.oncanplay = checkReady
+        video.onerror = () => {
+          console.error('Video error:', source.id)
+          resolve()
+        }
+        // 超时处理
+        setTimeout(() => {
+          console.warn('Video load timeout:', source.id, 'readyState:', video.readyState)
+          resolve()
+        }, 3000)
+      })
+      loadPromises.push(videoLoadPromise)
+      videoElements.set(source.id, video)
+
+      // 收集音频轨道
+      const audioTracks = source.stream.getAudioTracks()
+      if (audioTracks.length > 0) {
+        audioStreams.push(new MediaStream(audioTracks))
+      }
+    } else if (source.type === 'image' && source.url) {
+      // 预加载图片
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      console.log('Loading image:', source.url)
+
+      const imgLoadPromise = new Promise<void>((resolve) => {
+        img.onload = () => {
+          console.log('Image loaded successfully:', source.url, 'size:', img.naturalWidth, 'x', img.naturalHeight)
+          resolve()
+        }
+        img.onerror = () => {
+          console.error('Image failed to load:', source.url)
+          resolve()
+        }
+        // 超时处理
+        setTimeout(() => {
+          console.warn('Image load timeout:', source.url)
+          resolve()
+        }, 3000)
+      })
+      img.src = source.url
+      loadPromises.push(imgLoadPromise)
+      imageElements.set(source.id, img)
+    }
+  }
+
+  // 等待所有资源加载
+  await Promise.all(loadPromises)
+  console.log('All resources loaded, starting mixed stream')
+
+  // 使用 requestAnimationFrame 绘制混合画面
+  const drawFrame = () => {
+    if (!ctx) return
+
+    // 清空画布
+    ctx.fillStyle = '#1a1a2e'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    // 按 zIndex 顺序绘制每个素材
+    for (const source of sortedSources) {
+      // 计算实际像素位置 - 使用默认值防止 undefined
+      const x = ((source.x ?? 0) / 100) * canvas.width
+      const y = ((source.y ?? 0) / 100) * canvas.height
+      const width = ((source.width ?? 100) / 100) * canvas.width
+      const height = ((source.height ?? 100) / 100) * canvas.height
+      
+      console.log('Drawing source:', source.id, 'type:', source.type, 'pos:', x, y, width, height)
+
+      if (source.type === 'text' && source.content) {
+        // 绘制文字素材 - 添加半透明背景
+        ctx.save()
+
+        // 绘制背景
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
+        ctx.fillRect(x, y, width, height)
+
+        // 绘制文字
+        const fontSize = Math.max(16, Math.min(width, height) * 0.15)
+        ctx.font = `bold ${fontSize}px Arial, sans-serif`
+        ctx.fillStyle = '#ffffff'
+        ctx.strokeStyle = '#000000'
+        ctx.lineWidth = Math.max(2, fontSize * 0.1)
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+
+        // 文字描边
+        ctx.strokeText(source.content, x + width / 2, y + height / 2)
+        // 文字填充
+        ctx.fillText(source.content, x + width / 2, y + height / 2)
+        ctx.restore()
+      } else if (source.type === 'image') {
+        // 图片素材
+        const img = imageElements.get(source.id)
+        if (img && img.complete && img.naturalWidth > 0) {
+          ctx.drawImage(img, x, y, width, height)
+        } else {
+          // 图片未加载完成，绘制占位符
+          ctx.fillStyle = '#333344'
+          ctx.fillRect(x, y, width, height)
+          ctx.fillStyle = '#666677'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.font = '14px Arial'
+          ctx.fillText('图片加载中...', x + width / 2, y + height / 2)
+        }
+      } else if (source.type === 'camera' || source.type === 'screen' || source.type === 'window') {
+        // 视频素材（摄像头、屏幕共享、窗口共享）
+        const video = videoElements.get(source.id)
+        if (video && video.readyState >= 2 && video.videoWidth > 0) {
+          ctx.drawImage(video, x, y, width, height)
+        } else {
+          // 视频未准备好，绘制占位符
+          ctx.fillStyle = '#222233'
+          ctx.fillRect(x, y, width, height)
+          ctx.fillStyle = '#555566'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.font = '14px Arial'
+          ctx.fillText(source.type === 'camera' ? '摄像头' : '屏幕共享', x + width / 2, y + height / 2)
+        }
+      }
+    }
+
+    canvasAnimationFrameId = requestAnimationFrame(drawFrame)
+  }
+  drawFrame()
+
+  // 从画布捕获视频流
+  const canvasStream = canvas.captureStream(30)
+
+  // 合并所有音频流
+  if (audioStreams.length > 0) {
+    const audioContext = new AudioContext()
+    const destination = audioContext.createMediaStreamDestination()
+
+    audioStreams.forEach(stream => {
+      const source = audioContext.createMediaStreamSource(stream)
+      source.connect(destination)
+    })
+
+    destination.stream.getAudioTracks().forEach(track => {
+      canvasStream.addTrack(track)
+    })
+  }
+
+  return canvasStream
 }
 
 // WebRTC 推流到 SRS
-const startWebRTCPush = async (webrtcUrl: string) => {
+const startWebRTCPush = async (webrtcUrl: string, mediaStream?: MediaStream) => {
   try {
     console.log('Starting WebRTC push to:', webrtcUrl)
-    
-    if (!localStream.value) {
-      await initCamera()
+
+    // 使用传入的流或创建新的混合流
+    const mixedStream = mediaStream || await createMixedStream()
+    if (!mediaStream) {
+      localStream.value = mixedStream
     }
 
     // 解析 webrtcUrl: webrtc://localhost:1985/live/stream_key
@@ -1589,8 +2205,8 @@ const startWebRTCPush = async (webrtcUrl: string) => {
     if (!urlMatch) {
       throw new Error('Invalid WebRTC URL format: ' + webrtcUrl)
     }
-    const [, host, app, stream] = urlMatch
-    console.log('Parsed URL - host:', host, 'app:', app, 'stream:', stream)
+    const [, host, app, streamKey] = urlMatch
+    console.log('Parsed URL - host:', host, 'app:', app, 'streamKey:', streamKey)
 
     // 创建 RTCPeerConnection
     pc.value = new RTCPeerConnection({
@@ -1603,17 +2219,15 @@ const startWebRTCPush = async (webrtcUrl: string) => {
     pc.value.onconnectionstatechange = () => {
       console.log('WebRTC connection state:', pc.value?.connectionState)
     }
-    
+
     pc.value.oniceconnectionstatechange = () => {
       console.log('ICE connection state:', pc.value?.iceConnectionState)
     }
 
     // 添加音视频轨道
-    localStream.value?.getTracks().forEach(track => {
+    mixedStream.getTracks().forEach(track => {
       console.log('Adding track:', track.kind, track.label)
-      if (localStream.value && pc.value) {
-        pc.value.addTrack(track, localStream.value)
-      }
+      pc.value?.addTrack(track, mixedStream)
     })
 
     // 创建 offer
@@ -1645,13 +2259,17 @@ const startWebRTCPush = async (webrtcUrl: string) => {
 
     // SRS WebRTC 推流 API
     // 参考: https://ossrs.net/lts/zh-cn/docs/v4/doc/webrtc#http-api
-    // host 已经是 localhost:1985 格式
-    const srsApiUrl = `http://${host}/rtc/v1/publish/`
+    // HTTP API 使用 localhost:1985，streamurl 使用 webrtc://localhost:8000/...
+    const srsApiUrl = `http://localhost:1985/rtc/v1/publish/`
     console.log('Sending request to:', srsApiUrl)
     console.log('Full URL debug:', { host, srsApiUrl, webrtcUrl })
     
+    // 生成随机 tid (transaction id)
+    const tid = Math.random().toString(36).substring(2, 9)
+    
     const requestBody = {
       api: srsApiUrl,
+      tid: tid,
       streamurl: webrtcUrl,
       sdp: pc.value.localDescription?.sdp
     }
@@ -1694,6 +2312,11 @@ const startWebRTCPush = async (webrtcUrl: string) => {
 
 // 停止 WebRTC 推流
 const stopWebRTCPush = () => {
+  // 取消 Canvas 动画帧
+  if (canvasAnimationFrameId !== null) {
+    cancelAnimationFrame(canvasAnimationFrameId)
+    canvasAnimationFrameId = null
+  }
   if (pc.value) {
     pc.value.close()
     pc.value = null
@@ -1722,7 +2345,7 @@ const toggleScreenShare = async () => {
     // 开始屏幕共享
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { cursor: 'always' },
+        video: true,
         audio: true
       })
       screenStream.value = stream
@@ -1776,10 +2399,11 @@ const toggleStreaming = async () => {
     // 开始直播
     try {
       const userId = userStore.userId || 1
-      
-      // 先初始化摄像头
-      await initCamera()
-      
+
+      // 根据选择的素材创建混合流
+      const mixedStream = await createMixedStream()
+      localStream.value = mixedStream
+
       const response = await liveAPI.startLive({
         user_id: userId,
         title: liveTitle.value || '我的直播间',
@@ -1802,31 +2426,25 @@ const toggleStreaming = async () => {
         }
         showStreamInfo.value = true
         
+        // 等待 DOM 更新后，设置视频预览
+        nextTick(() => {
+          if (localVideo.value && localStream.value) {
+            localVideo.value.srcObject = localStream.value
+          }
+        })
+        
         // 开始 WebRTC 推流
         console.log('准备开始 WebRTC 推流, webrtc_url:', data.webrtc_url)
         let webrtcSuccess = false
         if (data.webrtc_url) {
           try {
-            await startWebRTCPush(data.webrtc_url)
+            await startWebRTCPush(data.webrtc_url, mixedStream)
             console.log('WebRTC 推流启动成功')
             webrtcSuccess = true
-            // 初始化视频播放器（本地摄像头预览）
-            nextTick(() => {
-              if (localVideo.value && localStream.value) {
-                localVideo.value.srcObject = localStream.value
-              }
-            })
           } catch (webrtcError) {
             console.error('WebRTC 推流启动失败:', webrtcError)
-            // WebRTC 失败时，显示 OBS 推流提示，并使用 HLS 播放 SRS 直播画面
+            // WebRTC 失败时，显示 OBS 推流提示
             alert('浏览器推流失败，请使用 OBS 推流\n推流地址: ' + data.push_url + '\n流密钥: ' + data.stream_key)
-            // 使用 HLS 播放 SRS 的直播画面（主播也能看到自己的直播）
-            nextTick(() => {
-              // 将 localVideo 临时用作 HLS 播放器
-              if (localVideo.value) {
-                initVideoPlayerForElement(data.play_url, localVideo.value)
-              }
-            })
           }
         } else {
           console.warn('没有 webrtc_url, 跳过 WebRTC 推流')
@@ -1971,7 +2589,6 @@ onUnmounted(() => {
   }
 })
 </script>
-
 <style scoped>
 /* 自定义滚动条 */
 ::-webkit-scrollbar {

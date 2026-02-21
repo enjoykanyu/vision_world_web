@@ -75,10 +75,23 @@
             ref="videoPlayer"
             autoplay
             :muted="streamInfo.isMuted"
-            controls
             playsinline
             class="w-full h-full object-contain"
           ></video>
+
+          <!-- 手动播放按钮 -->
+          <div v-if="showPlayButton" class="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+            <button
+              @click="manualPlay"
+              class="px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-full flex items-center space-x-2 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+              </svg>
+              <span>点击播放</span>
+            </button>
+          </div>
+
           <div v-if="!streamInfo.playUrl" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
             <img :src="streamInfo.cover" class="w-full h-full object-cover opacity-80">
             <div class="absolute inset-0 flex items-center justify-center">
@@ -434,6 +447,7 @@ import NavHeader from '@/components/NavHeader.vue'
 import { useUserStore } from '@/stores/userStore'
 import { liveAPI } from '@/api/live'
 import Hls from 'hls.js'
+import flvjs from 'flv.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -451,6 +465,20 @@ const goBack = () => {
 // 视频播放器
 const videoPlayer = ref<HTMLVideoElement | null>(null)
 let hls: Hls | null = null
+let flvPlayer: flvjs.Player | null = null
+let rtcPeerConnection: RTCPeerConnection | null = null
+const showPlayButton = ref(false)
+
+// 手动播放视频
+const manualPlay = () => {
+  if (videoPlayer.value) {
+    videoPlayer.value.play().then(() => {
+      showPlayButton.value = false
+    }).catch(err => {
+      console.error('手动播放失败:', err)
+    })
+  }
+}
 
 // 直播信息
 const streamInfo = ref({
@@ -597,15 +625,292 @@ const toggleMute = () => {
   console.log('静音状态:', streamInfo.value.isMuted)
 }
 
-// 初始化视频播放器
-const initVideoPlayer = (playUrl: string) => {
-  if (!videoPlayer.value || !playUrl) return
+// WebRTC 播放 - 超低延迟 (<500ms)
+const initWebRTCPlayer = async (webrtcUrl: string) => {
+  if (!videoPlayer.value || !webrtcUrl) return
 
-  // 销毁旧的 HLS 实例
+  console.log('Initializing WebRTC player:', webrtcUrl)
+
+  // 销毁旧的播放器
+  if (rtcPeerConnection) {
+    rtcPeerConnection.close()
+    rtcPeerConnection = null
+  }
+  if (flvPlayer) {
+    flvPlayer.destroy()
+    flvPlayer = null
+  }
   if (hls) {
     hls.destroy()
     hls = null
   }
+
+  const video = videoPlayer.value
+
+  try {
+    // 解析 WebRTC URL
+    const urlMatch = webrtcUrl.match(/webrtc:\/\/([^\/]+)\/([^\/]+)\/(.+)/)
+    if (!urlMatch) {
+      throw new Error('Invalid WebRTC URL format')
+    }
+    const [, host, app, stream] = urlMatch
+
+    // 创建 RTCPeerConnection
+    rtcPeerConnection = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' }
+      ]
+    })
+
+    // 监听远程轨道
+    rtcPeerConnection.ontrack = (event) => {
+      console.log('Received remote track:', event.track.kind)
+      if (video.srcObject !== event.streams[0]) {
+        video.srcObject = event.streams[0]
+        video.play().catch(err => console.log('播放失败:', err))
+      }
+    }
+
+    // 监听连接状态
+    rtcPeerConnection.onconnectionstatechange = () => {
+      console.log('WebRTC connection state:', rtcPeerConnection?.connectionState)
+    }
+
+    // 创建 offer
+    const offer = await rtcPeerConnection.createOffer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true
+    })
+    await rtcPeerConnection.setLocalDescription(offer)
+
+    // 等待 ICE gathering
+    await new Promise<void>((resolve) => {
+      if (rtcPeerConnection?.iceGatheringState === 'complete') {
+        resolve()
+      } else {
+        const timeout = setTimeout(() => resolve(), 2000)
+        rtcPeerConnection!.addEventListener('icegatheringstatechange', () => {
+          if (rtcPeerConnection?.iceGatheringState === 'complete') {
+            clearTimeout(timeout)
+            resolve()
+          }
+        })
+      }
+    })
+
+    // 请求 SRS WebRTC 播放 - 使用 1985 端口
+    const srsApiUrl = `http://${host.replace(':8000', ':1985')}/rtc/v1/play/`
+    console.log('SRS API URL:', srsApiUrl)
+    const tid = Math.random().toString(36).substring(2, 9)
+
+    const response = await fetch(srsApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api: srsApiUrl,
+        tid: tid,
+        streamurl: webrtcUrl,
+        sdp: rtcPeerConnection.localDescription?.sdp
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`SRS API error: ${response.status}`)
+    }
+
+    const result = await response.json()
+    console.log('SRS play response:', result)
+
+    if (result.code !== 0) {
+      throw new Error(`SRS error: ${result.msg || JSON.stringify(result)}`)
+    }
+
+    // 设置远程描述
+    await rtcPeerConnection.setRemoteDescription(new RTCSessionDescription({
+      type: 'answer',
+      sdp: result.sdp
+    }))
+
+    console.log('WebRTC 播放已连接，延迟 < 500ms')
+  } catch (error) {
+    console.error('WebRTC 播放失败:', error)
+    console.error('WebRTC 错误详情:', {
+      webrtcUrl,
+      srsApiUrl,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
+    // 回退到 FLV
+    console.log('回退到 FLV 播放')
+    initFLVPlayer(streamInfo.value.playUrl)
+  }
+}
+
+// FLV 播放器（次选）
+const initFLVPlayer = (playUrl: string) => {
+  console.log('initFLVPlayer called with playUrl:', playUrl)
+  console.log('videoPlayer ref:', videoPlayer.value)
+  
+  if (!videoPlayer.value) {
+    console.error('Video player element not found!')
+    return
+  }
+  if (!playUrl) {
+    console.error('Play URL is empty!')
+    return
+  }
+
+  // 销毁旧的播放器实例
+  if (hls) {
+    hls.destroy()
+    hls = null
+  }
+  if (flvPlayer) {
+    flvPlayer.destroy()
+    flvPlayer = null
+  }
+
+  const video = videoPlayer.value
+  // 直接使用传入的 URL，不再进行替换
+  const flvUrl = playUrl
+  console.log('Loading FLV source:', flvUrl)
+  
+  // 检查 FLV 是否支持
+  if (!flvjs.isSupported()) {
+    console.error('FLV.js is not supported in this browser')
+    initHLSPlayer(playUrl)
+    return
+  }
+
+  console.log('FLV.js is supported, creating player...')
+  
+  try {
+    flvPlayer = flvjs.createPlayer({
+      type: 'flv',
+      url: flvUrl,
+      isLive: true,
+      hasAudio: true,
+      hasVideo: true,
+      enableStashBuffer: false,       // 禁用缓冲，降低延迟
+      stashInitialSize: 64,           // 最小化初始缓冲
+      lazyLoad: false,                // 禁用懒加载
+      lazyLoadMaxDuration: 0.1,       // 最小化懒加载时间
+      seekType: 'range',              // 使用 range 请求
+      rangeLoadZeroStart: true,       // 从 0 开始加载
+      fixAudioTimestampGap: false,    // 禁用音频时间戳修复
+      autoCleanupSourceBuffer: true,  // 自动清理 buffer
+      autoCleanupMaxBackwardDuration: 3,  // 只保留 3 秒历史数据
+      autoCleanupMinBackwardDuration: 1   // 最小保留 1 秒
+    })
+
+    flvPlayer.attachMediaElement(video)
+    flvPlayer.load()
+
+    // 监听 FLV 播放器事件
+    flvPlayer.on(flvjs.Events.LOADING_COMPLETE, () => {
+      console.log('FLV loading complete')
+    })
+
+    flvPlayer.on(flvjs.Events.RECOVERED_EARLY_EOF, () => {
+      console.log('FLV recovered early EOF')
+    })
+
+    flvPlayer.on(flvjs.Events.MEDIA_INFO, (mediaInfo) => {
+      console.log('FLV media info:', mediaInfo)
+      // 确保视频尺寸正确
+      if (mediaInfo.width && mediaInfo.height) {
+        console.log(`Video dimensions: ${mediaInfo.width}x${mediaInfo.height}`)
+      }
+    })
+
+    flvPlayer.on(flvjs.Events.METADATA_ARRIVED, (metadata) => {
+      console.log('FLV metadata arrived:', metadata)
+    })
+
+    // 监听视频数据到达
+    flvPlayer.on(flvjs.Events.VIDEO_TAG_ARRIVED, (data) => {
+      console.log('FLV video tag arrived, size:', data?.byteLength || 0)
+    })
+
+    flvPlayer.on(flvjs.Events.SCRIPTDATA_ARRIVED, (data) => {
+      console.log('FLV script data arrived:', data)
+    })
+
+    // 监听 MediaSource 关闭事件（直播流的正常行为）
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
+    flvPlayer.on(flvjs.Events.SOURCE_CLOSE, () => {
+      console.log('FLV MediaSource closed')
+      // 清除之前的重连定时器
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout)
+      }
+      // 延迟重连，避免频繁重连
+      reconnectTimeout = setTimeout(() => {
+        if (flvPlayer && !flvPlayer.destroyed) {
+          console.log('Reloading FLV player...')
+          flvPlayer.load()
+        }
+      }, 2000)
+    })
+
+    flvPlayer.on(flvjs.Events.ERROR, (errType: string, errDetail: string) => {
+      console.error('FLV player error:', errType, errDetail)
+      // 只有网络错误才回退到 HLS，其他错误尝试恢复
+      if (errType === 'NetworkError') {
+        console.log('网络错误，回退到 HLS 播放')
+        initHLSPlayer(playUrl)
+      } else {
+        console.log('非网络错误，尝试恢复播放')
+        // 尝试重新加载
+        setTimeout(() => {
+          if (flvPlayer) {
+            flvPlayer.load()
+          }
+        }, 1000)
+      }
+    })
+
+    // 等待媒体加载完成后再播放
+    flvPlayer.on(flvjs.Events.MEDIA_INFO, () => {
+      console.log('FLV media info received, attempting to play...')
+      video.play().catch(err => {
+        console.log('自动播放被阻止:', err)
+        // 显示播放按钮让用户手动点击
+        showPlayButton.value = true
+      })
+    })
+    
+    console.log('FLV player created and loaded successfully')
+  } catch (error) {
+    console.error('Error creating FLV player:', error)
+    initHLSPlayer(playUrl)
+  }
+}
+
+// 初始化视频播放器 - 使用 FLV 低延迟播放
+const initVideoPlayer = (playUrl: string) => {
+  console.log('initVideoPlayer called with:', playUrl)
+  console.log('videoPlayer ref:', videoPlayer.value)
+  console.log('flvUrl:', streamInfo.value.flvUrl)
+  
+  if (!videoPlayer.value) {
+    console.error('videoPlayer ref is null!')
+    return
+  }
+  if (!playUrl) {
+    console.error('playUrl is empty!')
+    return
+  }
+
+  // 优先使用 FLV 格式（延迟约 0.5-1 秒）
+  const flvUrl = streamInfo.value.flvUrl || playUrl.replace('.m3u8', '.flv')
+  console.log('使用 FLV 播放，延迟约 0.5-1 秒:', flvUrl)
+  initFLVPlayer(flvUrl)
+}
+
+// HLS 播放器（备用）
+const initHLSPlayer = (playUrl: string) => {
+  if (!videoPlayer.value || !playUrl) return
 
   const video = videoPlayer.value
 
@@ -617,7 +922,6 @@ const initVideoPlayer = (playUrl: string) => {
       backBufferLength: 90
     })
 
-    // 添加时间戳绕过缓存？？？ 这里感觉修复了可以看到直播了但是有延迟
     const urlWithTimestamp = playUrl + (playUrl.includes('?') ? '&' : '?') + '_t=' + Date.now()
     console.log('Loading HLS source:', urlWithTimestamp)
     hls.loadSource(urlWithTimestamp)
@@ -643,13 +947,12 @@ const initVideoPlayer = (playUrl: string) => {
             break
           default:
             console.log('无法恢复的错误，重新初始化播放器')
-            initVideoPlayer(playUrl)
+            initHLSPlayer(playUrl)
             break
         }
       }
     })
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    // Safari 原生支持 HLS
     video.src = playUrl
     video.addEventListener('loadedmetadata', () => {
       video.play().catch(err => {
@@ -657,37 +960,54 @@ const initVideoPlayer = (playUrl: string) => {
       })
     })
   } else {
-    console.error('浏览器不支持 HLS 播放')
+    console.error('浏览器不支持视频播放')
   }
 }
 
 // 获取直播信息
 const fetchLiveInfo = async () => {
   try {
+    console.log('fetchLiveInfo called, streamId:', streamId)
     const roomId = parseInt(streamId)
     if (isNaN(roomId)) {
       console.error('Invalid room ID:', streamId)
       return
     }
+    console.log('Fetching room info for roomId:', roomId)
 
     const response = await liveAPI.getRoomInfo(roomId)
+    console.log('Room info response:', response.data)
     
     if (response.data.code === 0 && response.data.data && response.data.data.room) {
       const room = response.data.data.room
+      console.log('Room data:', room)
       
       // 更新直播间信息
       streamInfo.value.title = room.title || '无标题'
       streamInfo.value.cover = room.cover_url || ''
       streamInfo.value.viewers = room.online_count?.toString() || '0'
       streamInfo.value.playUrl = room.play_url || ''
-      streamInfo.value.flvUrl = room.play_url ? room.play_url.replace('.m3u8', '.flv') : ''
-      streamInfo.value.webrtcUrl = room.play_url ? room.play_url.replace('http://', 'webrtc://').replace('.m3u8', '') : ''
-      
+      // 使用后端返回的 flv_url，如果没有则通过替换生成
+      streamInfo.value.flvUrl = room.flv_url || (room.play_url ? room.play_url.replace('.m3u8', '.flv') : '')
+      // 使用后端返回的 webrtc_url，如果没有则从 play_url 提取生成
+      streamInfo.value.webrtcUrl = room.webrtc_url || ''
+      if (!streamInfo.value.webrtcUrl && room.play_url) {
+        const streamKey = room.play_url.split('/').pop()?.replace('.m3u8', '')
+        streamInfo.value.webrtcUrl = streamKey ? `webrtc://192.168.1.4:8000/live/${streamKey}` : ''
+      }
+
+      console.log('Updated streamInfo:', streamInfo.value)
+
       // 如果正在直播，初始化播放器
+      console.log('Room status:', room.status, 'play_url:', room.play_url)
       if (room.status === 'streaming' && room.play_url) {
+        console.log('Initializing video player with:', room.play_url)
         nextTick(() => {
+          console.log('nextTick - videoPlayer ref:', videoPlayer.value)
           initVideoPlayer(room.play_url)
         })
+      } else {
+        console.log('Not initializing player - status:', room.status, 'play_url:', room.play_url)
       }
     } else {
       console.error('获取直播间信息失败:', response.data.msg || response.data.message || '未知错误')
@@ -876,6 +1196,16 @@ const simulateDanmaku = () => {
 onUnmounted(() => {
   if (durationTimer) {
     clearInterval(durationTimer)
+  }
+  // 销毁 WebRTC 连接
+  if (rtcPeerConnection) {
+    rtcPeerConnection.close()
+    rtcPeerConnection = null
+  }
+  // 销毁 FLV 播放器
+  if (flvPlayer) {
+    flvPlayer.destroy()
+    flvPlayer = null
   }
   // 销毁 HLS 播放器
   if (hls) {
