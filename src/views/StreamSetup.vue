@@ -2169,15 +2169,14 @@ const createMixedStream = async (): Promise<MediaStream> => {
       }
     }
 
-    // 使用 setTimeout 控制帧率为 5fps，减少 CPU 占用
-    canvasAnimationFrameId = window.setTimeout(() => {
-      requestAnimationFrame(drawFrame)
-    }, 200) // 1000ms / 5fps = 200ms
+    // 使用 requestAnimationFrame 保持流畅，但控制渲染频率
+    // 目标 15-20fps 平衡流畅度和性能
+    canvasAnimationFrameId = requestAnimationFrame(drawFrame)
   }
   drawFrame()
 
-  // 从画布捕获视频流 - 降低帧率到 5fps
-  const canvasStream = canvas.captureStream(5)
+  // 从画布捕获视频流 - 提高到 15fps 保证流畅度（原来是5fps）
+  const canvasStream = canvas.captureStream(15)
 
   // 合并所有音频流
   if (audioStreams.length > 0) {
@@ -2232,17 +2231,87 @@ const startWebRTCPush = async (webrtcUrl: string, mediaStream?: MediaStream) => 
       console.log('ICE connection state:', pc.value?.iceConnectionState)
     }
 
-    // 添加音视频轨道
+    // 添加音视频轨道并设置编码参数
+    const senders: RTCRtpSender[] = []
     mixedStream.getTracks().forEach(track => {
       console.log('Adding track:', track.kind, track.label)
-      pc.value?.addTrack(track, mixedStream)
+      const sender = pc.value?.addTrack(track, mixedStream)
+      if (sender) {
+        senders.push(sender)
+      }
     })
+
+    // 设置视频编码参数：关键帧间隔 1 秒（关键！HLS 切片依赖关键帧）
+    await Promise.all(senders.map(async (sender) => {
+      if (sender.track?.kind === 'video') {
+        try {
+          const parameters = sender.getParameters()
+          console.log('Original encoding parameters:', parameters)
+          
+          if (!parameters.encodings) {
+            parameters.encodings = [{}]
+          }
+          
+          // 设置关键帧间隔为 1 秒（关键！）
+          // 这直接影响 HLS 切片大小
+          parameters.encodings[0].keyFrameInterval = 1.0
+          
+          // 设置帧率和码率
+          parameters.encodings[0].scaleResolutionDownBy = 1
+          parameters.encodings[0].maxBitrate = 2500000 // 2.5 Mbps
+          parameters.encodings[0].minBitrate = 1000000 // 1 Mbps
+          
+          // 尝试设置更多参数（浏览器可能不支持）
+          if (!parameters.degradationPreference) {
+            parameters.degradationPreference = 'maintain-framerate'
+          }
+          
+          await sender.setParameters(parameters)
+          console.log('Video encoding parameters set successfully:', parameters.encodings[0])
+          
+          // 验证设置是否生效
+          const newParams = sender.getParameters()
+          console.log('Verified encoding parameters:', newParams.encodings?.[0])
+        } catch (e) {
+          console.warn('Failed to set encoding parameters:', e)
+        }
+      }
+    }))
 
     // 创建 offer
     const offer = await pc.value.createOffer()
     console.log('Created offer:', offer.sdp?.substring(0, 100) + '...')
+
+    // 修改 SDP 强制设置关键帧间隔为 1 秒（关键！）
+    // 这会影响 HLS 切片大小 - GOP 必须等于 hls_fragment 才能生成 1 秒片段
+    let sdp = offer.sdp || ''
     
-    await pc.value.setLocalDescription(offer)
+    // 在视频 m= 行后添加关键帧相关属性
+    sdp = sdp.replace(
+      /(m=video [^\r\n]+\r\n)/g,
+      '$1a=x-google-min-bitrate:1000\r\na=x-google-max-bitrate:2500\r\n'
+    )
+    
+    // 设置帧率为 30fps，并添加关键帧间隔为 1 秒（30 帧）
+    // 这是实现 1 秒 HLS 片段的关键！
+    sdp = sdp.replace(
+      /(a=rtpmap:\d+ H264\/90000\r\n)/g,
+      '$1a=framerate:30\r\na=keyframe-interval:1\r\n'
+    )
+    
+    // 在 H264 fmtp 行中添加 GOP 相关参数（如果存在）
+    // profile-level-id=42e01f 表示 Baseline 3.1，支持 1 秒 GOP
+    sdp = sdp.replace(
+      /(a=fmtp:\d+ profile-level-id=42e01f[^\r\n]*)/g,
+      '$1;keyint=30;min-keyint=30'
+    )
+    
+    console.log('Modified SDP for 1-second GOP (HLS fragment)')
+
+    await pc.value.setLocalDescription(new RTCSessionDescription({
+      type: 'offer',
+      sdp: sdp
+    }))
 
     // 等待 ICE gathering 完成或超时
     await new Promise<void>((resolve) => {
@@ -2322,7 +2391,7 @@ const startWebRTCPush = async (webrtcUrl: string, mediaStream?: MediaStream) => 
 const stopWebRTCPush = () => {
   // 取消 Canvas 动画帧
   if (canvasAnimationFrameId !== null) {
-    clearTimeout(canvasAnimationFrameId)
+    cancelAnimationFrame(canvasAnimationFrameId)
     canvasAnimationFrameId = null
   }
   if (pc.value) {

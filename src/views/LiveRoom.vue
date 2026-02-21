@@ -633,16 +633,36 @@ const initWebRTCPlayer = async (webrtcUrl: string) => {
 
   // 销毁旧的播放器
   if (rtcPeerConnection) {
-    rtcPeerConnection.close()
+    try {
+      rtcPeerConnection.close()
+    } catch (e) {
+      console.warn('Error closing old RTC connection:', e)
+    }
     rtcPeerConnection = null
   }
   if (flvPlayer) {
-    flvPlayer.destroy()
+    try {
+      if (!flvPlayer.destroyed) {
+        flvPlayer.destroy()
+      }
+    } catch (e) {
+      console.warn('Error destroying old FLV player:', e)
+    }
     flvPlayer = null
   }
   if (hls) {
-    hls.destroy()
+    try {
+      hls.destroy()
+    } catch (e) {
+      console.warn('Error destroying old HLS player:', e)
+    }
     hls = null
+  }
+  // 清理视频元素
+  if (videoPlayer.value) {
+    videoPlayer.value.pause()
+    videoPlayer.value.srcObject = null
+    videoPlayer.value.src = ''
   }
 
   const video = videoPlayer.value
@@ -736,13 +756,27 @@ const initWebRTCPlayer = async (webrtcUrl: string) => {
     console.error('WebRTC 播放失败:', error)
     console.error('WebRTC 错误详情:', {
       webrtcUrl,
-      srsApiUrl,
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined
     })
-    // 回退到 FLV
+    // 清理 WebRTC 连接
+    if (rtcPeerConnection) {
+      try {
+        rtcPeerConnection.close()
+      } catch (e) {
+        console.warn('Error closing RTC connection:', e)
+      }
+      rtcPeerConnection = null
+    }
+    // 回退到 FLV（使用 flvUrl 而不是 playUrl）
     console.log('回退到 FLV 播放')
-    initFLVPlayer(streamInfo.value.playUrl)
+    const flvUrl = streamInfo.value.flvUrl || streamInfo.value.playUrl?.replace('.m3u8', '.flv')
+    if (flvUrl) {
+      initFLVPlayer(flvUrl)
+    } else {
+      console.error('No FLV URL available, falling back to HLS')
+      initHLSPlayer(streamInfo.value.playUrl)
+    }
   }
 }
 
@@ -750,7 +784,7 @@ const initWebRTCPlayer = async (webrtcUrl: string) => {
 const initFLVPlayer = (playUrl: string) => {
   console.log('initFLVPlayer called with playUrl:', playUrl)
   console.log('videoPlayer ref:', videoPlayer.value)
-  
+
   if (!videoPlayer.value) {
     console.error('Video player element not found!')
     return
@@ -760,21 +794,30 @@ const initFLVPlayer = (playUrl: string) => {
     return
   }
 
+  // 确保 URL 是 FLV 格式
+  let flvUrl = playUrl
+  if (playUrl.endsWith('.m3u8')) {
+    flvUrl = playUrl.replace('.m3u8', '.flv')
+    console.log('Converted HLS URL to FLV:', flvUrl)
+  }
+
   // 销毁旧的播放器实例
   if (hls) {
     hls.destroy()
     hls = null
   }
   if (flvPlayer) {
-    flvPlayer.destroy()
+    try {
+      flvPlayer.destroy()
+    } catch (e) {
+      console.warn('Error destroying old flvPlayer:', e)
+    }
     flvPlayer = null
   }
 
   const video = videoPlayer.value
-  // 直接使用传入的 URL，不再进行替换
-  const flvUrl = playUrl
   console.log('Loading FLV source:', flvUrl)
-  
+
   // 检查 FLV 是否支持
   if (!flvjs.isSupported()) {
     console.error('FLV.js is not supported in this browser')
@@ -783,7 +826,7 @@ const initFLVPlayer = (playUrl: string) => {
   }
 
   console.log('FLV.js is supported, creating player...')
-  
+
   try {
     flvPlayer = flvjs.createPlayer({
       type: 'flv',
@@ -791,16 +834,19 @@ const initFLVPlayer = (playUrl: string) => {
       isLive: true,
       hasAudio: true,
       hasVideo: true,
+      // === 关键：最小化缓冲以降低延迟 ===
       enableStashBuffer: false,       // 禁用缓冲，降低延迟
-      stashInitialSize: 64,           // 最小化初始缓冲
+      stashInitialSize: 16,           // 最小化初始缓冲（16KB）
       lazyLoad: false,                // 禁用懒加载
       lazyLoadMaxDuration: 0.1,       // 最小化懒加载时间
+      // === 加载策略 ===
       seekType: 'range',              // 使用 range 请求
       rangeLoadZeroStart: true,       // 从 0 开始加载
       fixAudioTimestampGap: false,    // 禁用音频时间戳修复
+      // === 自动清理策略 ===
       autoCleanupSourceBuffer: true,  // 自动清理 buffer
-      autoCleanupMaxBackwardDuration: 3,  // 只保留 3 秒历史数据
-      autoCleanupMinBackwardDuration: 1   // 最小保留 1 秒
+      autoCleanupMaxBackwardDuration: 1,  // 只保留 1 秒历史数据
+      autoCleanupMinBackwardDuration: 0.3 // 最小保留 0.3 秒
     })
 
     flvPlayer.attachMediaElement(video)
@@ -817,7 +863,6 @@ const initFLVPlayer = (playUrl: string) => {
 
     flvPlayer.on(flvjs.Events.MEDIA_INFO, (mediaInfo) => {
       console.log('FLV media info:', mediaInfo)
-      // 确保视频尺寸正确
       if (mediaInfo.width && mediaInfo.height) {
         console.log(`Video dimensions: ${mediaInfo.width}x${mediaInfo.height}`)
       }
@@ -840,7 +885,6 @@ const initFLVPlayer = (playUrl: string) => {
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
     flvPlayer.on(flvjs.Events.SOURCE_CLOSE, () => {
       console.log('FLV MediaSource closed')
-      // 清除之前的重连定时器
       if (reconnectTimeout) {
         clearTimeout(reconnectTimeout)
       }
@@ -850,23 +894,30 @@ const initFLVPlayer = (playUrl: string) => {
           console.log('Reloading FLV player...')
           flvPlayer.load()
         }
-      }, 2000)
+      }, 3000) // 增加重连间隔到3秒
     })
 
     flvPlayer.on(flvjs.Events.ERROR, (errType: string, errDetail: string) => {
       console.error('FLV player error:', errType, errDetail)
-      // 只有网络错误才回退到 HLS，其他错误尝试恢复
       if (errType === 'NetworkError') {
         console.log('网络错误，回退到 HLS 播放')
+        // 清理 FLV 播放器
+        if (flvPlayer) {
+          try {
+            flvPlayer.destroy()
+          } catch (e) {
+            console.warn('Error destroying flvPlayer on error:', e)
+          }
+          flvPlayer = null
+        }
         initHLSPlayer(playUrl)
       } else {
         console.log('非网络错误，尝试恢复播放')
-        // 尝试重新加载
         setTimeout(() => {
-          if (flvPlayer) {
+          if (flvPlayer && !flvPlayer.destroyed) {
             flvPlayer.load()
           }
-        }, 1000)
+        }, 2000)
       }
     })
 
@@ -875,11 +926,10 @@ const initFLVPlayer = (playUrl: string) => {
       console.log('FLV media info received, attempting to play...')
       video.play().catch(err => {
         console.log('自动播放被阻止:', err)
-        // 显示播放按钮让用户手动点击
         showPlayButton.value = true
       })
     })
-    
+
     console.log('FLV player created and loaded successfully')
   } catch (error) {
     console.error('Error creating FLV player:', error)
@@ -887,23 +937,39 @@ const initFLVPlayer = (playUrl: string) => {
   }
 }
 
-// 初始化视频播放器 - 使用 HLS 播放（和 B站 相同）
+// 初始化视频播放器 - 优先使用 HLS（有画面最重要）
 const initVideoPlayer = (playUrl: string) => {
   console.log('initVideoPlayer called with:', playUrl)
   console.log('videoPlayer ref:', videoPlayer.value)
-  
+  console.log('streamInfo:', streamInfo.value)
+
   if (!videoPlayer.value) {
     console.error('videoPlayer ref is null!')
     return
   }
-  if (!playUrl) {
-    console.error('playUrl is empty!')
+
+  // 优先使用 HLS（有画面最重要，B 站风格）
+  if (playUrl) {
+    console.log('优先使用 HLS 播放:', playUrl)
+    initHLSPlayer(playUrl)
     return
   }
 
-  // 使用 HLS 格式（和 B站 相同，每秒请求多个片段）
-  console.log('使用 HLS 播放:', playUrl)
-  initHLSPlayer(playUrl)
+  // 其次尝试 FLV（延迟较低）
+  if (streamInfo.value.flvUrl) {
+    console.log('回退到 FLV 播放:', streamInfo.value.flvUrl)
+    initFLVPlayer(streamInfo.value.flvUrl)
+    return
+  }
+
+  // 最后尝试 WebRTC（延迟最低，但可能有兼容性问题）
+  if (streamInfo.value.webrtcUrl) {
+    console.log('回退到 WebRTC 播放')
+    initWebRTCPlayer(streamInfo.value.webrtcUrl)
+    return
+  }
+
+  console.error('No play URL available!')
 }
 
 // HLS 播放器（备用）
@@ -913,21 +979,83 @@ const initHLSPlayer = (playUrl: string) => {
   const video = videoPlayer.value
 
   if (Hls.isSupported()) {
+    // 先销毁旧的 HLS 实例
+    if (hls) {
+      hls.destroy()
+      hls = null
+    }
+
+    // 关键配置：参考 B 站策略，从直播边缘开始播放
     hls = new Hls({
       debug: false,
       enableWorker: true,
-      lowLatencyMode: true,
-      backBufferLength: 90
+      lowLatencyMode: true,          // 启用低延迟模式
+      // === 缓冲区优化（激进模式）===
+      maxBufferLength: 1.5,           // 最大缓冲1.5秒（减少延迟）
+      maxMaxBufferLength: 3,          // 绝对最大缓冲3秒
+      backBufferLength: 0.5,          // 只保留0.5秒历史（减少内存占用）
+      // === 直播同步优化（激进追赶）===
+      liveSyncDurationCount: 1,       // 直播同步持续时间
+      liveMaxLatencyDurationCount: 2, // 最大延迟2秒就追赶
+      liveDurationInfinity: true,     // 直播流无限时长
+      // === 加载优化 ===
+      initialLiveManifestSize: 1,     // 只加载1个片段就开始播放
+      manifestLoadingTimeOut: 5000,
+      manifestLoadingMaxRetry: 2,
+      levelLoadingTimeOut: 5000,
+      levelLoadingMaxRetry: 2,
+      fragLoadingTimeOut: 5000,
+      fragLoadingMaxRetry: 2,
+      // === 追赶策略（激进）===
+      liveSyncPosition: -1,           // 从直播边缘开始
+      startFragPrefetch: false,
+      testBandwidth: false,
+      maxFragLookUpTolerance: 0.0,
+      // === 高缓冲检测（快速追赶）===
+      highBufferWatchdogPeriod: 1,    // 1秒检测一次
+      nudgeOffset: 0.3,               // 推进0.3秒
+      nudgeMaxRetry: 10,              // 最多重试10次
+      // === ABR 策略 ===
+      abrEwmaFastLive: 2,
+      abrEwmaSlowLive: 5,
+      forceStartPosition: true,
+      // === 额外：直播追赶配置 ===
+      liveBackBufferLength: 0.5       // 直播回放缓冲0.5秒
     })
 
+    // 添加时间戳防止缓存
     const urlWithTimestamp = playUrl + (playUrl.includes('?') ? '&' : '?') + '_t=' + Date.now()
     console.log('Loading HLS source:', urlWithTimestamp)
     hls.loadSource(urlWithTimestamp)
     hls.attachMedia(video)
 
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+    hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+      console.log('HLS manifest parsed:', data)
+      
+      // 检测 GOP 大小（通过片段时长）
+      const levels = data.levels
+      if (levels && levels.length > 0 && levels[0].details) {
+        const fragments = levels[0].details.fragments
+        if (fragments && fragments.length > 0) {
+          const firstFrag = fragments[0]
+          console.log('First fragment duration:', firstFrag.duration)
+          
+          // 如果片段时长 > 5 秒，说明 GOP 很大，启用追赶模式
+          if (firstFrag.duration > 5) {
+            console.log('⚠️ GOP too large (' + firstFrag.duration + 's), enabling catch-up mode')
+            // 强制跳转到最新位置
+            const liveEdge = levels[0].details.liveEdge
+            if (liveEdge && liveEdge > 0) {
+              video.currentTime = liveEdge - 2 // 从直播边缘前 2 秒开始
+              console.log('Jumped to live edge:', video.currentTime)
+            }
+          }
+        }
+      }
+      
       video.play().catch(err => {
         console.log('自动播放被阻止:', err)
+        showPlayButton.value = true
       })
     })
 
@@ -945,7 +1073,13 @@ const initHLSPlayer = (playUrl: string) => {
             break
           default:
             console.log('无法恢复的错误，重新初始化播放器')
-            initHLSPlayer(playUrl)
+            setTimeout(() => {
+              if (hls) {
+                hls.destroy()
+                hls = null
+              }
+              initHLSPlayer(playUrl)
+            }, 2000)
             break
         }
       }
@@ -953,8 +1087,13 @@ const initHLSPlayer = (playUrl: string) => {
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     video.src = playUrl
     video.addEventListener('loadedmetadata', () => {
+      // Safari 特殊处理：尝试跳转到最后
+      if (video.duration && !isNaN(video.duration)) {
+        video.currentTime = video.duration
+      }
       video.play().catch(err => {
         console.log('自动播放被阻止:', err)
+        showPlayButton.value = true
       })
     })
   } else {
@@ -1033,9 +1172,7 @@ onMounted(() => {
   simulateDanmaku()
 
   // 监听全屏变化事件
-  document.addEventListener('fullscreenchange', () => {
-    isFullscreen.value = !!document.fullscreenElement
-  })
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
 })
 
 // 发送弹幕
@@ -1191,29 +1328,62 @@ const simulateDanmaku = () => {
   }, 2000)
 }
 
+// 全屏变化处理函数（需要单独定义以便移除监听）
+const handleFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement
+}
+
 onUnmounted(() => {
+  console.log('LiveRoom unmounting, cleaning up resources...')
+
   if (durationTimer) {
     clearInterval(durationTimer)
+    durationTimer = null
   }
+
   // 销毁 WebRTC 连接
   if (rtcPeerConnection) {
-    rtcPeerConnection.close()
+    try {
+      rtcPeerConnection.close()
+    } catch (e) {
+      console.warn('Error closing RTC connection:', e)
+    }
     rtcPeerConnection = null
   }
+
   // 销毁 FLV 播放器
   if (flvPlayer) {
-    flvPlayer.destroy()
+    try {
+      if (!flvPlayer.destroyed) {
+        flvPlayer.destroy()
+      }
+    } catch (e) {
+      console.warn('Error destroying FLV player:', e)
+    }
     flvPlayer = null
   }
+
   // 销毁 HLS 播放器
   if (hls) {
-    hls.destroy()
+    try {
+      hls.destroy()
+    } catch (e) {
+      console.warn('Error destroying HLS player:', e)
+    }
     hls = null
   }
+
+  // 清理视频元素
+  if (videoPlayer.value) {
+    videoPlayer.value.pause()
+    videoPlayer.value.src = ''
+    videoPlayer.value.load()
+  }
+
   // 移除全屏监听
-  document.removeEventListener('fullscreenchange', () => {
-    isFullscreen.value = !!document.fullscreenElement
-  })
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+
+  console.log('LiveRoom cleanup completed')
 })
 </script>
 

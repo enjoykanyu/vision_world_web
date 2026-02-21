@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
     "@types/hls.js": "^0.13.3",
     "@types/markdown-it": "^14.1.2",
     "@vueuse/core": "^10.3.0",
