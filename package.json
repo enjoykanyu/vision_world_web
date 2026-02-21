@@ -17,6 +17,7 @@
     "axios": "^1.12.2",
     "axios-mock-adapter": "^1.22.0",
     "element-plus": "^2.11.5",
+    "flv.js": "^1.6.2",
     "github-markdown-css": "^5.8.1",
     "hls.js": "^1.6.15",
     "markdown-it": "^14.1.0",
