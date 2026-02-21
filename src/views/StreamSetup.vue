@@ -1992,11 +1992,11 @@ const createMixedStream = async (): Promise<MediaStream> => {
     return stream
   }
 
-  // 创建画布用于混合视频
+  // 创建画布用于混合视频 - 降低分辨率减少编码压力
   const canvas = document.createElement('canvas')
-  canvas.width = 1280
-  canvas.height = 720
-  const ctx = canvas.getContext('2d')
+  canvas.width = 640   // 从 1280 降到 640 (360p)
+  canvas.height = 360  // 从 720 降到 360
+  const ctx = canvas.getContext('2d', { alpha: false }) // 禁用 alpha 提升性能
   if (!ctx) throw new Error('无法创建 canvas context')
 
   // 按 zIndex 排序素材
@@ -2095,9 +2095,14 @@ const createMixedStream = async (): Promise<MediaStream> => {
   const drawFrame = () => {
     if (!ctx) return
 
-    // 清空画布
-    ctx.fillStyle = '#1a1a2e'
+    // 清空画布 - 使用亮色背景便于调试
+    ctx.fillStyle = '#2d1b4e'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+    
+    // 绘制调试边框
+    ctx.strokeStyle = '#00ff00'
+    ctx.lineWidth = 4
+    ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4)
 
     // 按 zIndex 顺序绘制每个素材
     for (const source of sortedSources) {
@@ -2164,12 +2169,15 @@ const createMixedStream = async (): Promise<MediaStream> => {
       }
     }
 
-    canvasAnimationFrameId = requestAnimationFrame(drawFrame)
+    // 使用 setTimeout 控制帧率为 5fps，减少 CPU 占用
+    canvasAnimationFrameId = window.setTimeout(() => {
+      requestAnimationFrame(drawFrame)
+    }, 200) // 1000ms / 5fps = 200ms
   }
   drawFrame()
 
-  // 从画布捕获视频流
-  const canvasStream = canvas.captureStream(30)
+  // 从画布捕获视频流 - 降低帧率到 5fps
+  const canvasStream = canvas.captureStream(5)
 
   // 合并所有音频流
   if (audioStreams.length > 0) {
@@ -2314,7 +2322,7 @@ const startWebRTCPush = async (webrtcUrl: string, mediaStream?: MediaStream) => 
 const stopWebRTCPush = () => {
   // 取消 Canvas 动画帧
   if (canvasAnimationFrameId !== null) {
-    cancelAnimationFrame(canvasAnimationFrameId)
+    clearTimeout(canvasAnimationFrameId)
     canvasAnimationFrameId = null
   }
   if (pc.value) {
@@ -2441,6 +2449,15 @@ const toggleStreaming = async () => {
             await startWebRTCPush(data.webrtc_url, mixedStream)
             console.log('WebRTC 推流启动成功')
             webrtcSuccess = true
+            
+            // 推流成功后，继续显示本地 Canvas 流（实时预览）
+            // 不使用 HLS 播放，避免延迟
+            nextTick(() => {
+              if (localVideo.value && localStream.value) {
+                console.log('显示本地 Canvas 流（实时预览）')
+                localVideo.value.srcObject = localStream.value
+              }
+            })
           } catch (webrtcError) {
             console.error('WebRTC 推流启动失败:', webrtcError)
             // WebRTC 失败时，显示 OBS 推流提示

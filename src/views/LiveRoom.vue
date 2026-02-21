@@ -887,11 +887,10 @@ const initFLVPlayer = (playUrl: string) => {
   }
 }
 
-// 初始化视频播放器 - 使用 FLV 低延迟播放
+// 初始化视频播放器 - 使用 HLS 播放（和 B站 相同）
 const initVideoPlayer = (playUrl: string) => {
   console.log('initVideoPlayer called with:', playUrl)
   console.log('videoPlayer ref:', videoPlayer.value)
-  console.log('flvUrl:', streamInfo.value.flvUrl)
   
   if (!videoPlayer.value) {
     console.error('videoPlayer ref is null!')
@@ -902,10 +901,9 @@ const initVideoPlayer = (playUrl: string) => {
     return
   }
 
-  // 优先使用 FLV 格式（延迟约 0.5-1 秒）
-  const flvUrl = streamInfo.value.flvUrl || playUrl.replace('.m3u8', '.flv')
-  console.log('使用 FLV 播放，延迟约 0.5-1 秒:', flvUrl)
-  initFLVPlayer(flvUrl)
+  // 使用 HLS 格式（和 B站 相同，每秒请求多个片段）
+  console.log('使用 HLS 播放:', playUrl)
+  initHLSPlayer(playUrl)
 }
 
 // HLS 播放器（备用）
