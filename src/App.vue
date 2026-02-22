@@ -42,7 +42,7 @@ const isDark = useDark()
 // 初始化应用
 const initApp = async () => {
   // 检查是否有token
-  const token = localStorage.getItem('token')
+  const token = sessionStorage.getItem('token')
   if (token) {
     userStore.accessToken = token
     userStore.isLoggedIn = true

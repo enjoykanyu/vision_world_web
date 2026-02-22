@@ -58,7 +58,7 @@ export const useLoginAnimation = () => {
       try {
         const response = await fetch('/api/auth/userinfo', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
           }
         })
         const data = await response.json()

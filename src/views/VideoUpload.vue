@@ -842,7 +842,7 @@ const uploadChunk = async (chunk: Blob, index: number, totalChunks: number, file
 
   // 获取token
   const userStore = useUserStore();
-  const token = userStore.accessToken || localStorage.getItem('access_token');
+  const token = userStore.accessToken || sessionStorage.getItem('access_token');
 
   try {
     await axios.post('/api/upload/chunk', formData, {

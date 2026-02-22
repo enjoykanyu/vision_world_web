@@ -32,8 +32,8 @@ export function generateShortId(): string {
  * 设备ID用于未登录用户的去重
  */
 export function getDeviceId(): string {
-  // 优先从 localStorage 获取
-  let deviceId = localStorage.getItem(DEVICE_ID_KEY)
+  // 优先从 sessionStorage 获取
+  let deviceId = sessionStorage.getItem(DEVICE_ID_KEY)
   
   if (!deviceId) {
     // 从 sessionStorage 获取（用于隐私模式）
@@ -44,9 +44,9 @@ export function getDeviceId(): string {
     // 生成新的设备ID
     deviceId = generateUUID()
     
-    // 尝试存储到 localStorage
+    // 尝试存储到 sessionStorage
     try {
-      localStorage.setItem(DEVICE_ID_KEY, deviceId)
+      sessionStorage.setItem(DEVICE_ID_KEY, deviceId)
     } catch (e) {
       // 隐私模式下使用 sessionStorage
       sessionStorage.setItem(DEVICE_ID_KEY, deviceId)

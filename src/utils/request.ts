@@ -69,7 +69,7 @@ request.interceptors.request.use(
 
     // 添加认证token - 从userStore获取，确保与应用状态同步
     const userStore = useUserStore()
-    const token = userStore.accessToken || localStorage.getItem('access_token')
+    const token = userStore.accessToken || sessionStorage.getItem('access_token')
 
     // 检查是否是 live 相关接口且用户未登录
     if (isAuthRequiredEndpoint(config.url) && !token) {
@@ -158,12 +158,12 @@ request.interceptors.response.use(
       
       try {
         // 获取刷新令牌
-        const refreshToken = localStorage.getItem('refresh_token')
+        const refreshToken = sessionStorage.getItem('refresh_token')
         if (!refreshToken) {
           // 没有refreshToken，直接返回错误
           processQueue(new Error('No refresh token available'), null)
-          localStorage.removeItem('access_token')
-          localStorage.removeItem('refresh_token')
+          sessionStorage.removeItem('access_token')
+          sessionStorage.removeItem('refresh_token')
           window.dispatchEvent(new CustomEvent('auth-logout'))
           return Promise.reject(error)
         }
@@ -173,7 +173,7 @@ request.interceptors.response.use(
         const tokenData = response.data.data
         
         // 更新本地存储的token
-        localStorage.setItem('access_token', tokenData.access_token)
+        sessionStorage.setItem('access_token', tokenData.access_token)
         
         // 处理等待队列
         processQueue(null, tokenData.access_token)
@@ -186,8 +186,8 @@ request.interceptors.response.use(
       } catch (refreshError) {
         // 刷新失败，清除token并重定向到登录页
         processQueue(refreshError, null)
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
+        sessionStorage.removeItem('access_token')
+        sessionStorage.removeItem('refresh_token')
         
         // 可以在这里触发全局登出事件或重定向到登录页
         window.dispatchEvent(new CustomEvent('auth-logout'))
@@ -241,8 +241,8 @@ const handleBusinessError = (code: number, message: string, config?: AxiosReques
       // 只有非公开接口才触发登出事件
       if (!isPublicEndpoint) {
         // 清除本地token
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
+        sessionStorage.removeItem('access_token')
+        sessionStorage.removeItem('refresh_token')
         
         // 触发全局登出事件
         window.dispatchEvent(new CustomEvent('auth-logout'))
@@ -254,9 +254,9 @@ const handleBusinessError = (code: number, message: string, config?: AxiosReques
   }
 }
 
-// Token同步函数 - 确保userStore和localStorage中的token保持一致
+// Token同步函数 - 确保userStore和sessionStorage中的token保持一致
 export const syncTokenWithLocalStorage = () => {
-  const token = localStorage.getItem('access_token')
+  const token = sessionStorage.getItem('access_token')
   return token
 }
 
@@ -274,7 +274,7 @@ const handleHttpError = (error: AxiosError) => {
     case 401:
       // 使用console.error替代ElementPlus的消息提示
       console.error('HTTP错误:', '未授权，请重新登录')
-      localStorage.removeItem('access_token')
+      sessionStorage.removeItem('access_token')
       // 可以在这里添加自定义的错误通知组件
       break
     case 403:

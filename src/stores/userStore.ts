@@ -142,7 +142,7 @@ export const useUserStore = defineStore('user', () => {
         refreshToken.value = loginDataRes.refresh_token
       }
       
-      // 保存到localStorage
+      // 保存到sessionStorage
       saveUserToLocalStorage()
       
       // 使用自定义通知或console.log替代ElementPlus的消息提示
@@ -184,9 +184,9 @@ export const useUserStore = defineStore('user', () => {
       // 清除用户信息和token
       clearUserInfo()
       clearLocalStorage()
-      // 清除localStorage中的token
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+      // 清除sessionStorage中的token
+      sessionStorage.removeItem('access_token')
+      sessionStorage.removeItem('refresh_token')
       // 使用console.log替代ElementPlus的消息提示
       console.log('退出登录成功')
       // 可以在这里添加自定义的成功通知组件
@@ -204,7 +204,7 @@ export const useUserStore = defineStore('user', () => {
       accessToken.value = tokenData.access_token
       expiresIn.value = tokenData.expires_in
       
-      // 更新localStorage
+      // 更新sessionStorage
       saveUserToLocalStorage()
       
       return true
@@ -365,13 +365,13 @@ export const useUserStore = defineStore('user', () => {
     // 添加对token的空值检查
     if (token) {
       accessToken.value = token
-      // 同时保存到localStorage，确保请求拦截器能够获取到token
-      localStorage.setItem('access_token', token)
+      // 同时保存到sessionStorage，确保请求拦截器能够获取到token
+      sessionStorage.setItem('access_token', token)
     } else {
       console.error('Token is undefined in updateUserInfo')
       accessToken.value = ''
-      // 清除localStorage中的token
-      localStorage.removeItem('access_token')
+      // 清除sessionStorage中的token
+      sessionStorage.removeItem('access_token')
     }
   }
 
@@ -403,12 +403,12 @@ export const useUserStore = defineStore('user', () => {
     refreshToken.value = ''
     expiresIn.value = 0
     
-    // 清除localStorage中的token
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    // 清除sessionStorage中的token
+    sessionStorage.removeItem('access_token')
+    sessionStorage.removeItem('refresh_token')
   }
 
-  // 保存用户信息到localStorage
+  // 保存用户信息到sessionStorage
   function saveUserToLocalStorage() {
     const userData = {
       isLoggedIn: isLoggedIn.value,
@@ -437,12 +437,12 @@ export const useUserStore = defineStore('user', () => {
       refreshToken: refreshToken.value,
       expiresIn: expiresIn.value
     }
-    localStorage.setItem('user', JSON.stringify(userData))
+    sessionStorage.setItem('user', JSON.stringify(userData))
   }
 
-  // 从localStorage加载用户信息
+  // 从sessionStorage加载用户信息
   function loadUserFromLocalStorage() {
-    const savedUser = localStorage.getItem('user')
+    const savedUser = sessionStorage.getItem('user')
     if (savedUser) {
       try {
         const userInfo = JSON.parse(savedUser)
@@ -474,26 +474,26 @@ export const useUserStore = defineStore('user', () => {
           expiresIn.value = userInfo.expiresIn || 0
         }
       } catch (e) {
-        console.error('Failed to parse user info from localStorage', e)
-        localStorage.removeItem('user')
+        console.error('Failed to parse user info from sessionStorage', e)
+        sessionStorage.removeItem('user')
       }
     }
   }
 
-  // 清除localStorage
+  // 清除sessionStorage
   function clearLocalStorage() {
-    localStorage.removeItem('user')
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    sessionStorage.removeItem('user')
+    sessionStorage.removeItem('access_token')
+    sessionStorage.removeItem('refresh_token')
   }
 
   // 生成设备ID
   function generateDeviceId(): string {
-    const existingId = localStorage.getItem('device_id')
+    const existingId = sessionStorage.getItem('device_id')
     if (existingId) return existingId
     
     const newId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-    localStorage.setItem('device_id', newId)
+    sessionStorage.setItem('device_id', newId)
     return newId
   }
 
@@ -582,19 +582,19 @@ export const useUserStore = defineStore('user', () => {
       .map(item => item.tag)
   }
   
-  // 保存用户标签到localStorage
+  // 保存用户标签到sessionStorage
   function saveUserTagsToLocalStorage() {
     const tagsData = {
       userTags: userTags.value,
       tagPreferences: tagPreferences.value,
       tagHistory: tagHistory.value
     }
-    localStorage.setItem('user_tags', JSON.stringify(tagsData))
+    sessionStorage.setItem('user_tags', JSON.stringify(tagsData))
   }
   
-  // 从localStorage加载用户标签
+  // 从sessionStorage加载用户标签
   function loadUserTagsFromLocalStorage() {
-    const savedTags = localStorage.getItem('user_tags')
+    const savedTags = sessionStorage.getItem('user_tags')
     if (savedTags) {
       try {
         const tagsData = JSON.parse(savedTags)
@@ -602,8 +602,8 @@ export const useUserStore = defineStore('user', () => {
         tagPreferences.value = tagsData.tagPreferences || {}
         tagHistory.value = tagsData.tagHistory || []
       } catch (e) {
-        console.error('Failed to parse user tags from localStorage', e)
-        localStorage.removeItem('user_tags')
+        console.error('Failed to parse user tags from sessionStorage', e)
+        sessionStorage.removeItem('user_tags')
       }
     }
   }
@@ -613,14 +613,14 @@ export const useUserStore = defineStore('user', () => {
     userTags.value = []
     tagPreferences.value = {}
     tagHistory.value = []
-    localStorage.removeItem('user_tags')
+    sessionStorage.removeItem('user_tags')
   }
 
   // 初始化
   async function init() {
-    // 从localStorage加载用户信息
+    // 从sessionStorage加载用户信息
     loadUserFromLocalStorage()
-    // 从localStorage加载用户标签
+    // 从sessionStorage加载用户标签
     loadUserTagsFromLocalStorage()
     
     // 如果有token，尝试验证其有效性

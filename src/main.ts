@@ -35,9 +35,9 @@ window.addEventListener('auth-logout', () => {
       userStore.clearUserInfo()
       userStore.clearLocalStorage()
       
-      // 清除localStorage中的token
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+      // 清除sessionStorage中的token
+      sessionStorage.removeItem('access_token')
+      sessionStorage.removeItem('refresh_token')
       
       // 检查当前路由是否需要登录
       const currentRoute = router.currentRoute.value
@@ -50,10 +50,10 @@ window.addEventListener('auth-logout', () => {
     }
   } catch (error) {
     console.error('处理auth-logout事件失败:', error)
-    // 即使出错也要清除localStorage
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    localStorage.removeItem('user')
+    // 即使出错也要清除sessionStorage
+    sessionStorage.removeItem('access_token')
+    sessionStorage.removeItem('refresh_token')
+    sessionStorage.removeItem('user')
     
     // 检查当前路由是否需要登录
     try {
