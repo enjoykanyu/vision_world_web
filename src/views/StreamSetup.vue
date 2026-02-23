@@ -626,15 +626,23 @@
               v-for="(msg, index) in danmakuMessages" 
               :key="index"
               class="flex items-start space-x-2"
+              :class="{ 'justify-center': msg.isSystem }"
             >
-              <div class="flex items-center space-x-1 flex-shrink-0">
-                <span v-if="msg.level" class="text-[10px] bg-[#00b5e5] text-white px-1 rounded">{{ msg.level }}</span>
-                <span v-if="msg.isAnchor" class="text-[10px] bg-yellow-400 text-white px-1 rounded">主播</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <span class="text-xs text-[#00b5e5]">{{ msg.username }}:</span>
-                <span class="text-xs text-gray-700">{{ msg.content }}</span>
-              </div>
+              <!-- 系统消息（进入/退出直播间） -->
+              <template v-if="msg.isSystem">
+                <span class="text-xs text-gray-400">{{ msg.content }}</span>
+              </template>
+              <!-- 普通消息和主播消息 -->
+              <template v-else>
+                <div class="flex items-center space-x-1 flex-shrink-0">
+                  <span v-if="msg.level" class="text-[10px] bg-[#00b5e5] text-white px-1 rounded">{{ msg.level }}</span>
+                  <span v-if="msg.isAnchor" class="text-[10px] bg-yellow-400 text-white px-1 rounded">主播</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <span :class="msg.isAnchor ? 'text-xs text-yellow-600 font-medium' : 'text-xs text-[#00b5e5]'">{{ msg.username }}:</span>
+                  <span :class="msg.isAnchor ? 'text-xs text-yellow-700' : 'text-xs text-gray-700'">{{ msg.content }}</span>
+                </div>
+              </template>
             </div>
             <div v-if="danmakuMessages.length === 0" class="text-center text-gray-400 py-8 text-sm">
               <p>暂无弹幕消息</p>
@@ -646,13 +654,13 @@
             <div class="flex items-center space-x-2">
               <input 
                 v-model="danmakuInput"
-                @keyup.enter="sendDanmaku"
+                @keyup.enter="sendDanmakuMsg"
                 type="text" 
                 placeholder="和观众聊聊吧~"
                 class="flex-1 bg-gray-100 border-0 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#00b5e5]"
               />
               <button 
-                @click="sendDanmaku"
+                @click="sendDanmakuMsg"
                 class="px-4 py-2 bg-[#00b5e5] hover:bg-[#00a3d1] text-white rounded text-sm font-medium transition-colors"
               >
                 发送
@@ -958,9 +966,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, h } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, h, watch } from 'vue'
 import NavHeader from '@/components/NavHeader.vue'
 import { useUserStore } from '@/stores/userStore'
+import { useWebSocketChat, type ChatMessage } from '@/composables/useWebSocketChat'
 import { liveAPI } from '@/api/live'
 import Hls from 'hls.js'
 import 'webrtc-adapter'
@@ -1376,19 +1385,43 @@ const interactionTools = ref([
   },
 ])
 
+// 房间ID（从直播信息获取）
+const roomId = computed(() => streamInfo.value?.roomId?.toString() || '')
+
+// WebSocket 弹幕相关
+const wsChat = ref<ReturnType<typeof useWebSocketChat> | null>(null)
+const connectionStatus = computed(() => wsChat.value?.connectionStatus || ref('disconnected').value)
+const isConnected = computed(() => wsChat.value?.isConnected || false)
+const wsMessages = computed(() => wsChat.value?.messages || ref<ChatMessage[]>([]).value)
+const onlineCount = computed(() => wsChat.value?.onlineCount || ref(0).value)
+const connectWS = () => wsChat.value?.connect()
+const disconnectWS = () => wsChat.value?.disconnect()
+const sendDanmaku = (content: string) => wsChat.value?.sendDanmaku(content) || false
+const sendLike = () => wsChat.value?.sendLike() || false
+const sendGiftMsg = (giftId: number, giftName: string, price: number) => wsChat.value?.sendGift(giftId, giftName, price) || false
+
 // 弹幕相关
-const danmakuMessages = ref<Array<{
-  username: string
-  content: string
-  level?: number
-  isAnchor?: boolean
-}>>([
-  { username: '憨憨吉', content: '欢迎光辉级不挠号，终于等到你~', level: 14, isAnchor: true },
-  { username: '光辉级不挠号', content: '进入直播间', level: 10 },
-  { username: '加西佩', content: 'IBUKI_IBUKI 进入直播间', level: 10 },
-])
 const danmakuInput = ref('')
 const danmakuContainer = ref<HTMLElement | null>(null)
+
+// 转换 WebSocket 消息为本地格式
+const danmakuMessages = computed(() => {
+  return wsMessages.value
+    .filter(msg => {
+      // 过滤空内容
+      if (!msg.content || msg.content.trim() === '') return false
+      return true
+    })
+    .map(msg => ({
+      username: msg.username,
+      content: msg.content,
+      level: 1,
+      type: msg.type,
+      isSelf: msg.user_id === userStore.userId?.toString(),
+      isAnchor: msg.user_id === userStore.userId?.toString(),
+      isSystem: msg.type === 'enter' || msg.type === 'leave' || msg.type === 'system'
+    }))
+})
 
 // 屏幕共享流
 const screenStream = ref<MediaStream | null>(null)
@@ -2554,24 +2587,23 @@ const toggleStreaming = async () => {
 }
 
 // 发送弹幕
-const sendDanmaku = () => {
+const sendDanmakuMsg = () => {
   if (!danmakuInput.value.trim()) return
   
-  danmakuMessages.value.push({
-    username: '主播',
-    content: danmakuInput.value,
-    level: 20,
-    isAnchor: true
-  })
-  
-  danmakuInput.value = ''
-  
+  // 通过 WebSocket 发送
+  if (sendDanmaku(danmakuInput.value)) {
+    danmakuInput.value = ''
+  }
+}
+
+// 监听 WebSocket 消息，自动滚动
+watch(wsMessages, () => {
   nextTick(() => {
     if (danmakuContainer.value) {
       danmakuContainer.value.scrollTop = danmakuContainer.value.scrollHeight
     }
   })
-}
+}, { deep: true })
 
 // 初始化视频播放器
 const initVideoPlayer = (playUrl: string) => {
@@ -2654,8 +2686,31 @@ onMounted(() => {
   }
 })
 
+// 监听 roomId 变化，初始化 WebSocket
+watch(roomId, (newRoomId) => {
+  if (newRoomId && newRoomId !== '') {
+    // 断开旧连接
+    if (wsChat.value) {
+      wsChat.value.disconnect()
+    }
+    // 创建新的 WebSocket 连接
+    console.log('[StreamSetup] Connecting WebSocket with user info:', {
+      userId: userStore.userId,
+      nickname: userStore.nickname,
+      username: userStore.username
+    })
+    wsChat.value = useWebSocketChat(newRoomId)
+    // 连接 WebSocket
+    nextTick(() => {
+      wsChat.value?.connect()
+    })
+  }
+}, { immediate: true })
+
 onUnmounted(() => {
   if (streamTimer) clearInterval(streamTimer)
+  // 断开 WebSocket 连接
+  disconnectWS()
   // 清理所有媒体流
   sources.value.forEach(source => {
     if (source.stream) {
