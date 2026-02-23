@@ -152,7 +152,7 @@ export const useUserStore = defineStore('user', () => {
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('login-success', { 
           detail: { 
-            username: loginDataRes.user.username, 
+            username: loginDataRes.user.name, 
             userId: loginDataRes.user.id
           } 
         }))
@@ -258,7 +258,7 @@ export const useUserStore = defineStore('user', () => {
     if (isAuthenticated.value && !nickname.value) {
       const profile = await fetchUserProfile()
       if (profile) {
-        nickname.value = profile.nickname
+        nickname.value = profile.name
         avatarUrl.value = profile.avatar || profile.avatar_url || ''
       }
     }
@@ -340,11 +340,11 @@ export const useUserStore = defineStore('user', () => {
   // 更新用户信息
   function updateUserInfo(user: UserInfo, token: string) {
     isLoggedIn.value = true
-    username.value = user.username || ''
-    nickname.value = user.nickname || ''
+    username.value = user.name || ''
+    nickname.value = user.name || ''
     userId.value = user.id || 0
     email.value = user.email || ''
-    avatarUrl.value = user.avatar_url || ''
+    avatarUrl.value = user.avatar || ''
     backgroundImage.value = user.background_image || ''
     signature.value = user.signature || ''
     gender.value = user.gender || 0
@@ -660,12 +660,11 @@ export const useUserStore = defineStore('user', () => {
 
   // 模拟登录（开发测试用）
   function mockLogin() {
-    const mockUser = {
+    const mockUser: UserInfo = {
       id: 12345,
-      username: 'VisionUser',
-      nickname: '视觉世界探索者',
+      name: '视觉世界探索者',
       email: 'user@visionworld.com',
-      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=VisionUser12345&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=VisionUser12345&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf',
       background_image: 'https://picsum.photos/800/400?random=1',
       signature: '探索视觉世界的无限可能 🌟',
       gender: 1,
