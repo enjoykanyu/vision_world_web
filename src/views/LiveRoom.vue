@@ -12,8 +12,8 @@
       <!-- 左侧：主播信息 -->
       <div class="flex items-center space-x-3">
         <div class="relative">
-          <img :src="streamInfo.streamer.avatar" class="w-10 h-10 rounded-full object-cover border-2 border-pink-500">
-          <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center">
+          <img :src="streamInfo.streamer.avatar" class="w-10 h-10 rounded-full object-cover" :class="streamInfo.isLive ? 'border-2 border-pink-500' : 'border-2 border-gray-500'">
+          <div v-if="streamInfo.isLive" class="absolute -bottom-1 -right-1 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center">
             <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
               <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.523 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
@@ -23,7 +23,8 @@
         <div>
           <div class="flex items-center space-x-2">
             <h1 class="font-bold text-white">{{ streamInfo.streamer.name }}</h1>
-            <span class="px-2 py-0.5 bg-pink-500 text-white text-xs rounded-full">直播中</span>
+            <span v-if="streamInfo.isLive" class="px-2 py-0.5 bg-pink-500 text-white text-xs rounded-full">直播中</span>
+            <span v-else class="px-2 py-0.5 bg-gray-500 text-white text-xs rounded-full">未开播</span>
           </div>
           <p class="text-xs text-gray-400">{{ streamInfo.title }}</p>
         </div>
@@ -39,7 +40,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
           </svg>
-          <span class="text-white font-medium">{{ streamInfo.viewers }}人看过</span>
+          <span class="text-white font-medium">{{ onlineCount }}人在线</span>
         </div>
       </div>
 
@@ -92,13 +93,41 @@
             </button>
           </div>
 
-          <div v-if="!streamInfo.playUrl" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
-            <img :src="streamInfo.cover" class="w-full h-full object-cover opacity-80">
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-20 h-20 bg-black/50 rounded-full flex items-center justify-center cursor-pointer hover:bg-black/70 transition-colors">
-                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
-                </svg>
+          <!-- 下播状态覆盖层 -->
+          <div v-if="!streamInfo.isLive" class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 z-20">
+            <img :src="streamInfo.cover" class="absolute inset-0 w-full h-full object-cover opacity-30">
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-gray-900/50"></div>
+            <div class="relative z-10 flex flex-col items-center text-center px-8">
+              <!-- 主播头像 -->
+              <div class="relative mb-6">
+                <img :src="streamInfo.streamer.avatar" class="w-24 h-24 rounded-full object-cover border-4 border-gray-600 shadow-2xl">
+                <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </div>
+              </div>
+              <!-- 下播提示 -->
+              <h2 class="text-3xl font-bold text-white mb-2">主播已下播</h2>
+              <p class="text-gray-400 mb-6">感谢观看，下次再见 👋</p>
+              <!-- 主播信息 -->
+              <div class="flex items-center space-x-4 mb-8">
+                <span class="text-white font-medium">{{ streamInfo.streamer.name }}</span>
+                <span class="text-gray-500">|</span>
+                <span class="text-gray-400">{{ streamInfo.title }}</span>
+              </div>
+              <!-- 操作按钮 -->
+              <div class="flex items-center space-x-4">
+                <button class="px-6 py-2.5 bg-pink-500 hover:bg-pink-600 text-white rounded-full font-medium transition-colors flex items-center space-x-2">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.523 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>查看回放</span>
+                </button>
+                <button class="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium transition-colors">
+                  关注主播
+                </button>
               </div>
             </div>
           </div>
@@ -342,12 +371,12 @@
             弹幕
             <div v-if="activeTab === 'chat'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-pink-500"></div>
           </button>
-          <button 
-            @click="activeTab = 'audience'"
+          <button
+            @click="switchToAudienceTab"
             class="flex-1 py-3 text-sm font-medium transition-colors relative"
             :class="activeTab === 'audience' ? 'text-pink-400' : 'text-gray-400 hover:text-white'"
           >
-            在线观众({{ onlineUsers }})
+            在线观众({{ onlineCount }})
             <div v-if="activeTab === 'audience'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-pink-500"></div>
           </button>
         </div>
@@ -358,10 +387,17 @@
             v-for="(msg, index) in chatMessages" 
             :key="index"
             class="text-sm"
-            :class="{ 'chat-gift-animation': msg.isGift }"
+            :class="{ 
+              'chat-gift-animation': msg.isGift,
+              'text-center': msg.isSystem
+            }"
           >
+            <!-- 系统消息（进入/退出直播间） -->
+            <template v-if="msg.isSystem">
+              <span class="text-gray-500 text-xs">{{ msg.content }}</span>
+            </template>
             <!-- 礼物消息特殊样式 -->
-            <template v-if="msg.isGift">
+            <template v-else-if="msg.isGift">
               <div class="flex items-center">
                 <span :class="['chat-gift-badge', msg.giftType === 'heart' ? 'pink' : msg.giftType === 'ticket' ? 'blue' : 'rose']">
                   <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -373,8 +409,15 @@
                 <span class="text-white ml-1">{{ msg.content }}</span>
               </div>
             </template>
+            <!-- 主播消息 -->
+            <template v-else-if="msg.isAnchor">
+              <span class="text-yellow-400 font-bold">[主播] </span>
+              <span v-if="msg.level" class="text-pink-400">[{{ msg.level }}] </span>
+              <span class="text-yellow-200">{{ msg.username }}:</span>
+              <span class="text-yellow-100">{{ msg.content }}</span>
+            </template>
+            <!-- 普通用户消息 -->
             <template v-else>
-              <span v-if="msg.isAnchor" class="text-yellow-400 font-bold">[主播] </span>
               <span v-if="msg.level" class="text-pink-400">[{{ msg.level }}] </span>
               <span class="text-gray-300">{{ msg.username }}:</span>
               <span class="text-white">{{ msg.content }}</span>
@@ -388,9 +431,10 @@
             <div 
               v-for="user in audienceList" 
               :key="user.id"
-              class="flex flex-col items-center p-2 hover:bg-white/5 rounded-lg cursor-pointer"
+              class="flex flex-col items-center p-2 hover:bg-white/5 rounded-lg cursor-pointer transition-colors"
+              @click="goToUserProfile(user.id)"
             >
-              <img :src="user.avatar" class="w-10 h-10 rounded-full object-cover">
+              <img :src="user.avatar" class="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-pink-500 transition-all">
               <span class="text-xs text-gray-400 mt-1 truncate w-full text-center">{{ user.name }}</span>
             </div>
           </div>
@@ -398,7 +442,12 @@
 
         <!-- 弹幕输入 -->
         <div class="p-3 border-t border-white/10 bg-[#1a1a2e]">
-          <div class="flex items-center space-x-2">
+          <!-- 下播时显示提示 -->
+          <div v-if="!streamInfo.isLive" class="flex items-center justify-center py-2">
+            <span class="text-gray-500 text-sm">主播已下播，无法发送弹幕</span>
+          </div>
+          <!-- 直播中显示输入框 -->
+          <div v-else class="flex items-center space-x-2">
             <div class="flex-1 relative">
               <input 
                 v-model="chatInput"
@@ -416,7 +465,7 @@
               发送
             </button>
           </div>
-          <div class="flex items-center justify-between mt-2">
+          <div v-if="streamInfo.isLive" class="flex items-center justify-between mt-2">
             <div class="flex items-center space-x-2">
               <button class="text-gray-400 hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -441,10 +490,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 import { useUserStore } from '@/stores/userStore'
+import { useWebSocketChat, type ChatMessage } from '@/composables/useWebSocketChat'
 import { liveAPI } from '@/api/live'
 import Hls from 'hls.js'
 import flvjs from 'flv.js'
@@ -460,6 +510,34 @@ const showLoginModal = ref(false)
 // 返回上一页
 const goBack = () => {
   router.back()
+}
+
+// 跳转到用户主页
+const goToUserProfile = (userId: number | string) => {
+  router.push(`/user/${userId}`)
+}
+
+// 切换到在线观众标签并获取观众列表
+const switchToAudienceTab = async () => {
+  activeTab.value = 'audience'
+  await fetchOnlineUsers()
+}
+
+// 获取在线观众列表
+const fetchOnlineUsers = async () => {
+  try {
+    const response = await fetch(`http://localhost:8088/api/chat/online-users?room_id=${streamId}`)
+    const result = await response.json()
+    if (result.code === 0 && result.data) {
+      audienceList.value = result.data.map((user: any) => ({
+        id: user.user_id,
+        name: user.username,
+        avatar: user.avatar || `https://i.pravatar.cc/150?u=${user.user_id}`
+      }))
+    }
+  } catch (error) {
+    console.error('获取在线观众列表失败:', error)
+  }
 }
 
 // 视频播放器
@@ -491,6 +569,8 @@ const streamInfo = ref({
   viewers: '2.1万',
   likes: '8.5万',
   isMuted: true, // 默认静音
+  isLive: false, // 是否正在直播
+  anchorId: null as number | null, // 主播ID
   streamer: {
     name: '超牛的直播间，快来看',
     avatar: 'https://i.pravatar.cc/150?u=streamer1'
@@ -504,30 +584,44 @@ let durationSeconds = 0
 
 // 右侧标签页
 const activeTab = ref('chat')
-const onlineUsers = ref(255)
+
+// WebSocket 弹幕相关
+const roomId = computed(() => route.params.id as string || '1')
+const {
+  connectionStatus,
+  isConnected,
+  messages: wsMessages,
+  onlineCount,
+  connect: connectWS,
+  disconnect: disconnectWS,
+  sendDanmaku,
+  sendLike,
+  sendGift: sendGiftMsg
+} = useWebSocketChat(roomId.value)
 
 // 弹幕相关
 const chatInput = ref('')
 const chatContainer = ref<HTMLElement | null>(null)
 const isDanmakuMode = ref(true)
 
-const chatMessages = ref([
-  { username: '跨房', content: '?', level: 1 },
-  { username: '跨房', content: '?', level: 1 },
-  { username: '跨房', content: '😂', level: 1 },
-  { username: '跨房', content: '洗头机可以有', level: 2 },
-  { username: '跨房', content: '你们高低是俩艺人不知道这事儿你们知不知道', level: 3 },
-  { username: '跨房', content: '我看到有人直播过在厕所待一天的', level: 2 },
-  { username: '跨房', content: '拉不不', level: 1 },
-  { username: '跨房', content: '聊聊b站吧😂', level: 2 },
-  { username: '跨房', content: '哈哈哈哈哈哈哈', level: 1 },
-  { username: '跨房', content: '段子里演一个吧', level: 2 },
-  { username: '跨房', content: '?', level: 1 },
-  { username: '跨房', content: '阿b啥时候春晚啊', level: 3 },
-  { username: '鸡爪狗小狗', content: '你们真的在厕所直播吗', isAnchor: false },
-  { username: '跨房', content: '在说啥你俩', level: 1 },
-  { username: 'JHF-1', content: '进入直播间' },
-])
+// 转换 WebSocket 消息为本地格式
+const chatMessages = computed(() => {
+  return wsMessages.value
+    .filter(msg => {
+      // 过滤空内容
+      if (!msg.content || msg.content.trim() === '') return false
+      return true
+    })
+    .map(msg => ({
+      username: msg.username,
+      content: msg.content,
+      level: 1,
+      type: msg.type,
+      isSelf: msg.user_id === userStore.userId?.toString(),
+      isAnchor: msg.user_id === streamInfo.value.anchorId?.toString(),
+      isSystem: msg.type === 'enter' || msg.type === 'leave' || msg.type === 'system'
+    }))
+})
 
 // 浮动弹幕
 const floatingDanmaku = ref<Array<{
@@ -1123,6 +1217,7 @@ const fetchLiveInfo = async () => {
       streamInfo.value.title = room.title || '无标题'
       streamInfo.value.cover = room.cover_url || ''
       streamInfo.value.viewers = room.online_count?.toString() || '0'
+      streamInfo.value.anchorId = room.user_id || room.anchor_id || null
       streamInfo.value.playUrl = room.play_url || ''
       // 使用后端返回的 flv_url，如果没有则通过替换生成
       streamInfo.value.flvUrl = room.flv_url || (room.play_url ? room.play_url.replace('.m3u8', '.flv') : '')
@@ -1133,11 +1228,13 @@ const fetchLiveInfo = async () => {
         streamInfo.value.webrtcUrl = streamKey ? `webrtc://192.168.1.4:8000/live/${streamKey}` : ''
       }
 
+      // 设置直播状态
+      streamInfo.value.isLive = room.status === 'streaming' && room.play_url
       console.log('Updated streamInfo:', streamInfo.value)
 
       // 如果正在直播，初始化播放器
       console.log('Room status:', room.status, 'play_url:', room.play_url)
-      if (room.status === 'streaming' && room.play_url) {
+      if (streamInfo.value.isLive) {
         console.log('Initializing video player with:', room.play_url)
         nextTick(() => {
           console.log('nextTick - videoPlayer ref:', videoPlayer.value)
@@ -1155,9 +1252,12 @@ const fetchLiveInfo = async () => {
 }
 
 // 监听全屏变化
-onMounted(() => {
+onMounted(async () => {
   // 获取直播信息并初始化播放器
   fetchLiveInfo()
+
+  // 获取在线观众列表
+  fetchOnlineUsers()
 
   // 启动直播时长计时
   durationTimer = window.setInterval(() => {
@@ -1168,8 +1268,14 @@ onMounted(() => {
     streamDuration.value = `${hours}:${minutes}:${seconds}`
   }, 1000)
 
-  // 启动模拟弹幕
-  simulateDanmaku()
+  // 等待用户信息加载完成后再连接 WebSocket
+  await nextTick()
+  console.log('[LiveRoom] onMounted - user info:', {
+    userId: userStore.userId,
+    nickname: userStore.nickname,
+    username: userStore.username
+  })
+  connectWS()
 
   // 监听全屏变化事件
   document.addEventListener('fullscreenchange', handleFullscreenChange)
@@ -1177,26 +1283,19 @@ onMounted(() => {
 
 // 发送弹幕
 const sendChat = () => {
-  if (!chatInput.value.trim()) return
-  
-  chatMessages.value.push({
-    username: '我',
-    content: chatInput.value,
-    level: 5
-  })
-  
-  // 添加到浮动弹幕
-  if (isDanmakuMode.value) {
-    addFloatingDanmaku(chatInput.value)
+  // 检查直播状态
+  if (!streamInfo.value.isLive) {
+    console.log('[LiveRoom] 主播已下播，无法发送弹幕')
+    return
   }
   
-  chatInput.value = ''
+  if (!chatInput.value.trim()) return
   
-  nextTick(() => {
-    if (chatContainer.value) {
-      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
-    }
-  })
+  // 通过 WebSocket 发送
+  if (sendDanmaku(chatInput.value)) {
+    // 注意：浮动弹幕由 watch(wsMessages) 统一处理，避免重复显示
+    chatInput.value = ''
+  }
 }
 
 // 添加浮动弹幕
@@ -1288,44 +1387,68 @@ const sendGift = (gift: any) => {
   }
 }
 
-// 模拟接收弹幕
-const simulateDanmaku = () => {
-  const randomMsgs = [
-    '哈哈哈',
-    '主播好棒',
-    '666666',
-    '来了来了',
-    '前排围观',
-    '这波操作可以',
-    '笑死我了',
-    '支持主播',
-    '新年快乐',
-    '拜年啦'
-  ]
-  const randomUsers = ['小明', '小红', '路人甲', '观众乙', '粉丝丙']
-  
-  setInterval(() => {
-    if (Math.random() > 0.7) {
-      const msg = randomMsgs[Math.floor(Math.random() * randomMsgs.length)]
-      const user = randomUsers[Math.floor(Math.random() * randomUsers.length)]
-      
-      chatMessages.value.push({
-        username: user,
-        content: msg,
-        level: Math.floor(Math.random() * 5) + 1
-      })
-      
-      if (isDanmakuMode.value && Math.random() > 0.5) {
-        addFloatingDanmaku(msg)
+// 监听 WebSocket 消息，显示浮动弹幕
+watch(() => wsMessages.value.length, (newLength, oldLength) => {
+  // 只在有新消息时处理
+  if (newLength > oldLength) {
+    const lastMessage = wsMessages.value[newLength - 1]
+
+    // 处理下播消息
+    if (lastMessage && lastMessage.type === 'stream_end') {
+      console.log('[LiveRoom] 收到下播消息，更新直播状态')
+      streamInfo.value.isLive = false
+      // 停止视频播放
+      if (videoPlayer.value) {
+        videoPlayer.value.pause()
       }
-      
-      nextTick(() => {
-        if (chatContainer.value) {
-          chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+      // 销毁播放器
+      if (flvPlayer) {
+        try {
+          if (!flvPlayer.destroyed) {
+            flvPlayer.destroy()
+          }
+        } catch (e) {
+          console.warn('Error destroying FLV player:', e)
         }
-      })
+        flvPlayer = null
+      }
+      if (hls) {
+        try {
+          hls.destroy()
+        } catch (e) {
+          console.warn('Error destroying HLS player:', e)
+        }
+        hls = null
+      }
+      return
     }
-  }, 2000)
+
+    // 处理观众进入/离开消息，刷新观众列表
+    if (lastMessage && (lastMessage.type === 'enter' || lastMessage.type === 'leave')) {
+      console.log('[LiveRoom] 观众进入/离开，刷新观众列表')
+      if (activeTab.value === 'audience') {
+        fetchOnlineUsers()
+      }
+    }
+
+    // 只显示普通消息，且内容不为空
+    if (lastMessage && lastMessage.type === 'message' && lastMessage.content && isDanmakuMode.value) {
+      addFloatingDanmaku(lastMessage.content)
+    }
+  }
+
+  // 自动滚动到底部
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+  })
+})
+
+// 模拟接收弹幕（已弃用，使用 WebSocket 替代）
+const simulateDanmaku = () => {
+  // WebSocket 连接后不再需要模拟弹幕
+  console.log('WebSocket 已连接，使用实时弹幕')
 }
 
 // 全屏变化处理函数（需要单独定义以便移除监听）
@@ -1340,6 +1463,9 @@ onUnmounted(() => {
     clearInterval(durationTimer)
     durationTimer = null
   }
+
+  // 断开 WebSocket 连接
+  disconnectWS()
 
   // 销毁 WebRTC 连接
   if (rtcPeerConnection) {
