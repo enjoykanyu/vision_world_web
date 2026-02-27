@@ -122,11 +122,54 @@
         <div class="dialog-content">
           <div class="chat-messages" ref="chatMessages">
             <div v-if="messages.length === 0" class="welcome-view">
-              <div class="welcome-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+              <!-- 主卡片 -->
+              <div class="welcome-card">
+                <div class="welcome-card-header">
+                  <div class="welcome-card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                  </div>
+                  <div class="welcome-card-title">小V助手持续为你护航中</div>
+                </div>
+                <div class="welcome-card-desc">
+                  小V助手帮你全天智能答疑，能及时发现技术问题并给出解决方案，开发难题早知道，异常情况早解决。
+                </div>
+                <div class="welcome-card-stats">
+                  <span class="welcome-card-stats-number">1,827</span>
+                  <span class="welcome-card-stats-label">次问题已解决</span>
+                </div>
+                <div class="welcome-card-actions">
+                  <button class="welcome-card-action">
+                    <span>查看历史记录</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                  <button class="welcome-card-action">
+                    <span>设置偏好</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </div>
               </div>
-              <h2 class="welcome-title">你好，我是小V助手</h2>
-              <p class="welcome-subtitle">随时可以向我提问</p>
+
+              <!-- 快捷功能区 -->
+              <div class="quick-actions">
+                <div class="quick-action-item">
+                  <div class="quick-action-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </div>
+                  <div class="quick-action-text">
+                    <div class="quick-action-title">代码诊断</div>
+                    <div class="quick-action-desc">帮你分析代码问题，定位Bug</div>
+                  </div>
+                </div>
+                <div class="quick-action-item">
+                  <div class="quick-action-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+                  </div>
+                  <div class="quick-action-text">
+                    <div class="quick-action-title">技术咨询</div>
+                    <div class="quick-action-desc">解答技术难题，提供方案</div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div
               v-for="(message, index) in messages"
@@ -136,17 +179,19 @@
               <div class="message-content" v-if="message.type === 'user'">{{ message.content }}</div>
               <div class="message-content markdown-body" v-else v-html="renderMarkdown(message.content)"></div>
             </div>
-            <div v-if="isTyping" class="message assistant typing">
-              <div class="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
+            <div v-if="isTyping" class="message assistant thinking">
+              <div class="thinking-indicator">
+                <svg class="thinking-icon" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="currentColor"/>
+                </svg>
+                <span class="thinking-text">理解问题</span>
               </div>
             </div>
           </div>
           
           <!-- 猜你想问区域 -->
           <div v-if="messages.length === 0" class="suggested-questions-container">
+            <div class="welcome-section-title">你还可以这样问我</div>
             <div class="suggested-questions">
               <button
                 v-for="(question, index) in suggestedQuestions"
@@ -186,6 +231,7 @@
 import { ref, reactive, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import axios from 'axios'
 import MarkdownIt from 'markdown-it'
+import { useUserStore } from '@/stores/userStore'
 
 // Markdown渲染器
 const md = new MarkdownIt({
@@ -197,6 +243,9 @@ const md = new MarkdownIt({
 const renderMarkdown = (content: string) => {
   return md.render(content);
 };
+
+// 用户状态
+const userStore = useUserStore()
 
 // 状态管理
 const isDialogOpen = ref(false)
@@ -763,6 +812,59 @@ const autoResizeTextarea = () => {
 };
 
 // 发送消息
+// 会话ID，用于保持上下文
+const sessionId = ref('')
+
+// 普通Chat接口调用（非流式）
+const fetchChatResponse = async (message: string) => {
+  // 创建响应式消息对象
+  const messageIndex = messages.value.length;
+  messages.value.push({ type: 'assistant' as const, content: '' });
+  
+  try {
+    const response = await axios.post('http://localhost:8080/api/xiaov/chat', {
+      user_id: userStore.userId?.toString() || 'guest_' + Date.now(),
+      message: message,
+      session_id: sessionId.value
+    });
+
+    if (response.data.code === 0) {
+      // 保存会话ID
+      sessionId.value = response.data.session_id;
+      
+      // 逐字显示动画
+      const reply = response.data.reply || '';
+      let currentIndex = 0;
+      
+      const animate = async () => {
+        while (currentIndex < reply.length) {
+          messages.value[messageIndex] = { 
+            type: 'assistant', 
+            content: reply.substring(0, currentIndex + 1)
+          };
+          currentIndex++;
+          nextTick(scrollToBottom);
+          // 控制打字速度，每个字符间隔20ms
+          await new Promise(r => setTimeout(r, 20));
+        }
+      };
+      
+      await animate();
+    } else {
+      messages.value[messageIndex] = { 
+        type: 'assistant', 
+        content: '抱歉，请求失败：' + response.data.message 
+      };
+    }
+  } catch (error) {
+    console.error('Chat请求失败:', error);
+    messages.value[messageIndex] = { 
+      type: 'assistant', 
+      content: '抱歉，我暂时无法连接到服务器，请稍后再试。' 
+    };
+  }
+};
+
 const sendMessage = async () => {
   const userMessage = userInput.value.trim();
   if (!userMessage || isTyping.value) return;
@@ -775,8 +877,7 @@ const sendMessage = async () => {
   nextTick(scrollToBottom);
 
   try {
-    const response = await fetchChatResponse(userMessage);
-    await streamResponse(response);
+    await fetchChatResponse(userMessage);
   } catch (error) {
     console.error('API调用失败:', error);
     messages.value.push({ type: 'assistant', content: '抱歉，我遇到了一些问题，请稍后再试。' });
@@ -800,51 +901,6 @@ const sendSuggestedQuestion = (question: string, event?: Event) => {
   nextTick(() => {
     scrollToBottom();
   });
-}
-
-// API调用
-const fetchChatResponse = async (message: string): Promise<string> => {
-  // 模拟API延迟
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // 模拟一个更真实的回复
-  if (message.includes("Vue组件")) {
-    return `好的，这是一个简单的Vue 3计数器组件示例：
-
-\`\`\`vue
-<template>
-  <div>
-    <p>Count: {{ count }}</p>
-    <button @click="increment">Increment</button>
-  </div>
-</template>
-
-<script setup>
-import { ref } from 'vue';
-
-const count = ref(0);
-const increment = () => {
-  count.value++;
-};
-<\/script>
-\`\`\`
-
-你可以将此代码复制到你的项目中。`;
-  }
-  return `关于“${message}”，我还在学习中。不过，我可以帮你搜索相关信息。`;
-}
-
-// 模拟stream输出
-const streamResponse = async (response: string) => {
-  const assistantMessage = { type: 'assistant' as const, content: '' };
-  messages.value.push(assistantMessage);
-  
-  const tokens = response.split('');
-  for (const token of tokens) {
-    assistantMessage.content += token;
-    await new Promise(resolve => setTimeout(resolve, 15));
-    nextTick(scrollToBottom);
-  }
 }
 
 // 窗口大小改变时调整位置
@@ -1171,35 +1227,174 @@ onUnmounted(() => {
 }
 
 .welcome-view {
-  text-align: center;
-  padding: 80px 20px;
+  padding: 40px 20px;
   color: var(--assistant-text-secondary);
 }
 
-.welcome-icon {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 20px;
-  color: var(--assistant-primary-color);
+.welcome-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
 }
 
-.welcome-icon svg {
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
+.welcome-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.welcome-title {
-  font-size: 22px;
+.welcome-card-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-card-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+.welcome-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.welcome-card-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 16px;
+}
+
+.welcome-card-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.welcome-card-stats-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+}
+
+.welcome-card-stats-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.welcome-card-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.welcome-card-action {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.welcome-card-action:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.welcome-card-action svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+}
+
+.welcome-section-title {
+  font-size: 14px;
   font-weight: 600;
   color: var(--assistant-text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  padding-left: 4px;
 }
 
-.welcome-subtitle {
-  font-size: 16px;
+/* 快捷功能区 */
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.quick-action-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border: 1px solid var(--assistant-border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-action-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.quick-action-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-action-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.quick-action-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-action-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--assistant-text-primary);
+  margin-bottom: 4px;
+}
+
+.quick-action-desc {
+  font-size: 12px;
+  color: var(--assistant-text-secondary);
+  line-height: 1.4;
 }
 
 .message {
@@ -1238,39 +1433,35 @@ onUnmounted(() => {
   border-bottom-left-radius: 4px;
 }
 
-.typing-indicator {
+.thinking-indicator {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  background: white;
-  border: 1px solid var(--assistant-border-color);
-  border-radius: 18px;
-  border-bottom-left-radius: 4px;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.typing-indicator span {
-  width: 8px;
-  height: 8px;
-  background: #a0aec0;
-  border-radius: 50%;
-  animation: typing-bounce 1.2s infinite ease-in-out;
+.thinking-icon {
+  width: 16px;
+  height: 16px;
+  color: #8b5cf6;
+  animation: thinking-spin 2s linear infinite;
 }
 
-.typing-indicator span:nth-child(2) {
-  animation-delay: -0.2s;
+.thinking-text {
+  color: #6b7280;
 }
 
-.typing-indicator span:nth-child(3) {
-  animation-delay: -0.4s;
-}
-
-@keyframes typing-bounce {
-  0%, 80%, 100% {
-    transform: scale(0);
+@keyframes thinking-spin {
+  from {
+    transform: rotate(0deg);
   }
-  40% {
-    transform: scale(1.0);
+  to {
+    transform: rotate(360deg);
   }
 }
 
